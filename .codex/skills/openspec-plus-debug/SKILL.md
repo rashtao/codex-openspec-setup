@@ -9,7 +9,7 @@ Diagnose one observed failure before changing behavior. Gather evidence, isolate
 
 ## Integration and routing
 
-Use this skill reactively. `openspec-plus-apply` continues to own slicing, correction-cycle accounting, ordered reviews, gates, task checkboxes, and handoff. `openspec-plus-tdd` continues to own every test and production edit; a cause-level fix still requires a valid RED followed by GREEN and REFACTOR.
+Use this skill reactively. `openspec-apply-change` continues to own slicing, correction-cycle accounting, ordered reviews, gates, task checkboxes, and handoff. `openspec-plus-tdd` continues to own every test and production edit; a cause-level fix still requires a valid RED followed by GREEN and REFACTOR.
 
 This skill spawns no agents. The `gpt-5.6-terra` medium implementer or fixer reads it on demand after a failure. In inline mode, the orchestrator reads and follows it directly. Keep all existing routing unchanged: use `gpt-5.6-sol` high for orchestration, planning, and review; use `gpt-5.6-terra` medium for implementation and fixing; always dispatch with `fork_turns: "none"`.
 
@@ -22,7 +22,7 @@ Require:
 - the bounded affected source and test paths;
 - applicable project instructions, specifications, and design decisions;
 - the session baseline and current diff;
-- the owning slice or whole-change correction-cycle state from `openspec-plus-apply`.
+- the owning slice or whole-change correction-cycle state from `openspec-apply-change`.
 
 Edit only the bounded affected paths and use `apply_patch` for manual edits. Preserve pre-existing and unrelated work; never reset, revert, overwrite, or absorb it. If evidence points outside the approved paths, return `NEEDS_CONTEXT` before editing.
 
@@ -57,11 +57,11 @@ Test it with the smallest diagnostic observation or temporary instrumentation th
 
 ### 4. Fix the cause and verify
 
-Before changing production behavior, establish or re-establish one valid RED under `openspec-plus-tdd`. Apply only the smallest cause-level fix needed for that RED, then complete GREEN and REFACTOR. Rerun the exact focused command and every affected gate required by `openspec-plus-apply`; stale or partial results are not verification.
+Before changing production behavior, establish or re-establish one valid RED under `openspec-plus-tdd`. Apply only the smallest cause-level fix needed for that RED, then complete GREEN and REFACTOR. Rerun the exact focused command and every affected gate required by `openspec-apply-change`; stale or partial results are not verification.
 
 Where invalid data or state crosses multiple relevant boundaries, add the contract-appropriate validation at each boundary rather than only at the outermost entry point. Drive each behavior-changing validation through its own sequential TDD cycle. Keep checks proportional to the specification and approved scope; do not invent new behavior.
 
-If the fix fails, preserve its command and result in the evidence trail and return to phase 1. Use the existing slice or whole-change correction-cycle count owned by `openspec-plus-apply`; do not create a second counter. When the third failed fix for the same failure reaches that existing cap, stop before a fourth attempt and return `BLOCKED: fundamental`. Name the owning planning skill:
+If the fix fails, preserve its command and result in the evidence trail and return to phase 1. Use the existing slice or whole-change correction-cycle count owned by `openspec-apply-change`; do not create a second counter. When the third failed fix for the same failure reaches that existing cap, stop before a fourth attempt and return `BLOCKED: fundamental`. Name the owning planning skill:
 
 - `openspec-plus-design` for an architectural or technical-structure defect;
 - `openspec-plus-spec` for a behavior-contract defect;

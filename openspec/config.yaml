@@ -31,9 +31,6 @@ schema: spec-driven
 #       guidance:
 #         - Summarize the archive outcome before finishing
 
-context: |
-  MANDATORY: Invoke the 'openspec-plus-apply' skill immediately when openspec-apply-change is invoked
-
 rules:
   proposal:
     - "MANDATORY: Invoke the 'openspec-plus-proposal' skill BEFORE writing the proposal."

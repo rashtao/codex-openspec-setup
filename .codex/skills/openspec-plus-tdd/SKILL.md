@@ -1,6 +1,6 @@
 ---
 name: openspec-plus-tdd
-description: Mandatory strict test-driven development for implementing or fixing OpenSpec change tasks. Use whenever openspec-plus-apply is active, an implementer or fixer starts an OpenSpec task, or Codex writes tests or production code for OpenSpec requirements and scenarios. Enforces one-test-at-a-time RED-GREEN-REFACTOR, Gherkin acceptance coverage, scoped edits, and auditable evidence before task completion.
+description: Mandatory strict test-driven development for implementing or fixing OpenSpec change tasks. Use whenever openspec-apply-change is active, an implementer or fixer starts an OpenSpec task, or Codex writes tests or production code for OpenSpec requirements and scenarios. Enforces one-test-at-a-time RED-GREEN-REFACTOR, Gherkin acceptance coverage, scoped edits, and auditable evidence before task completion.
 ---
 
 # Apply Strict TDD to OpenSpec Tasks
@@ -13,13 +13,13 @@ NO PRODUCTION BEHAVIOR CHANGE WITHOUT A TEST THAT FIRST FAILS FOR THE INTENDED R
 
 Do not batch tests, implement ahead of the current test, skip refactor assessment, hide failures, or broaden the slice.
 
-## Integration with plus-apply
+## Integration with apply
 
-This skill governs implementation mechanics; `openspec-plus-apply` owns slicing, dispatch, reviews, gates, task checkboxes, and the final handoff.
+This skill governs implementation mechanics; `openspec-apply-change` owns slicing, dispatch, reviews, gates, task checkboxes, and the final handoff.
 
-- The plus-apply orchestrator tracks the active slice with `update_plan` and dispatches a delegated implementer or fixer through `spawn_agent` as `gpt-5.6-terra` with medium reasoning and `fork_turns: "none"`. The agent receives the absolute path to this file and must read it completely before editing.
+- The apply orchestrator tracks the active slice with `update_plan` and dispatches a delegated implementer or fixer through `spawn_agent` as `gpt-5.6-terra` with medium reasoning and `fork_turns: "none"`. The agent receives the absolute path to this file and must read it completely before editing.
 - Main orchestrator, planning/design/specification, and review roles use `gpt-5.6-sol` with high reasoning and `fork_turns: "none"` when dispatched.
-- This skill does not spawn agents. The plus-apply orchestrator uses `send_message` only for active-agent scope corrections, `followup_task` for a new pass on an idle implementer/fixer, and `wait_agent` for terminal results.
+- This skill does not spawn agents. The apply orchestrator uses `send_message` only for active-agent scope corrections, `followup_task` for a new pass on an idle implementer/fixer, and `wait_agent` for terminal results.
 - In delegated mode, return `NEEDS_CONTEXT` or `BLOCKED` for ambiguity; the main agent asks the user directly. In inline mode, ask the user directly and wait.
 - Never mark task checkboxes, edit planning artifacts, commit, or archive from this skill.
 
@@ -161,7 +161,7 @@ Before returning `DONE` or `DONE_WITH_CONCERNS`, verify:
 - changed paths remain in scope and no planning artifact changed;
 - exact focused and slice-gate commands ran freshly, with outcomes recorded.
 
-Return the status and evidence required by the plus-apply implementer contract: files/instructions read, conventions applied, changed paths, tests in execution order, scenario mapping, per-test RED/GREEN/refactor evidence, gate results, and concerns or blockers. Completion without this temporal evidence is not valid.
+Return the status and evidence required by the apply implementer contract: files/instructions read, conventions applied, changed paths, tests in execution order, scenario mapping, per-test RED/GREEN/refactor evidence, gate results, and concerns or blockers. Completion without this temporal evidence is not valid.
 
 ## Compact example
 

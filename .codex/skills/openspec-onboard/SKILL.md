@@ -136,9 +136,8 @@ openspec instructions apply --change "<name>" --json
 
 Ask the user directly whether to begin implementation. After confirmation, load and follow these skills in order:
 
-1. `openspec-apply-change` for selection, context loading, status handling, and overall apply control;
-2. `openspec-plus-apply` for the implementation loop and reviews;
-3. `openspec-plus-tdd` before any test or production code is written.
+1. `openspec-apply-change` for selection, context loading, status handling, the implementation loop, reviews, and overall apply control;
+2. `openspec-plus-tdd` before any test or production code is written.
 
 Do not reproduce a weaker implementation loop in onboarding. Every applicable specification scenario must receive test coverage, production code must follow strict per-test RED-GREEN-REFACTOR, relevant checks must pass, and task checkboxes may be marked complete only after their owning gates pass.
 
