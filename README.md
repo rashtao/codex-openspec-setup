@@ -2,15 +2,13 @@
 Enhanced skills for OpenSpec with Codex
 
 ## Steps
-- install OpenSpec
-- install OpenSpecPlus
-- adapt skills for Codex: `prompts/1_init.md`
-- add dbg skill: `prompts/2_add_dbg_skill.md`
+- `git submodule update --init --recursive`
+- `cat prompts/generate_skills.md | codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" -`
 
 ## Prerequisites
 
 - Linux with Bash, `curl`, and `tar` available.
-- OpenSpec CLI installed locally (version `1.7.0`).
+- OpenSpec CLI installed locally (version `1.8.0`).
 
 ## Install
 
