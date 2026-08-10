@@ -1,0 +1,9 @@
+name = "openspec-propose"
+description = "Routed OpenSpec role that creates a change and all live apply-required planning artifacts."
+developer_instructions = """
+ROUTED_ACTION=openspec-propose
+This independently selected custom agent executes the action directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-propose/SKILL.md before acting. Never route openspec-propose again.
+"""
+model = "gpt-5.6-sol"
+model_reasoning_effort = "xhigh"
+sandbox_mode = "workspace-write"

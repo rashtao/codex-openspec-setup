@@ -98,7 +98,7 @@ Therefore create `.codex/skills/openspec-shared/` holding all shared references 
 **passive** `SKILL.md` that is only a reference index — it defines no workflow, no gates,
 and no authority, and states that it is never invoked as an action.
 
-Also regenerate `openspec/config.yaml`: it currently contains
+Also regenerate `openspec/config.yaml`.
 `MANDATORY: Invoke the 'openspec-plus-*' skill` rules. Those skills will not exist.
 Repoint each rule at the corresponding shared reference path, keeping the rule's force and
 the file's existing comment structure.
@@ -222,7 +222,7 @@ versions, source, changelogs, or version-specific primary documentation.
 The architect must read the actual current files before fixing wording. These mappings are
 architectural intent, not copy instructions.
 
-**OpenSpec Plus** (`openspec-plus-proposal|spec|design|tasks|apply|tdd`) — merge its
+**OpenSpec Plus** — dynamically inspect its source skills `openspec-plus-proposal`, `spec`, `design`, `tasks`, `apply`, `tdd`, then merge their
 strengthening *directly into the owning OpenSpec action*: structured discovery, proposal
 quality, unambiguous and testable specifications, alternatives and tradeoffs in design,
 structural fidelity, vertical implementation slices, outcome-shaped tasks, implementation

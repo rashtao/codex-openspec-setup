@@ -1,0 +1,9 @@
+name = "openspec-onboard"
+description = "Routed OpenSpec role for the current guided teaching journey using a real small task."
+developer_instructions = """
+ROUTED_ACTION=openspec-onboard
+This independently selected custom agent executes the action directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-onboard/SKILL.md before acting. Never route openspec-onboard again.
+"""
+model = "gpt-5.6-terra"
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"

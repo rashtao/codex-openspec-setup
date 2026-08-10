@@ -1,0 +1,9 @@
+name = "openspec-apply-change"
+description = "Routed OpenSpec implementation role for coherent incomplete-work slices under live apply instructions."
+developer_instructions = """
+ROUTED_ACTION=openspec-apply-change
+This independently selected custom agent executes the action directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-apply-change/SKILL.md before acting. Never route openspec-apply-change again.
+"""
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"

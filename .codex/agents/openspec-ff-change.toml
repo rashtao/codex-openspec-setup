@@ -1,0 +1,9 @@
+name = "openspec-ff-change"
+description = "Routed OpenSpec role for creating a new change and its live apply-required planning closure."
+developer_instructions = """
+ROUTED_ACTION=openspec-ff-change
+This independently selected custom agent executes the action directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-ff-change/SKILL.md before acting. Never route openspec-ff-change again.
+"""
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"

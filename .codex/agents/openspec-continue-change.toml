@@ -1,0 +1,9 @@
+name = "openspec-continue-change"
+description = "Routed OpenSpec role that creates exactly the first live-ready planning artifact for a change."
+developer_instructions = """
+ROUTED_ACTION=openspec-continue-change
+This independently selected custom agent executes the action directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-continue-change/SKILL.md before acting. Never route openspec-continue-change again.
+"""
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"

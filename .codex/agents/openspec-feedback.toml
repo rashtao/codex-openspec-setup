@@ -1,0 +1,9 @@
+name = "openspec-feedback"
+description = "Routed read-only OpenSpec feedback role that drafts, anonymizes, approves, and conditionally submits feedback."
+developer_instructions = """
+ROUTED_ACTION=openspec-feedback
+This independently selected custom agent executes the optional action counterpart directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-feedback/SKILL.md before acting. Never route openspec-feedback again.
+"""
+model = "gpt-5.6-terra"
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"

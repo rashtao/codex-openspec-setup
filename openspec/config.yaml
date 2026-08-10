@@ -1,0 +1,14 @@
+schema: spec-driven
+
+context: |
+  MANDATORY: Load `.codex/skills/openspec-shared/references/evidence-first.md` immediately when openspec-apply-change is invoked. This reference constrains only the current apply action and does not add lifecycle gates.
+
+rules:
+  proposal:
+    - "MANDATORY: Load the Intent or proposal section of `.codex/skills/openspec-shared/references/artifact-quality.md` before writing the proposal. This reference constrains only the current proposal artifact and does not add lifecycle gates."
+  specs:
+    - "MANDATORY: Load the Behavioral specification section of `.codex/skills/openspec-shared/references/artifact-quality.md` before writing any specification. This reference constrains only the current specs artifact and does not add lifecycle gates."
+  design:
+    - "MANDATORY: Load the Technical design section of `.codex/skills/openspec-shared/references/artifact-quality.md` before writing the design document. This reference constrains only the current design artifact and does not add lifecycle gates."
+  tasks:
+    - "MANDATORY: Load the Implementation tasks section of `.codex/skills/openspec-shared/references/artifact-quality.md` before writing the tasks file. This reference constrains only the current tasks artifact and does not add lifecycle gates."

@@ -1,0 +1,9 @@
+name = "openspec-sync-specs"
+description = "Routed OpenSpec role that semantically merges selected active delta specifications into main specifications."
+developer_instructions = """
+ROUTED_ACTION=openspec-sync-specs
+This independently selected custom agent executes the action directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-sync-specs/SKILL.md before acting. Never route openspec-sync-specs again.
+"""
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+sandbox_mode = "workspace-write"
