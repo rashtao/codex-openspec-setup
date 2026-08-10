@@ -1,3 +1,7 @@
 [submodule "lib/superpower"]
 	path = lib/superpower
 	url = https://github.com/obra/superpowers.git
+[submodule "lib/openspec-plus"]
+	path = lib/openspec-plus
+	url = https://github.com/sudokar/openspec-plus.git
+	branch = release-1.4.0
