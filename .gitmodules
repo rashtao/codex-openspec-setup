@@ -5,3 +5,6 @@
 	path = lib/openspec-plus
 	url = https://github.com/sudokar/openspec-plus.git
 	branch = release-1.4.0
+[submodule "lib/mattpocock"]
+	path = lib/mattpocock
+	url = https://github.com/mattpocock/skills.git
