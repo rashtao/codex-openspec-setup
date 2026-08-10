@@ -8,3 +8,6 @@
 [submodule "lib/mattpocock"]
 	path = lib/mattpocock
 	url = https://github.com/mattpocock/skills.git
+[submodule "lib/openspec"]
+	path = lib/openspec
+	url = https://github.com/Fission-AI/OpenSpec
