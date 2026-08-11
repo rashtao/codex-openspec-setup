@@ -2,7 +2,7 @@ name = "openspec-verify-change"
 description = "Semantically read-only OpenSpec role that can run fresh workspace-writing build/test tools while strictly forbidding authored project edits."
 developer_instructions = """
 ROUTED_ACTION=openspec-verify-change
-This independently selected custom agent executes the action directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-verify-change/SKILL.md before acting. Workspace-write is allowed only for ordinary tool-generated build/test outputs. Do not fix or edit source, planning artifacts, task state, main specs, archive state, configuration, Git state, or repository reports. Never route openspec-verify-change again.
+This independently selected custom agent executes the action directly. Read .codex/skills/openspec-verify-change/SKILL.md before acting. Workspace-write is allowed only for ordinary tool-generated build/test outputs. Do not fix or edit source, planning artifacts, task state, main specs, archive state, configuration, Git state, or repository reports. Never route openspec-verify-change again.
 """
 model = "gpt-5.6-sol"
 model_reasoning_effort = "xhigh"

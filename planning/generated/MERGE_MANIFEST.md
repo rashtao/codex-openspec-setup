@@ -1,6 +1,6 @@
 # OpenSpec Codex distribution merge manifest
 
-Generated: 2026-08-10T17:33:24+02:00 (Europe/Madrid)
+Generated: 2026-08-10T17:33:24+02:00; runtime-dependency refinement: 2026-08-11T15:40:13+02:00 (Europe/Madrid)
 
 This distribution was regenerated from the current local source trees. OpenSpec is the sole workflow authority. Imported repositories supplied engineering techniques only; no generated runtime file depends on or invokes them.
 
@@ -27,7 +27,7 @@ Verified against locally installed `codex-cli 0.147.0`, its installed model cata
 - `gpt-5.6-sol` and `gpt-5.6-terra` accept `xhigh`, so no reasoning-effort substitution was made;
 - `[agents].max_concurrent_threads_per_session = 3` provides bounded concurrency and does not make parallel writing the default.
 
-The agent TOMLs declare selectable roles; runtime action skills use the verified callable `spawn_agent` contract and do not pretend a TOML filename is a dispatch selector.
+The agent TOMLs declare selectable, self-contained roles; action agents read only their installed action skill, and specialists read only applicable installed canonical references. Runtime files do not read this manifest, the merge contract, the model matrix, another file under `planning/generated/**`, or anything under `staging/**`. Runtime action skills use the verified callable `spawn_agent` contract and do not pretend a TOML filename is a dispatch selector.
 
 ## Discovered OpenSpec surface and generated counterparts
 
@@ -53,6 +53,8 @@ The generator in `lib/openspec/src/core/shared/skill-generation.ts` enumerates 1
 Generated counts: 12 authoritative generated counterparts, 1 optional action counterpart, 1 passive shared index, 13 action-agent declarations, and 9 specialist-agent declarations.
 
 No previous `planning/generated/MERGE_MANIFEST.md` existed, so this run has no earlier generated baseline to diff. The current source snapshot establishes the regeneration baseline; no legacy generated behavior was preserved for its own sake.
+
+On 2026-08-11, the runtime packaging boundary was tightened without changing an OpenSpec action: custom-agent declarations stopped reading `planning/generated/MERGE_CONTRACT.md`; action agents now read only their installed action skill, specialists read only applicable installed shared references, and the merge contract/model/audit documents became removable target-project provenance. The regeneration prompt now requires this boundary.
 
 ## Action model matrix
 
@@ -120,7 +122,7 @@ Canonical shared owners are `artifact-quality.md`, `evidence-first.md`, `api-sem
 - Feedback is an optional read-only action; the 12 generated skills remain exactly the current generator surface.
 - Shared doctrine was deduplicated to one owner per concern, including exactly one diagnosis failure counter in `debugging.md`.
 - Reviewers receive artifacts, diffs, criteria, and raw evidence rather than an implementer's reasoning transcript. Parallel writers require demonstrably disjoint ownership.
-- Runtime skills do not depend on the planning contract file, staging paths, agent TOML activation, or imported repositories.
+- Runtime skills, action agents, specialist agents, and OpenSpec configuration do not depend on generated planning documents, staging paths, agent TOML activation, or imported repositories. The merge contract remains generation/audit provenance only.
 
 ## Audit and evaluation disposition
 
@@ -129,6 +131,7 @@ Canonical shared owners are `artifact-quality.md`, `evidence-first.md`, `api-sem
 - Shared minor: verify's ambiguous multi-candidate filter cannot reliably identify a custom-schema implementation-task artifact from status alone. Explicit selection and post-selection verification remain correct.
 - Audit-only minor: nine staging-only rewrite reports have stale shared-reference inventories. Runtime reference links and conditional loads are correct; rewrite reports are not published.
 - Behavioral notes: the public tracking-path limitation is handled safely; verify's wider sandbox is restricted to build/test outputs; feedback is optional rather than a resurrected generated action.
+- The 2026-08-11 dependency refinement changed no action skill or OpenSpec lifecycle behavior. A targeted post-refinement check parsed all 22 agent TOMLs, revalidated all 14 skills, resolved every agent file reference in a target-layout probe with no `planning/` directory, and confirmed zero runtime references to `planning/generated/**` or `staging/**`. The earlier independent action audit and behavior evaluation were not rerun because their audited action procedures were unchanged.
 
 No BLOCKER or MAJOR finding remains.
 
@@ -141,6 +144,7 @@ Passed:
 - 22/22 agent TOMLs parse and contain explicit recognized GPT-5.6 model, accepted effort, sandbox, and required declaration fields.
 - The OpenSpec YAML and Codex fragment TOML parse; bounded concurrency is 3.
 - Every runtime link resolves; every agent points to a real generated skill; all action routes use the single bounded dispatch mechanism; no recursive route is present.
+- No runtime skill, agent declaration, or OpenSpec configuration references `planning/generated/**` or `staging/**`; generated planning documents are removable from target installations.
 - Exactly one numeric diagnosis failure counter exists; shared TDD/debug/review doctrine is not duplicated.
 - No runtime invocation of imported sources, unavailable Plus skills, foreign agent syntax, slash commands, pseudo-tools, `.claude` output, or generated symlink exists.
 - Current OpenSpec CLI names, flags, parsed fields, artifact names, action ordering, and multi-artifact boundaries were checked against this checkout.

@@ -93,13 +93,16 @@ Read `install.sh` and `tests/` before generating. The distribution MUST satisfy:
 - `openspec/config.yaml` exists and is valid;
 - shared references must live inside an `openspec-*` skill directory, otherwise the
   installer will not ship them.
+- runtime files under `.codex/skills/**`, `.codex/agents/**`, and `openspec/**` must not
+  read from `staging/**` or `planning/generated/**`; those trees contain generation and
+  audit artifacts, not installed runtime dependencies.
 
 Therefore create `.codex/skills/openspec-shared/` holding all shared references plus a
 **passive** `SKILL.md` that is only a reference index — it defines no workflow, no gates,
 and no authority, and states that it is never invoked as an action.
 
-Also regenerate `openspec/config.yaml`.
-`MANDATORY: Invoke the 'openspec-plus-*' skill` rules. Those skills will not exist.
+Also regenerate `openspec/config.yaml`. It currently contains mandatory rules that invoke
+unavailable imported skills. Those skills will not exist.
 Repoint each rule at the corresponding shared reference path, keeping the rule's force and
 the file's existing comment structure.
 
@@ -146,7 +149,8 @@ Output: `staging/global/MERGE_CONTRACT.md`, unambiguously defining:
 4. Action-specific generated rules
 5. Imported engineering techniques
 
-No rewrite subagent may start before this file exists.
+No rewrite subagent may start before this file exists. The contract is a generation,
+integration, and audit authority; it is never a target-project runtime dependency.
 
 ## 6. Doctrine to encode exactly once
 
@@ -425,8 +429,11 @@ generate, using the schema verified in §3:
 
 - one custom-agent file under `staging/.codex/agents/` for **every** discovered action,
   whose instructions tell it to execute the corresponding generated skill from disk and
-  honour `MERGE_CONTRACT.md`, and forbid self-redispatch;
-- all specialist agents from §9;
+  forbid self-redispatch. Contract requirements must already be embodied by that skill,
+  its conditional shared references, and the agent's own bounded role constraints;
+- all specialist agents from §9, loading only the canonical shared references relevant to
+  their role and relying on their own complete bounded instructions for any role-specific
+  constraint not owned by a shared reference;
 - `staging/.codex/config.toml.fragment` (never an overwrite of an existing config), with a
   bounded concurrency default; parallel writing must not be the default;
 - `staging/openspec/config.yaml` regenerated per §4;
@@ -435,6 +442,9 @@ generate, using the schema verified in §3:
 Each agent must explicitly set name, description, instructions, model, reasoning effort,
 and an appropriate sandbox mode. The skill remains the authoritative action definition;
 the agent exists to guarantee the model even when the parent session uses another one.
+No agent instruction may read `MERGE_CONTRACT.md`, `MODEL_MATRIX.md`, another file under
+`planning/generated/**`, or anything under `staging/**`. Contract compliance is compiled
+into installed skills, canonical shared references, and self-contained agent constraints.
 
 ## 14. Phase F — contradiction audit (do not accept output before this)
 
@@ -483,6 +493,8 @@ Run mechanical checks in addition to the audit, and run the repository's existin
 14. packaging: `.codex/skills/openspec-*/SKILL.md` present for every skill directory, no
     symlinks, valid YAML frontmatter everywhere, `openspec/config.yaml` valid
 15. `install.sh` and `tests/` still succeed against the generated tree
+16. no runtime skill, agent, or OpenSpec configuration references `staging/**` or
+    `planning/generated/**`; generated planning documents remain removable provenance
 
 Search explicitly for stale or vendor-specific terms and inspect every hit rather than
 deleting blindly.
@@ -527,6 +539,11 @@ Then publish atomically:
 Adapt names only where current OpenSpec or Codex conventions require it. Keep provenance
 out of runtime skills — centralise it in the manifest. Do not commit. Do not install
 anything via package managers.
+
+The files under `planning/generated/` are published for regeneration provenance and audit
+review only. Removing them from a target installation must not change skill, action-agent,
+specialist-agent, or OpenSpec runtime behaviour. Mechanically rewrite and validate relative
+links when moving reports from their staging directories to `planning/generated/`.
 
 `MERGE_MANIFEST.md` records: timestamp; each source repo's commit/version/dirty state;
 every discovered skill and action; every generated counterpart; exact model and effort per

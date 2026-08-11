@@ -17,7 +17,7 @@ Runtime dependencies have one installed layout:
 - canonical shared doctrine: `.codex/skills/openspec-shared/references/*.md`;
 - passive reference index: `.codex/skills/openspec-shared/SKILL.md`.
 
-Runtime skills and generic spawned children must not require this planning contract or `.codex/agents/*.toml`. Repository custom-agent declarations may independently read `planning/generated/MERGE_CONTRACT.md` and the corresponding installed action skill when the runtime actually selects that custom agent.
+This contract is a generation, integration, and audit artifact. Runtime skills, generic spawned children, custom-agent declarations, specialist-agent declarations, and OpenSpec configuration must not read this contract, `MODEL_MATRIX.md`, another file under `planning/generated/**`, or anything under `staging/**`. Contract requirements are compiled into the installed action skills, canonical shared references, and each agent's self-contained bounded role constraints. Action agents read the corresponding installed action skill; specialists read only the canonical shared references relevant to their role.
 
 `store-selection.ts` remains shared command guidance, not an action. `lib/openspec/skills/**` is only a lag check; current templates, generators, schemas, CLI state, and instruction machinery control.
 
@@ -74,15 +74,15 @@ Operational doctrine has exactly one owner. The contract establishes ownership a
 
 | Doctrine | Canonical owner |
 |---|---|
-| Planning-artifact substance and traceability | [artifact-quality.md](../skills/openspec-shared/references/artifact-quality.md) |
-| Evidence, task-completion proof, and pass claims | [evidence-first.md](../skills/openspec-shared/references/evidence-first.md) |
-| Public API and release impact | [api-semver.md](../skills/openspec-shared/references/api-semver.md) |
-| Performance and memory | [performance-memory.md](../skills/openspec-shared/references/performance-memory.md) |
-| Connector and framework integration | [integration-correctness.md](../skills/openspec-shared/references/integration-correctness.md) |
-| Diagnosis and the distribution's sole numeric failure counter | [debugging.md](../skills/openspec-shared/references/debugging.md) |
-| Independent review | [review.md](../skills/openspec-shared/references/review.md) |
-| Version-specific external research | [research.md](../skills/openspec-shared/references/research.md) |
-| Delegation, evidence packets, and concurrency | [subagents.md](../skills/openspec-shared/references/subagents.md) |
+| Planning-artifact substance and traceability | [artifact-quality.md](../../.codex/skills/openspec-shared/references/artifact-quality.md) |
+| Evidence, task-completion proof, and pass claims | [evidence-first.md](../../.codex/skills/openspec-shared/references/evidence-first.md) |
+| Public API and release impact | [api-semver.md](../../.codex/skills/openspec-shared/references/api-semver.md) |
+| Performance and memory | [performance-memory.md](../../.codex/skills/openspec-shared/references/performance-memory.md) |
+| Connector and framework integration | [integration-correctness.md](../../.codex/skills/openspec-shared/references/integration-correctness.md) |
+| Diagnosis and the distribution's sole numeric failure counter | [debugging.md](../../.codex/skills/openspec-shared/references/debugging.md) |
+| Independent review | [review.md](../../.codex/skills/openspec-shared/references/review.md) |
+| Version-specific external research | [research.md](../../.codex/skills/openspec-shared/references/research.md) |
+| Delegation, evidence packets, and concurrency | [subagents.md](../../.codex/skills/openspec-shared/references/subagents.md) |
 
 ## 6. Representable dispatch
 
@@ -99,15 +99,15 @@ Every spawn with explicit `model` or `reasoning_effort` sets an explicit partial
 - top-level action routing uses `fork_turns: "1"`, so the latest user request is available;
 - a specialist whose message contains the complete evidence packet uses `fork_turns: "none"`.
 
-An action skill implements one representable nonrecursive guard. If its current task prompt already contains `ROUTED_ACTION=<action>`, it executes directly and never routes that action again. Otherwise it spawns exactly once with the action route in [MODEL_MATRIX.md](../MODEL_MATRIX.md); the message contains `ROUTED_ACTION=<action>`, instructs the child to execute the latest user request directly, tells it to read `.codex/skills/<action>/SKILL.md`, and forbids routing the same action again. The parent waits and returns the child's result without duplicate work.
+An action skill implements one representable nonrecursive guard. If its current task prompt already contains `ROUTED_ACTION=<action>`, it executes directly and never routes that action again. Otherwise it spawns exactly once with the action route in [MODEL_MATRIX.md](MODEL_MATRIX.md); the message contains `ROUTED_ACTION=<action>`, instructs the child to execute the latest user request directly, tells it to read `.codex/skills/<action>/SKILL.md`, and forbids routing the same action again. The parent waits and returns the child's result without duplicate work.
 
 Specialist messages contain the full bounded objective, exact scope, authoritative artifacts, raw evidence, constraints, expected return, and no-recursion instruction. They do not claim custom-TOML activation. Custom-agent TOMLs independently include the appropriate routed marker for runtimes that actually select them.
 
-Existing-agent coordination is not another creation mechanism. The canonical coordination and concurrency rules are owned by [subagents.md](../skills/openspec-shared/references/subagents.md).
+Existing-agent coordination is not another creation mechanism. The canonical coordination and concurrency rules are owned by [subagents.md](../../.codex/skills/openspec-shared/references/subagents.md).
 
 ## 7. Model and sandbox ownership
 
-[MODEL_MATRIX.md](../MODEL_MATRIX.md) is the canonical model/effort/sandbox matrix. Every action and specialist TOML explicitly declares all required fields and matches it. Reviewers and research specialists remain `read-only`; implementation writers remain `workspace-write`. `openspec-verify-change` is `workspace-write` solely so fresh tools may create ordinary build/test outputs, while its skill and TOML strictly forbid source, artifact, task, spec, archive, Git-state, or report edits.
+[MODEL_MATRIX.md](MODEL_MATRIX.md) is the canonical model/effort/sandbox matrix. Every action and specialist TOML explicitly declares all required fields and matches it. Reviewers and research specialists remain `read-only`; implementation writers remain `workspace-write`. `openspec-verify-change` is `workspace-write` solely so fresh tools may create ordinary build/test outputs, while its skill and TOML strictly forbid source, artifact, task, spec, archive, Git-state, or report edits.
 
 ## 8. Precedence
 

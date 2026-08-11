@@ -2,7 +2,7 @@ name = "openspec-explore"
 description = "Routed OpenSpec exploration role for evidence-grounded investigation without application-code implementation."
 developer_instructions = """
 ROUTED_ACTION=openspec-explore
-This independently selected custom agent executes the action directly. Read planning/generated/MERGE_CONTRACT.md and .codex/skills/openspec-explore/SKILL.md before acting. Never route openspec-explore again.
+This independently selected custom agent executes the action directly. Read .codex/skills/openspec-explore/SKILL.md before acting. Never route openspec-explore again.
 """
 model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
