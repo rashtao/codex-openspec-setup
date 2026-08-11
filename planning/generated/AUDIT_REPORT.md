@@ -83,7 +83,7 @@ The generation brief requires each rewrite report to list every shared reference
 - Passive shared skill indexes: 1.
 - Action-agent TOMLs: 13; specialist TOMLs: 9.
 - All 22 agent TOMLs contain `name`, `description`, `developer_instructions`, `model`, `model_reasoning_effort`, and `sandbox_mode` and parse successfully.
-- All 14 staged `SKILL.md` frontmatters parse and contain only `name` and `description`; staged `openspec/config.yaml` parses.
+- All 14 staged `SKILL.md` frontmatters parse and contain only `name` and `description`; staged `release/openspec/config.yaml` parses.
 - Staged skill/OpenSpec symlinks: 0.
 - Shared doctrine owners: 9; numeric failure-counter owner hits: 1 (`debugging.md` only).
 - All relative links in the staged runtime and generated supporting Markdown checked for this audit resolve.

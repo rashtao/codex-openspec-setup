@@ -5,6 +5,10 @@ Enhanced skills for OpenSpec with Codex
 - `git submodule update --init --recursive`
 - `cat prompts/generate_skills.md | codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" -`
 
+Generated Codex skills, agents, and configuration are published under
+`release/.codex/`; the generated OpenSpec configuration is published under
+`release/openspec/`.
+
 ## Prerequisites
 
 - Linux with Bash, `curl`, and `tar` available.

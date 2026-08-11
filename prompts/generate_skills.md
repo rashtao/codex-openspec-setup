@@ -87,28 +87,27 @@ Cursor/Windsurf/Gemini agent syntax.
 
 Read `install.sh` and `tests/` before generating. The distribution MUST satisfy:
 
-- skills live in `.codex/skills/openspec-*/`;
+- skills live in `release/.codex/skills/openspec-*/`;
 - **every** such directory contains a real `SKILL.md`;
-- **no symlinks anywhere** in `.codex/skills/**` or `openspec/**`;
-- `openspec/config.yaml` exists and is valid;
+- **no symlinks anywhere** in `release/.codex/skills/**` or `release/openspec/**`;
+- `release/openspec/config.yaml` exists and is valid;
 - shared references must live inside an `openspec-*` skill directory, otherwise the
   installer will not ship them.
-- runtime files under `.codex/skills/**`, `.codex/agents/**`, and `openspec/**` must not
+- runtime files under `release/.codex/skills/**`, `release/.codex/agents/**`, and `release/openspec/**` must not
   read from `staging/**` or `planning/generated/**`; those trees contain generation and
   audit artifacts, not installed runtime dependencies.
 
-Therefore create `.codex/skills/openspec-shared/` holding all shared references plus a
+Therefore create `release/.codex/skills/openspec-shared/` holding all shared references plus a
 **passive** `SKILL.md` that is only a reference index — it defines no workflow, no gates,
 and no authority, and states that it is never invoked as an action.
 
-Also regenerate `openspec/config.yaml`. It currently contains mandatory rules that invoke
+Also regenerate `release/openspec/config.yaml`. It currently contains mandatory rules that invoke
 unavailable imported skills. Those skills will not exist.
 Repoint each rule at the corresponding shared reference path, keeping the rule's force and
 the file's existing comment structure.
 
 Build everything under `staging/` first; publish to the final locations only after all
-audits pass. Never overwrite a user `~/.codex/config.toml`; emit
-`.codex/config.toml.fragment` instead.
+audits pass.
 
 ## 5. Phase A — freeze the global merge contract (before any parallel work)
 
@@ -118,7 +117,7 @@ Dispatch one isolated subagent:
 sandbox read-only.
 
 Inputs: OpenSpec templates/generators/schemas/CLI semantics; the skill indexes of all four
-repositories; `install.sh`; `openspec/config.yaml`; the verified Codex runtime contract.
+repositories; `install.sh`; `release/openspec/config.yaml`; the verified Codex runtime contract.
 
 Output: `staging/global/MERGE_CONTRACT.md`, unambiguously defining:
 
@@ -347,7 +346,7 @@ Each invocation receives ONLY:
 
 Do **not** give a worker other workers' output. This isolation is deliberate.
 
-Each worker writes to `staging/skills/<skill-name>/`:
+Each worker writes to `staging/release/.codex/skills/<skill-name>/`:
 
 - `SKILL.md` — frontmatter with only the fields the Codex/OpenSpec schema allows
   (`name`, `description`; trigger-rich description; no emoji, no slogans), then:
@@ -414,7 +413,7 @@ Dispatch **`merge-reference-editor`** (`gpt-5.6-sol`, `high`, workspace-write) w
 `MERGE_CONTRACT.md`, all `REWRITE_REPORT.md` files, and only the source excerpts needed.
 
 Produce compact canonical references under
-`staging/skills/openspec-shared/references/`, e.g. `evidence-first.md`, `api-semver.md`,
+`staging/release/.codex/skills/openspec-shared/references/`, e.g. `evidence-first.md`, `api-semver.md`,
 `performance-memory.md`, `integration-correctness.md`, `debugging.md`, `review.md`,
 `research.md`, `subagents.md` (rename where clearer). Each doctrine appears in exactly one
 file, with exactly one owner. Then mechanically fix reference links in staged skills.
@@ -427,16 +426,14 @@ Also produce the passive `openspec-shared/SKILL.md` reference index described in
 Dispatch **`merge-codex-config-author`** (`gpt-5.6-terra`, `high`, workspace-write) to
 generate, using the schema verified in §3:
 
-- one custom-agent file under `staging/.codex/agents/` for **every** discovered action,
+- one custom-agent file under `staging/release/.codex/agents/` for **every** discovered action,
   whose instructions tell it to execute the corresponding generated skill from disk and
   forbid self-redispatch. Contract requirements must already be embodied by that skill,
   its conditional shared references, and the agent's own bounded role constraints;
 - all specialist agents from §9, loading only the canonical shared references relevant to
   their role and relying on their own complete bounded instructions for any role-specific
   constraint not owned by a shared reference;
-- `staging/.codex/config.toml.fragment` (never an overwrite of an existing config), with a
-  bounded concurrency default; parallel writing must not be the default;
-- `staging/openspec/config.yaml` regenerated per §4;
+- `staging/release/openspec/config.yaml` regenerated per §4;
 - `staging/MODEL_MATRIX.md` listing every action and agent with its exact model and effort.
 
 Each agent must explicitly set name, description, instructions, model, reasoning effort,
@@ -450,7 +447,7 @@ into installed skills, canonical shared references, and self-contained agent con
 
 Dispatch **`merge-cross-skill-auditor`** (`gpt-5.6-sol`, `xhigh`, read-only) with the
 authoritative OpenSpec action definitions, `MERGE_CONTRACT.md`, every generated skill,
-action, reference, agent config, the regenerated `openspec/config.yaml`, and all
+action, reference, agent config, the regenerated `release/openspec/config.yaml`, and all
 `REWRITE_REPORT.md` files.
 
 It must build a contradiction matrix across at least: OpenSpec workflow authority; action
@@ -481,7 +478,7 @@ Run mechanical checks in addition to the audit, and run the repository's existin
 5. only reasoning-effort values accepted by the installed Codex build are used
 6. no runtime dependency on, or instruction to invoke, `lib/openspec-plus`,
    `lib/mattpocock`, or `lib/superpower`; no `openspec-plus-*` skill names remain anywhere,
-   including `openspec/config.yaml`, `README.md`, and `prompts/`
+   including `release/openspec/config.yaml`, `README.md`, and `prompts/`
 7. no foreign agent-platform syntax, slash commands, or pseudo-tools; no `.claude/` output
 8. no recursive action-agent dispatch
 9. every referenced file exists; every agent points at a real generated skill
@@ -490,8 +487,8 @@ Run mechanical checks in addition to the audit, and run the repository's existin
 12. no copied phase gate alters the semantics of `propose`, fast-forward, or any other
     multi-artifact action
 13. no duplicated TDD/debug/review doctrine remains; exactly one failure counter
-14. packaging: `.codex/skills/openspec-*/SKILL.md` present for every skill directory, no
-    symlinks, valid YAML frontmatter everywhere, `openspec/config.yaml` valid
+14. packaging: `release/.codex/skills/openspec-*/SKILL.md` present for every skill directory, no
+    symlinks, valid YAML frontmatter everywhere, `release/openspec/config.yaml` valid
 15. `install.sh` and `tests/` still succeed against the generated tree
 16. no runtime skill, agent, or OpenSpec configuration references `staging/**` or
     `planning/generated/**`; generated planning documents remain removable provenance
@@ -523,13 +520,12 @@ until no BLOCKER or MAJOR remains. Never hide unresolved findings.
 
 Then publish atomically:
 
-    .codex/skills/<one dir per discovered OpenSpec skill>/SKILL.md (+ action-specific files)
-    .codex/skills/openspec-shared/SKILL.md
-    .codex/skills/openspec-shared/references/*.md
-    .codex/agents/<one per action>.toml
-    .codex/agents/opsx-*.toml
-    .codex/config.toml.fragment
-    openspec/config.yaml
+    release/.codex/skills/<one dir per discovered OpenSpec skill>/SKILL.md (+ action-specific files)
+    release/.codex/skills/openspec-shared/SKILL.md
+    release/.codex/skills/openspec-shared/references/*.md
+    release/.codex/agents/<one per action>.toml
+    release/.codex/agents/opsx-*.toml
+    release/openspec/config.yaml
     planning/generated/MERGE_CONTRACT.md
     planning/generated/MODEL_MATRIX.md
     planning/generated/MERGE_MANIFEST.md

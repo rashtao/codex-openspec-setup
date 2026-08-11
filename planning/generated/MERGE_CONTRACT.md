@@ -2,7 +2,7 @@
 
 This contract fixes precedence, action boundaries, runtime layout, doctrine ownership, and dispatch representation for this generated distribution. OpenSpec is the sole workflow authority. Imported repositories contribute engineering techniques only; they do not contribute actions, lifecycle phases, approval gates, state, or runtime dependencies.
 
-## 1. Generated surfaces and installed layout
+## 1. Generated surfaces and packaging layout
 
 The current OpenSpec enumerators generate exactly these 12 action counterparts:
 
@@ -10,12 +10,18 @@ The current OpenSpec enumerators generate exactly these 12 action counterparts:
 
 `feedback.ts` is exported but not enumerated. This distribution therefore also provides `openspec-feedback` as one optional action counterpart, explicitly outside the 12 generated counterparts. `openspec-shared` is a passive reference index required by the generation brief; it is never an action trigger.
 
-Runtime dependencies have one installed layout:
+Generated runtime dependencies have one repository packaging layout:
 
-- action skills: `.codex/skills/<action>/SKILL.md`;
-- optional feedback counterpart: `.codex/skills/openspec-feedback/SKILL.md`;
-- canonical shared doctrine: `.codex/skills/openspec-shared/references/*.md`;
-- passive reference index: `.codex/skills/openspec-shared/SKILL.md`.
+- action skills: `release/.codex/skills/<action>/SKILL.md`;
+- optional feedback counterpart: `release/.codex/skills/openspec-feedback/SKILL.md`;
+- canonical shared doctrine: `release/.codex/skills/openspec-shared/references/*.md`;
+- passive reference index: `release/.codex/skills/openspec-shared/SKILL.md`;
+- OpenSpec project configuration: `release/openspec/config.yaml`.
+
+The installer copies packaged skills into the target project's `.codex/skills/` runtime
+layout and the packaged OpenSpec configuration into its `openspec/` runtime layout.
+References embedded in runtime files therefore continue to use those installed paths
+rather than the repository packaging paths.
 
 This contract is a generation, integration, and audit artifact. Runtime skills, generic spawned children, custom-agent declarations, specialist-agent declarations, and OpenSpec configuration must not read this contract, `MODEL_MATRIX.md`, another file under `planning/generated/**`, or anything under `staging/**`. Contract requirements are compiled into the installed action skills, canonical shared references, and each agent's self-contained bounded role constraints. Action agents read the corresponding installed action skill; specialists read only the canonical shared references relevant to their role.
 
@@ -74,15 +80,15 @@ Operational doctrine has exactly one owner. The contract establishes ownership a
 
 | Doctrine | Canonical owner |
 |---|---|
-| Planning-artifact substance and traceability | [artifact-quality.md](../../.codex/skills/openspec-shared/references/artifact-quality.md) |
-| Evidence, task-completion proof, and pass claims | [evidence-first.md](../../.codex/skills/openspec-shared/references/evidence-first.md) |
-| Public API and release impact | [api-semver.md](../../.codex/skills/openspec-shared/references/api-semver.md) |
-| Performance and memory | [performance-memory.md](../../.codex/skills/openspec-shared/references/performance-memory.md) |
-| Connector and framework integration | [integration-correctness.md](../../.codex/skills/openspec-shared/references/integration-correctness.md) |
-| Diagnosis and the distribution's sole numeric failure counter | [debugging.md](../../.codex/skills/openspec-shared/references/debugging.md) |
-| Independent review | [review.md](../../.codex/skills/openspec-shared/references/review.md) |
-| Version-specific external research | [research.md](../../.codex/skills/openspec-shared/references/research.md) |
-| Delegation, evidence packets, and concurrency | [subagents.md](../../.codex/skills/openspec-shared/references/subagents.md) |
+| Planning-artifact substance and traceability | [artifact-quality.md](../../release/.codex/skills/openspec-shared/references/artifact-quality.md) |
+| Evidence, task-completion proof, and pass claims | [evidence-first.md](../../release/.codex/skills/openspec-shared/references/evidence-first.md) |
+| Public API and release impact | [api-semver.md](../../release/.codex/skills/openspec-shared/references/api-semver.md) |
+| Performance and memory | [performance-memory.md](../../release/.codex/skills/openspec-shared/references/performance-memory.md) |
+| Connector and framework integration | [integration-correctness.md](../../release/.codex/skills/openspec-shared/references/integration-correctness.md) |
+| Diagnosis and the distribution's sole numeric failure counter | [debugging.md](../../release/.codex/skills/openspec-shared/references/debugging.md) |
+| Independent review | [review.md](../../release/.codex/skills/openspec-shared/references/review.md) |
+| Version-specific external research | [research.md](../../release/.codex/skills/openspec-shared/references/research.md) |
+| Delegation, evidence packets, and concurrency | [subagents.md](../../release/.codex/skills/openspec-shared/references/subagents.md) |
 
 ## 6. Representable dispatch
 
@@ -103,7 +109,7 @@ An action skill implements one representable nonrecursive guard. If its current 
 
 Specialist messages contain the full bounded objective, exact scope, authoritative artifacts, raw evidence, constraints, expected return, and no-recursion instruction. They do not claim custom-TOML activation. Custom-agent TOMLs independently include the appropriate routed marker for runtimes that actually select them.
 
-Existing-agent coordination is not another creation mechanism. The canonical coordination and concurrency rules are owned by [subagents.md](../../.codex/skills/openspec-shared/references/subagents.md).
+Existing-agent coordination is not another creation mechanism. The canonical coordination and concurrency rules are owned by [subagents.md](../../release/.codex/skills/openspec-shared/references/subagents.md).
 
 ## 7. Model and sandbox ownership
 
