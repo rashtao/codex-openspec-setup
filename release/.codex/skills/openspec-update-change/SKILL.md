@@ -1,6 +1,6 @@
 ---
 name: openspec-update-change
-description: Revise one OpenSpec change's already-existing planning artifacts, reconcile proposal, requirement, design, and task intent when those artifact types exist, and keep public contracts coherent without creating artifacts or editing implementation. Use when the user asks to update, refine, correct, review, or reconcile an existing change plan; fold a new decision into existing artifacts; repair contradictions or gaps among planning documents; adjust requirements, architecture, scope, or tasks before or after implementation; or assess whether a requested planning edit accidentally weakens or widens observable behavior, APIs, compatibility, integration, performance, or memory commitments.
+description: Revise one OpenSpec change's already-existing planning artifacts, reconcile proposal, requirement, design, and task intent when those artifact types exist, without creating artifacts or editing implementation. Use when the user asks to update, refine, correct, review, or reconcile an existing change plan; fold a new decision into existing artifacts; repair contradictions or gaps among planning documents; adjust requirements, architecture, scope, or tasks before or after implementation; or assess whether a requested planning edit accidentally weakens or widens observable behavior, integration, performance, or memory commitments.
 ---
 
 # Update an existing OpenSpec change
@@ -165,7 +165,7 @@ Before any write, present the first artifact-level revision. Include:
 - artifact id and exact eligible `existingOutputPaths` proposed for editing;
 - a concise before/after semantic summary or focused patch preview;
 - why the revision is required and which other artifacts it keeps coherent;
-- any public-contract, release, integration, performance, or implementation consequence;
+- any integration, performance, or implementation consequence;
 - assumptions, deferred missing artifacts/files, and unresolved conflict.
 
 Offer exactly these choices:
@@ -195,7 +195,6 @@ Do not batch confirmations or writes. Parallel reads may be used only when indep
 Load a shared reference only when its exact condition applies:
 
 - `../openspec-shared/references/artifact-quality.md` — when revising or assessing the substance of an intent, behavioral specification, technical design, implementation-task, or unknown custom artifact; use only the section matching the live artifact semantics and template.
-- `../openspec-shared/references/api-semver.md` — when an edit may affect public API or externally observable compatibility.
 - `../openspec-shared/references/performance-memory.md` — when performance or memory may plausibly change or a quantitative claim is involved.
 - `../openspec-shared/references/integration-correctness.md` — when the revision crosses an integration or version-sensitive boundary.
 - `../openspec-shared/references/research.md` — when repository evidence is insufficient or exact external-version behavior matters.
@@ -218,7 +217,6 @@ Report:
 - each revised artifact and exact existing output path;
 - each rejected or skipped proposed revision;
 - anything deferred because an artifact or glob output does not exist;
-- detected public-contract or release-impact consequences;
 - implementation drift the user may need to address later;
 - the final artifact states, planning completion value, and CLI `nextSteps`;
 - commands run, unavailable checks, and unresolved conflicts.

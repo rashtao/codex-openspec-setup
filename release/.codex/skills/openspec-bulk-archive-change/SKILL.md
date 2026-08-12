@@ -100,7 +100,6 @@ Order by trustworthy change creation date from current metadata. Break equal or 
 
 Read these shared references only when their condition applies:
 
-- [`api-semver.md`](../openspec-shared/references/api-semver.md) when implementation evidence or a conflicting delta can affect a public API, externally observable compatibility, or release impact.
 - [`integration-correctness.md`](../openspec-shared/references/integration-correctness.md) when a delta concerns a connector, protocol, framework lifecycle, external service, streaming, retries, transactions, or version-specific integration behavior.
 - [`review.md`](../openspec-shared/references/review.md) for a read-only independent check when conflict resolution is high consequence or repository evidence is materially ambiguous. Review findings inform the consolidated plan; they add no confirmation gate.
 - [`subagents.md`](../openspec-shared/references/subagents.md) only when independent read-only discovery or investigation will materially reduce latency. Any child receives a complete bounded evidence packet, uses the verified `spawn_agent` form with an explicit model and effort plus `fork_turns: "none"`, and cannot decide, write, validate, move, confirm, or redispatch this action.

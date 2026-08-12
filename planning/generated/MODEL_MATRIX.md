@@ -30,6 +30,5 @@ All routes explicitly select the listed model and reasoning effort. No `xhigh` r
 | `opsx-debugger` | `gpt-5.6-sol` | `high` | `workspace-write` |
 | `opsx-test-reviewer` | `gpt-5.6-sol` | `high` | `read-only` |
 | `opsx-spec-reviewer` | `gpt-5.6-sol` | `high` | `read-only` |
-| `opsx-api-compat-reviewer` | `gpt-5.6-sol` | `high` | `read-only` |
 | `opsx-perf-memory-reviewer` | `gpt-5.6-sol` | `high` | `read-only` |
 | `opsx-final-consistency-reviewer` | `gpt-5.6-sol` | `xhigh` | `read-only` |

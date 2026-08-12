@@ -127,7 +127,6 @@ Summarize the schema, current `complete/total` progress, pending task descriptio
 Load a shared reference only for the exact reason below, then follow it without restating its doctrine here:
 
 - `../openspec-shared/references/evidence-first.md` — when selecting evidence for a behavior change, bug fix, refactor, or an implementation where executable evidence may be unavailable.
-- `../openspec-shared/references/api-semver.md` — when the slice can alter a public contract or externally observable behavior, or its release impact is uncertain.
 - `../openspec-shared/references/performance-memory.md` — when the slice can plausibly affect latency, throughput, allocation, buffering, concurrency, or resource usage.
 - `../openspec-shared/references/integration-correctness.md` — when a connector, protocol, external system, framework lifecycle, transaction, streaming, cancellation, retry, conversion, or compatibility boundary is involved.
 - `../openspec-shared/references/debugging.md` — when reproducing or diagnosing a bug, failing test, nondeterminism, leak, regression, or unexpected implementation failure.
@@ -161,7 +160,6 @@ Every specialist spawn must explicitly set the route from this matrix, use `fork
 | `opsx-debugger` | `gpt-5.6-sol` | `high` | A hard defect, nondeterminism, concurrency issue, leak, or regression |
 | `opsx-test-reviewer` | `gpt-5.6-sol` | `high` | Whether tests can fail for the intended defect or behavior |
 | `opsx-spec-reviewer` | `gpt-5.6-sol` | `high` | Task and implementation compliance with authoritative artifacts |
-| `opsx-api-compat-reviewer` | `gpt-5.6-sol` | `high` | Public API, behavior compatibility, deprecation, or release impact |
 | `opsx-perf-memory-reviewer` | `gpt-5.6-sol` | `high` | Performance or memory methodology and measurement evidence |
 | `opsx-final-consistency-reviewer` | `gpt-5.6-sol` | `xhigh` | High-consequence cross-artifact and cross-slice consistency |
 

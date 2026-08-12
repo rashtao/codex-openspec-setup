@@ -30,7 +30,6 @@ Select only a relevant specialist and pass the explicit route shown:
 | `opsx-debugger` | `gpt-5.6-sol` | `high` | workspace-write | Hard defects, nondeterminism, concurrency, leaks, and regressions. |
 | `opsx-test-reviewer` | `gpt-5.6-sol` | `high` | read-only | Whether tests can fail for the intended defect. |
 | `opsx-spec-reviewer` | `gpt-5.6-sol` | `high` | read-only | Implementation against proposal, specs, design, and tasks. |
-| `opsx-api-compat-reviewer` | `gpt-5.6-sol` | `high` | read-only | Public API and behavior compatibility, deprecations, and release impact. |
 | `opsx-perf-memory-reviewer` | `gpt-5.6-sol` | `high` | read-only | Methodology, hot paths, allocations, and measurement evidence. |
 | `opsx-final-consistency-reviewer` | `gpt-5.6-sol` | `xhigh` | read-only | High-consequence cross-artifact consistency. |
 

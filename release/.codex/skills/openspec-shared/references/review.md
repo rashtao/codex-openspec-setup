@@ -7,7 +7,6 @@ Select only relevant axes:
 - task and artifact completeness;
 - behavior against requirements and scenarios, including whether tests fail for the intended defect;
 - design and cross-artifact coherence;
-- public API, observable behavior, deprecation, and release-impact classification;
 - protocol and framework integration and version claims;
 - performance and memory methodology, workload, thresholds, allocations, and evidence;
 - errors, resources, concurrency, cancellation, timeouts, backpressure, and cleanup;

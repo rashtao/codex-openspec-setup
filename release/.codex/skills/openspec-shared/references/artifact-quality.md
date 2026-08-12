@@ -14,7 +14,7 @@ Apply only the section matching the live artifact's semantics. The current OpenS
 - State the problem, why it matters, desired outcomes, cohesive scope or capabilities, explicit non-goals, and impact.
 - Describe what must change, not implementation architecture, task sequencing, estimates, or milestones.
 - Make each scope item trace to a present need. Split independent changes rather than hiding them in one proposal.
-- Identify public-contract, integration, migration, security, and performance impact only where relevant; use the dedicated reference for the analysis.
+- Identify integration, migration, security, and performance impact only where relevant; use the dedicated reference for the analysis.
 
 ## Behavioral specification
 

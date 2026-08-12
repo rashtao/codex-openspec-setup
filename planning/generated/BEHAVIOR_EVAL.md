@@ -27,7 +27,7 @@ Authority inspected:
 
 Because the evaluator was constrained to read-only operation except for this report, action mutations were not executed. Each scenario was instead traced through the exact commands, parsed fields, decisions, permitted writes, stop conditions, and ordering stated by the staged skill, then compared with the current template and CLI implementation.
 
-The current enumerator exposes exactly 12 generated actions (`explore`, `new`, `continue`, `apply`, `update`, `ff`, `sync`, `archive`, `bulk-archive`, `verify`, `onboard`, and `propose`). The current exported-but-unenumerated feedback template is covered by the thirteenth, explicitly optional `openspec-feedback` counterpart. `openspec-shared` remains passive.
+The current enumerator exposes exactly 12 generated actions (`explore`, `new`, `continue`, `apply`, `update`, `ff`, `sync`, `archive`, `bulk-archive`, `verify`, `onboard`, and `propose`). The current exported-but-unenumerated feedback template is covered by the thirteenth, explicitly optional `openspec-feedback` counterpart. `openspec-shared` remains passive. Generated counts: 12 authoritative generated counterparts, 1 optional action counterpart, 1 passive shared index, 13 action-agent declarations, and 8 specialist-agent declarations.
 
 ## Control-plane invariants
 
@@ -62,7 +62,7 @@ PASS.
 - All 13 action counterparts have a nonrecursive `ROUTED_ACTION=<action>` guard and exactly one top-level action route with explicit model, explicit effort, and `fork_turns: "1"`.
 - The routed message tells the generic child to execute the latest request directly, read the installed action skill, and never route the same action again. The parent waits and does not duplicate work.
 - Specialist examples use explicit GPT-5.6 routes and `fork_turns: "none"` with a complete evidence packet. They do not claim that a task label or TOML read activates a custom role.
-- All 13 custom action declarations carry the matching routed marker. The nine specialist declarations forbid spawning and self-redispatch. `openspec-shared` has no route.
+- All 13 custom action declarations carry the matching routed marker. The eight specialist declarations forbid spawning and self-redispatch. `openspec-shared` has no route.
 - Write-capable roles are restricted to action/implementation work; reviewers and researchers are read-only. `openspec-verify-change` has workspace-write only for ordinary build/test outputs and explicitly forbids authored source, artifact, task, spec, archive, Git, configuration, or report changes.
 
 ## Representative change scenarios
@@ -70,8 +70,6 @@ PASS.
 | Scenario | Expected staged behavior | Result |
 |---|---|---|
 | Ordinary feature | `propose` or `ff-change` creates one new change, computes the transitive `applyRequires` closure from live edges, writes applicable artifacts in dependency order, and stops before code. Behavioral capability changes produce delta specs. A conditional design is skipped only when its own live instruction says its predicate is false. | PASS |
-| Additive public API | Planning loads the API/SemVer contract, records externally observable behavior and compatibility, and classifies the impact as `minor-compatible addition` when supported. Apply uses behavioral evidence and avoids accidental public expansion. Verify compares the claimed impact with the actual diff and behavior. No extra lifecycle gate is added. | PASS |
-| Breaking API | The proposal/specs explicitly support the break and identify migration/deprecation consequences; impact is `major-breaking candidate` unless evidence requires `uncertain-needs-investigation`. Only an unresolved material decision pauses. The action still stops at its native planning boundary. | PASS |
 | Pure refactor | The live proposal has zero new/modified capabilities. The producing action sets only `skip_specs: true`, reruns status, requires every `specs/`-generating artifact to become `skipped` with no output, continues the remaining apply-required closure, and stops before implementation. Apply establishes characterization evidence before structural edits. | PASS |
 | Implementation-only bug fix | When the intended contract is unchanged and the defect merely violates it, the proposal uses zero capabilities and the same forward `skip_specs` transition. Apply reproduces and minimizes, obtains defect-sensitive evidence, diagnoses the cause, fixes it, reruns fresh evidence, and checks a task only after proof. If the intended requirement itself changes, this is no longer implementation-only and the inverse transition/spec path applies. | PASS |
 | Implementation-only performance regression | With no requirement-level behavior change, specs are skipped through the schema-required marker. Planning/apply still load performance guidance when relevant. Apply records environment, representative workload, and baseline, diagnoses before optimizing, then reruns the same measurement plus correctness evidence. Quantitative improvement is not claimed without measurement. | PASS |
@@ -178,4 +176,4 @@ The current enumerator still has 12 generated actions. Feedback is exported by c
 
 ## Final assessment
 
-Across the required ordinary feature, API, pure-refactor, implementation-only bug/performance/leak/framework, connector, ambiguous design, invalid-design discovery, archive collision, bulk conflict, custom tracking, registered-store, feedback, and routing scenarios, the staged behavior preserves current OpenSpec state, questions, writes, stops, and ordering. Added API, evidence, performance, integration, diagnosis, research, review, and delegation rigor remains relevance-driven. There are no lifecycle-changing findings and no BLOCKER or MAJOR findings.
+Across the required ordinary feature, pure-refactor, implementation-only bug/performance/leak/framework, connector, ambiguous design, invalid-design discovery, archive collision, bulk conflict, custom tracking, registered-store, feedback, and routing scenarios, the staged behavior preserves current OpenSpec state, questions, writes, stops, and ordering. Added evidence, performance, integration, diagnosis, research, review, and delegation rigor remains relevance-driven. There are no lifecycle-changing findings and no BLOCKER or MAJOR findings.

@@ -48,7 +48,6 @@ Keep at most one step `in_progress`. Use `apply_patch` for every artifact-file e
 Shared references are relative to this skill. Load one only when its condition is true, and apply it as technique under the authority order above.
 
 - `../openspec-shared/references/artifact-quality.md`: load while drafting or assessing intent, behavioral specification, technical design, implementation-task, or unknown custom artifacts. Use only the section matching the live artifact semantics and template.
-- `../openspec-shared/references/api-semver.md`: load when the change can affect public API or externally observable compatibility.
 - `../openspec-shared/references/performance-memory.md`: load when performance or memory can plausibly change or a quantitative claim is needed.
 - `../openspec-shared/references/integration-correctness.md`: load when the change crosses an integration or version-sensitive boundary.
 - `../openspec-shared/references/research.md`: load when repository evidence is insufficient or exact external-version behavior matters.

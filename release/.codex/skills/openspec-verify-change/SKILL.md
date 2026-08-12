@@ -89,7 +89,6 @@ Read the following references only under the stated condition and record the rea
 - `../openspec-shared/references/evidence-first.md` when selecting or interpreting commands needed for a pass, complete, fixed, or ready claim; reason: determine what fresh evidence supports each claim and how to report unavailable evidence.
 - `../openspec-shared/references/review.md` when performing or dispatching independent review; reason: calibrate finding-oriented, read-only review and evidence handoff.
 - `../openspec-shared/references/subagents.md` before any specialist dispatch; reason: apply the verified spawn form, context isolation, nonrecursive guard, and result-integration rules.
-- `../openspec-shared/references/api-semver.md` when the artifacts or diff can affect a public contract or externally observable behavior; reason: assess compatibility dimensions and the required release-impact class.
 - `../openspec-shared/references/integration-correctness.md` when the change touches a connector, protocol, external service, framework hook, persistence boundary, or runtime-version contract; reason: assess real boundary semantics and integration evidence.
 - `../openspec-shared/references/performance-memory.md` when the change plausibly affects latency, throughput, allocation, buffering, caching, pooling, serialization, or resource lifetime, or makes a quantitative claim; reason: evaluate baseline, workload, thresholds, and comparable measurements.
 - `../openspec-shared/references/debugging.md` when fresh evidence fails, is flaky, or contradicts an artifact or prior claim and diagnosis is needed to classify the finding; reason: isolate the failing boundary and avoid speculative diagnosis. Remain read-only.
@@ -117,10 +116,6 @@ Apply `artifact-quality.md` to the live behavioral artifacts and `evidence-first
 
 Apply `artifact-quality.md` and `review.md` across the live planning artifacts, implementation, and repository conventions. When implementation exposes an artifact gap, identify the owning artifact and future correction; never edit it in this action.
 
-### Public API and release impact
-
-When relevant, load and apply `api-semver.md` to the artifact intent, actual diff, and observed behavior.
-
 ### Integration correctness
 
 When relevant, load and apply `integration-correctness.md` and the evidence contract to the implemented boundary.
@@ -141,7 +136,6 @@ Use only these verified calls with the listed explicit route, replacing every pa
 
 - Test strength: `spawn_agent({ task_name: "verify_tests", message: "Independently assess test strength for this bounded verification axis. Remain read-only, report findings only, and do not spawn agents. Complete packet: <objective; exact artifact/test/diff paths or contents; repository standards; raw commands, outputs, exits, scope, and limitations; expected return>.", fork_turns: "none", model: "gpt-5.6-sol", reasoning_effort: "high" })`
 - Spec correctness and completeness: `spawn_agent({ task_name: "verify_spec", message: "Independently compare implementation and tests with every supplied planning artifact. Remain read-only, report findings only, and do not spawn agents. Complete packet: <objective; all artifact and implementation paths or contents; repository standards; raw evidence and limitations; expected return>.", fork_turns: "none", model: "gpt-5.6-sol", reasoning_effort: "high" })`
-- Public API and release impact: `spawn_agent({ task_name: "verify_api", message: "Independently assess the supplied public-contract scope and release impact. Remain read-only, report findings only, and do not spawn agents. Complete packet: <objective; artifacts; relevant diff; supported-version facts; repository standards; raw evidence and limitations; expected return>.", fork_turns: "none", model: "gpt-5.6-sol", reasoning_effort: "high" })`
 - Performance and memory: `spawn_agent({ task_name: "verify_perf_memory", message: "Independently assess the supplied performance or memory claim. Remain read-only, report findings only, and do not spawn agents. Complete packet: <objective; artifacts; diff; workload; environment; measurements; correctness evidence; limitations; expected return>.", fork_turns: "none", model: "gpt-5.6-sol", reasoning_effort: "high" })`
 - Focused integration, error, resource, or concurrency discovery: `spawn_agent({ task_name: "verify_code", message: "Independently inspect the named bounded code question. Remain read-only, report evidence only, and do not spawn agents. Complete packet: <focused question; artifact and changed paths or contents; repository standards; raw evidence and limitations; expected return>.", fork_turns: "none", model: "gpt-5.6-terra", reasoning_effort: "high" })`
 - High-consequence final synthesis across three or more applicable axes: `spawn_agent({ task_name: "verify_consistency", message: "Independently assess cross-artifact and cross-axis consistency. Remain read-only, report findings only, and do not spawn agents. Complete packet: <objective; every authoritative artifact; full relevant diff; prior findings; repository standards; raw evidence and limitations; expected return>.", fork_turns: "none", model: "gpt-5.6-sol", reasoning_effort: "xhigh" })`

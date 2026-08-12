@@ -9,8 +9,8 @@ This is a **generation task**. Output is disposable and will be regenerated when
 upstream source changes. Never hand-preserve previous generated behaviour.
 
 Target runtime: **Codex CLI only**, GPT-5.6 model family. This project develops **database
-connectors and framework integrations**: public APIs under SemVer, protocol correctness,
-performance and memory efficiency are first-class correctness concerns.
+connectors and framework integrations**: protocol correctness, performance and memory
+efficiency are first-class correctness concerns.
 
 ## 0. Non-negotiable objective
 
@@ -125,20 +125,19 @@ Output: `staging/global/MERGE_CONTRACT.md`, unambiguously defining:
 2. artifact source-of-truth rules
 3. question/semantic-gate policy
 4. evidence-first implementation policy
-5. public API & SemVer policy
-6. performance & memory policy
-7. connector/framework-integration policy
-8. external research policy (primary sources, version-pinned)
-9. diagnosis-before-fix policy, with exactly ONE failure counter
-10. independent review/verification policy and its axes
-11. subagent delegation policy and the single verified dispatch mechanism
-12. concurrency / write-conflict policy
-13. task-completion criteria
-14. archive-readiness rules
-15. model routing (§9)
-16. canonical terminology every skill must use
-17. precedence rules
-18. forbidden workflow substitutions and forbidden vocabulary
+5. performance & memory policy
+6. connector/framework-integration policy
+7. external research policy (primary sources, version-pinned)
+8. diagnosis-before-fix policy, with exactly ONE failure counter
+9. independent review/verification policy and its axes
+10. subagent delegation policy and the single verified dispatch mechanism
+11. concurrency / write-conflict policy
+12. task-completion criteria
+13. archive-readiness rules
+14. model routing (§9)
+15. canonical terminology every skill must use
+16. precedence rules
+17. forbidden workflow substitutions and forbidden vocabulary
 
 ### Required precedence (lower may never contradict higher)
 
@@ -183,33 +182,18 @@ failed cycle for the same failure, stop, return a blocked status with the eviden
 and escalate to the owning planning artifact. **Exactly one counter exists across the
 whole distribution.**
 
-### 6.3 Public API & SemVer
-
-When a change can affect public API or externally observable behaviour, require
-consideration of: source compatibility; runtime behaviour; wire/protocol behaviour;
-configuration; documented extension points; framework integration contracts; observable
-error types and semantics; lifecycle/resource-management semantics; feature detection;
-deprecation path; version support matrix; binary/ABI compatibility where applicable.
-
-Classify release impact as: no release-facing impact / patch-compatible /
-minor-compatible addition / major-breaking candidate / uncertain-needs-investigation.
-Never derive SemVer from syntax alone — behavioural compatibility counts. During
-implementation, prevent accidental public-API expansion. During verification, compare the
-claimed impact against the actual diff and behaviour. Intentional breaks require explicit
-artifact support.
-
-### 6.4 Performance & memory
+### 6.3 Performance & memory
 
 Relevant-change planning identifies hot paths, expected workload, allocation and resource
 risks, latency/throughput, concurrency, buffering/batching, connection and pool lifecycle,
 backpressure, caching, serialization/conversion cost, benchmark/profile strategy, and any
 existing regression thresholds. Quantitative claims require measurement; prefer
 representative benchmarks over toy microbenchmarks. Diagnose suspected regressions before
-optimising. Never trade away correctness, public contracts, or resource cleanup without
-explicit justification. This is **not** ceremony for changes that cannot plausibly affect
+optimising. Never trade away correctness or resource cleanup without explicit
+justification. This is **not** ceremony for changes that cannot plausibly affect
 performance.
 
-### 6.5 Connector / framework integration
+### 6.4 Connector / framework integration
 
 When relevant, reason explicitly about supported server/framework/runtime versions,
 protocol semantics, transactions, connection lifecycle, pooling, cancellation, timeouts,
@@ -234,7 +218,7 @@ gates, artifact-aware evidence practices, and its subagent/review orchestration 
 with the current OpenSpec action. An action whose purpose is to produce several planning
 artifacts in one invocation must not become a per-artifact approval lifecycle. Convert
 those pauses into semantic gates that fire only on materially consequential unresolved
-choices (public behaviour, SemVer/API, architecture, acceptance criteria, destructive
+choices (public behaviour, architecture, acceptance criteria, destructive
 migration, security, interoperability, major perf/memory tradeoff).
 **Do not emit standalone `openspec-plus-*` skills.** Their content becomes shared
 references owned by OpenSpec actions.
@@ -309,7 +293,6 @@ Specialist runtime agents (all explicit):
 | `opsx-debugger` | `gpt-5.6-sol` | high | workspace-write | hard bugs, nondeterminism, concurrency, leaks, regressions |
 | `opsx-test-reviewer` | `gpt-5.6-sol` | high | read-only | can these tests actually fail for the intended defect? |
 | `opsx-spec-reviewer` | `gpt-5.6-sol` | high | read-only | implementation vs proposal/spec/design/tasks |
-| `opsx-api-compat-reviewer` | `gpt-5.6-sol` | high | read-only | public API, behaviour compat, deprecations, SemVer claim |
 | `opsx-perf-memory-reviewer` | `gpt-5.6-sol` | high | read-only | benchmark methodology, hot paths, allocations, evidence |
 | `opsx-final-consistency-reviewer` | `gpt-5.6-sol` | xhigh | read-only | high-consequence cross-artifact consistency |
 
@@ -363,7 +346,7 @@ A worker MUST NOT touch another worker's directory.
 
 Reference loading must be conditional and justified — e.g. `new-change` must not load the
 performance reference; `apply-change` loads it only when tasks/design indicate
-performance-sensitive work; `verify-change` loads API/SemVer and perf references only when
+performance-sensitive work; `verify-change` loads the perf reference only when
 relevant; `explore` loads research or debugging guidance based on the problem.
 
 ### Per-action enhancement guidance
@@ -372,29 +355,28 @@ relevant; `explore` loads research or debugging guidance based on the problem.
   research, reproduction when investigating a defect, compatibility consequences,
   perf/memory hypotheses. Preserve its non-implementation boundary.
 - **propose / artifact-producing actions** — structured discovery, explicit alternatives
-  where a real choice exists, compatibility classification, measurable nonfunctional goals
+  where a real choice exists, measurable nonfunctional goals
   where relevant, unknowns and risks, external-version assumptions. Never start implementing.
-- **specs** — unambiguous behavioural requirements, testable scenarios, public API
-  behaviour, failure and error semantics, integration contracts, compatibility
+- **specs** — unambiguous behavioural requirements, testable scenarios,
+  failure and error semantics, integration contracts, compatibility
   requirements, meaningful performance/resource requirements. No implementation detail
   unless it is part of the contract.
 - **design** — alternatives and tradeoffs, deep-module/interface reasoning, resource and
-  concurrency architecture, protocol/framework constraints, compatibility and deprecation
-  strategy, benchmark/profile design.
+  concurrency architecture, protocol/framework constraints, benchmark/profile design.
 - **tasks** — vertical behavioural slices stating the observable result and how success is
   established, without pre-scripting every edit. Dedicated benchmark/compat tasks only
   when relevant.
 - **apply** — evidence-first implementation, one coherent slice at a time,
-  diagnosis-before-fix, project conventions, focused diffs, API-compat checks, measurement
+  diagnosis-before-fix, project conventions, focused diffs, measurement
   for any performance claim, specialists only when useful, verification before any task is
   marked complete. Preserve OpenSpec's ability to update artifacts when implementation
   exposes a legitimate spec/design problem — never silently code around a contradiction.
 - **verify** — deliberately independent and rigorous across completeness, spec
-  correctness, design coherence, test strength, public API/SemVer, integration
+  correctness, design coherence, test strength, integration
   compatibility, perf/memory evidence, and error/resource/concurrency paths. A "passes"
   claim requires fresh evidence whenever the environment permits verification.
 - **sync / update** — preserve semantic intent; detect accidental weakening or widening of
-  public contracts.
+  behavioural contracts.
 - **archive** — never a substitute for verification; preserve current archive semantics;
   fold unresolved critical verification/compatibility concerns into the existing readiness
   check without inventing a second lifecycle.
@@ -413,7 +395,7 @@ Dispatch **`merge-reference-editor`** (`gpt-5.6-sol`, `high`, workspace-write) w
 `MERGE_CONTRACT.md`, all `REWRITE_REPORT.md` files, and only the source excerpts needed.
 
 Produce compact canonical references under
-`staging/release/.codex/skills/openspec-shared/references/`, e.g. `evidence-first.md`, `api-semver.md`,
+`staging/release/.codex/skills/openspec-shared/references/`, e.g. `evidence-first.md`,
 `performance-memory.md`, `integration-correctness.md`, `debugging.md`, `review.md`,
 `research.md`, `subagents.md` (rename where clearer). Each doctrine appears in exactly one
 file, with exactly one owner. Then mechanically fix reference links in staged skills.
@@ -453,7 +435,7 @@ action, reference, agent config, the regenerated `release/openspec/config.yaml`,
 It must build a contradiction matrix across at least: OpenSpec workflow authority; action
 boundaries; artifact source of truth; question/confirmation rules; evidence rules; task
 completion; artifact updates during implementation; implementation vs exploration;
-concurrency; subagent ownership; API/SemVer; performance/memory; integration research;
+concurrency; subagent ownership; performance/memory; integration research;
 debugging and failure counters; review independence; model routing; sandbox and write
 permissions; archive readiness; git/worktree policy.
 
@@ -499,9 +481,9 @@ deleting blindly.
 ## 16. Phase H — behavioural evaluation
 
 Dispatch **`merge-behavior-evaluator`** (`gpt-5.6-sol`, `high`, read-only) to walk
-representative scenarios: ordinary feature; additive public API change; breaking API
-change; bug fix; refactor; performance regression; memory/resource leak; connector
-protocol defect; framework version incompatibility; ambiguous architectural change;
+representative scenarios: ordinary feature; bug fix; refactor; performance regression;
+memory/resource leak; connector protocol defect; framework version incompatibility;
+ambiguous architectural change;
 implementation discovery that invalidates the design; bulk archive with conflicting
 changes; any newly discovered action.
 
@@ -572,9 +554,9 @@ finding remains.
 OpenSpec owns the workflow. Other collections contribute techniques, never lifecycle
 authority. Local source beats remembered behaviour. One skill rewrite = one clean-context
 subagent. Cross-skill policy is frozen before parallel rewriting. Audits happen after
-isolated rewrites. One canonical rule beats three near-duplicates. Public API
-compatibility is part of correctness. Performance claims require measurement. Hard bugs are
-diagnosed before fixes are guessed. Subagents help only when their responsibility is
+isolated rewrites. One canonical rule beats three near-duplicates. Performance claims
+require measurement. Hard bugs are diagnosed before fixes are guessed. Subagents help only
+when their responsibility is
 narrow. Parallel reads are cheap; conflicting parallel writes are not. Every action and
 every subagent has an explicit GPT-5.6 model and effort. The generated skills must be
 compact enough to help the model rather than bury it.

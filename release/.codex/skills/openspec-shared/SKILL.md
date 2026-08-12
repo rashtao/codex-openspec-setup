@@ -9,7 +9,6 @@ Never invoke this index as an action. It defines no workflow, gate, authority, r
 
 - [`artifact-quality.md`](references/artifact-quality.md) — when drafting or assessing the substance of an intent, behavioral specification, technical design, or implementation-task artifact.
 - [`evidence-first.md`](references/evidence-first.md) — when choosing evidence for implementation or deciding whether a completion, pass, fixed, or readiness claim is supported.
-- [`api-semver.md`](references/api-semver.md) — when public API or externally observable compatibility and release impact may change.
 - [`performance-memory.md`](references/performance-memory.md) — when latency, throughput, allocation, concurrency, buffering, caching, serialization, or resource lifetime may change, or a quantitative claim is made.
 - [`integration-correctness.md`](references/integration-correctness.md) — when connector, protocol, framework, external-service, transaction, streaming, retry, cancellation, version, cleanup, error-mapping, or value-conversion semantics matter.
 - [`debugging.md`](references/debugging.md) — when a bug, regression, leak, nondeterminism, failing check, or contradictory observation requires diagnosis.

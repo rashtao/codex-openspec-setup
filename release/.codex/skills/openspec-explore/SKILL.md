@@ -84,7 +84,6 @@ Use `update_plan` only when a plan materially aids the exploration. Use `apply_p
 Load a reference only for its stated reason, then apply it within this action's no-implementation boundary:
 
 - `../openspec-shared/references/artifact-quality.md` — when assessing the substance of an intent, behavioral specification, technical design, or implementation-task artifact, including an explicitly requested capture.
-- `../openspec-shared/references/api-semver.md` — when the explored choice may alter a public API, externally observable behavior, compatibility, deprecation, or release classification.
 - `../openspec-shared/references/performance-memory.md` — when the issue or option can plausibly affect latency, throughput, allocation, resource lifetime, concurrency, buffering, or memory.
 - `../openspec-shared/references/integration-correctness.md` — when the subject crosses a protocol, connector, framework, database, external service, or runtime-version boundary.
 - `../openspec-shared/references/debugging.md` — when reproducing or diagnosing a bug, failure, flake, or performance regression; follow its diagnosis contract without applying a fix.

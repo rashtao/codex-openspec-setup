@@ -50,7 +50,7 @@ The generator in `lib/openspec/src/core/shared/skill-generation.ts` enumerates 1
 | optional action | `feedback` | `release/.codex/skills/openspec-feedback/SKILL.md` |
 | passive package index | shared doctrine references | `release/.codex/skills/openspec-shared/SKILL.md` and `references/*.md` |
 
-Generated counts: 12 authoritative generated counterparts, 1 optional action counterpart, 1 passive shared index, 13 action-agent declarations, and 9 specialist-agent declarations.
+Generated counts: 12 authoritative generated counterparts, 1 optional action counterpart, 1 passive shared index, 13 action-agent declarations, and 8 specialist-agent declarations.
 
 No previous `planning/generated/MERGE_MANIFEST.md` existed, so this run has no earlier generated baseline to diff. The current source snapshot establishes the regeneration baseline; no legacy generated behavior was preserved for its own sake.
 
@@ -86,7 +86,6 @@ On 2026-08-11, the runtime packaging boundary was tightened without changing an 
 | `opsx-debugger` | `gpt-5.6-sol` | `high` | `workspace-write` |
 | `opsx-test-reviewer` | `gpt-5.6-sol` | `high` | `read-only` |
 | `opsx-spec-reviewer` | `gpt-5.6-sol` | `high` | `read-only` |
-| `opsx-api-compat-reviewer` | `gpt-5.6-sol` | `high` | `read-only` |
 | `opsx-perf-memory-reviewer` | `gpt-5.6-sol` | `high` | `read-only` |
 | `opsx-final-consistency-reviewer` | `gpt-5.6-sol` | `xhigh` | `read-only` |
 
@@ -100,7 +99,7 @@ The slice implementer deliberately uses `gpt-5.6-terra` at `high`, not the earli
 | mattpocock/skills | vertical slices; deep modules behind small stable interfaces; design-it-twice; minimized reproduction; hypothesis and boundary instrumentation; independent code/spec review; primary-source research; useful domain modeling | `artifact-quality.md`; `evidence-first.md`; `debugging.md`; `review.md`; `research.md`; relevant planning/apply actions |
 | obra/superpowers | root-cause tracing; condition-based waiting; defense in depth; verification before completion; requesting/receiving review discipline; safe parallel-subagent hygiene | `debugging.md`; `evidence-first.md`; `review.md`; `subagents.md` |
 
-Canonical shared owners are `artifact-quality.md`, `evidence-first.md`, `api-semver.md`, `performance-memory.md`, `integration-correctness.md`, `debugging.md`, `review.md`, `research.md`, and `subagents.md`. Action skills load them only when their subject is relevant.
+Canonical shared owners are `artifact-quality.md`, `evidence-first.md`, `performance-memory.md`, `integration-correctness.md`, `debugging.md`, `review.md`, `research.md`, and `subagents.md`. Action skills load them only when their subject is relevant.
 
 ## Deliberately rejected concepts
 
@@ -131,7 +130,7 @@ Canonical shared owners are `artifact-quality.md`, `evidence-first.md`, `api-sem
 - Shared minor: verify's ambiguous multi-candidate filter cannot reliably identify a custom-schema implementation-task artifact from status alone. Explicit selection and post-selection verification remain correct.
 - Audit-only minor: nine staging-only rewrite reports have stale shared-reference inventories. Runtime reference links and conditional loads are correct; rewrite reports are not published.
 - Behavioral notes: the public tracking-path limitation is handled safely; verify's wider sandbox is restricted to build/test outputs; feedback is optional rather than a resurrected generated action.
-- The 2026-08-11 dependency refinement changed no action skill or OpenSpec lifecycle behavior. A targeted post-refinement check parsed all 22 agent TOMLs, revalidated all 14 skills, resolved every agent file reference in a target-layout probe with no `planning/` directory, and confirmed zero runtime references to `planning/generated/**` or `staging/**`. The earlier independent action audit and behavior evaluation were not rerun because their audited action procedures were unchanged.
+- The 2026-08-11 dependency refinement changed no action skill or OpenSpec lifecycle behavior. A targeted post-refinement check parsed all 21 agent TOMLs, revalidated all 14 skills, resolved every agent file reference in a target-layout probe with no `planning/` directory, and confirmed zero runtime references to `planning/generated/**` or `staging/**`. The earlier independent action audit and behavior evaluation were not rerun because their audited action procedures were unchanged.
 
 No BLOCKER or MAJOR finding remains.
 
@@ -141,7 +140,7 @@ Passed:
 
 - 12/12 generated OpenSpec skills have exactly one counterpart; optional feedback and passive shared are categorized separately.
 - 14/14 staged `SKILL.md` files have YAML frontmatter containing only `name` and `description` and pass the local skill validator.
-- 22/22 agent TOMLs parse and contain explicit recognized GPT-5.6 model, accepted effort, sandbox, and required declaration fields.
+- 21/21 agent TOMLs parse and contain explicit recognized GPT-5.6 model, accepted effort, sandbox, and required declaration fields.
 - The OpenSpec YAML and Codex fragment TOML parse; bounded concurrency is 3.
 - Every runtime link resolves; every agent points to a real generated skill; all action routes use the single bounded dispatch mechanism; no recursive route is present.
 - No runtime skill, agent declaration, or OpenSpec configuration references `planning/generated/**` or `staging/**`; generated planning documents are removable from target installations.

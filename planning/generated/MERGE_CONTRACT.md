@@ -82,7 +82,6 @@ Operational doctrine has exactly one owner. The contract establishes ownership a
 |---|---|
 | Planning-artifact substance and traceability | [artifact-quality.md](../../release/.codex/skills/openspec-shared/references/artifact-quality.md) |
 | Evidence, task-completion proof, and pass claims | [evidence-first.md](../../release/.codex/skills/openspec-shared/references/evidence-first.md) |
-| Public API and release impact | [api-semver.md](../../release/.codex/skills/openspec-shared/references/api-semver.md) |
 | Performance and memory | [performance-memory.md](../../release/.codex/skills/openspec-shared/references/performance-memory.md) |
 | Connector and framework integration | [integration-correctness.md](../../release/.codex/skills/openspec-shared/references/integration-correctness.md) |
 | Diagnosis and the distribution's sole numeric failure counter | [debugging.md](../../release/.codex/skills/openspec-shared/references/debugging.md) |

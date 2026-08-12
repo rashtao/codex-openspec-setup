@@ -104,7 +104,6 @@ Load `artifact-quality.md` when its condition below applies and use only its mat
 These are optional technique references, not lifecycle authorities. Load only the file whose condition is met for the live next artifact and current change; never load all by default:
 
 - `../openspec-shared/references/artifact-quality.md` when the live next artifact is an intent, behavioral specification, technical design, implementation-task artifact, or unknown custom artifact needing the matching compact quality contract.
-- `../openspec-shared/references/api-semver.md` only when the artifact must reason about public API, externally observable compatibility, deprecation, or release impact.
 - `../openspec-shared/references/performance-memory.md` only when the change can plausibly affect performance, memory, allocation, concurrency, buffering, backpressure, or resource lifetime.
 - `../openspec-shared/references/integration-correctness.md` only when the artifact concerns a connector, framework integration, protocol, external system, or version interoperability.
 - `../openspec-shared/references/research.md` only when repository evidence is insufficient or an exact dependency, protocol, or runtime version materially affects the artifact.

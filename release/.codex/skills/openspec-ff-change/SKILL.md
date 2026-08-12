@@ -148,7 +148,6 @@ Use active-schema declaration order as the stable tie-break while topologically 
 Before drafting an affected artifact, read only the shared references whose exact condition applies:
 
 - `../openspec-shared/references/artifact-quality.md` when drafting or assessing an intent, behavioral specification, technical design, implementation-task, or unknown custom artifact; use only the section matching its live semantics.
-- `../openspec-shared/references/api-semver.md` when the change can affect a public API, configuration contract, protocol/wire behavior, observable errors, lifecycle semantics, extension points, or any other externally relied-on behavior.
 - `../openspec-shared/references/performance-memory.md` when the change can plausibly affect latency, throughput, allocation, buffering, batching, caching, concurrency, backpressure, connection/resource lifetime, or memory use.
 - `../openspec-shared/references/integration-correctness.md` when the change touches a connector, framework integration, external service, protocol, transaction, retry/idempotency behavior, streaming, cancellation, version compatibility, or value conversion.
 - `../openspec-shared/references/research.md` when repository evidence is insufficient or the exact dependency, protocol, framework, runtime, or supported-version behavior matters.

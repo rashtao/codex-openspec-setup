@@ -179,7 +179,6 @@ If the target exists, report the selected change, exact target, failure, and the
 
 Read only the references whose condition applies, and state the listed reason in the plan or working notes:
 
-- `../openspec-shared/references/api-semver.md` — only when the change can affect a public API or externally observable behavior; reason: assess and disclose unresolved release compatibility without turning it into another archive gate.
 - `../openspec-shared/references/integration-correctness.md` — only when the change touches a connector, framework, protocol, concurrency, cancellation, resource lifecycle, or performance-sensitive integration; reason: assess and disclose unresolved integration correctness concerns relevant to archive readiness.
 - `../openspec-shared/references/evidence-first.md` — only when interpreting an available pass, completion, readiness, or unavailable-evidence claim.
 - `../openspec-shared/references/review.md` — only when existing review or verification evidence, or an unresolved critical finding, must be interpreted for readiness disclosure; reason: report evidence and findings accurately without substituting a new verification action.

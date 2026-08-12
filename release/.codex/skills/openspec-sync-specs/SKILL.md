@@ -32,7 +32,6 @@ Current OpenSpec CLI state, the active schema, artifact instructions, and this a
 Read a shared reference only when its condition applies:
 
 - `../openspec-shared/references/artifact-quality.md` when assessing whether merged requirements remain observable, testable, complete, traceable, and consistent under the live OpenSpec specification format.
-- `../openspec-shared/references/api-semver.md` when the delta can affect a public API or externally observable behavior and the compatibility or release impact is not obvious. Use it to detect accidental weakening or widening, not to veto an intentional delta.
 - `../openspec-shared/references/integration-correctness.md` when the requirements concern a connector, protocol, framework integration, version matrix, transactions, retries, cancellation, streaming, resource lifetime, error mapping, or data conversion.
 - `../openspec-shared/references/review.md` when a high-consequence or semantically ambiguous merge merits an independent read-only review.
 - `../openspec-shared/references/subagents.md` only when such a narrow independent review or bounded read-only investigation is actually delegated. Follow its verified dispatch and non-overlapping-write rules.

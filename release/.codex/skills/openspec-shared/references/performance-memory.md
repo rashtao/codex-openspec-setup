@@ -16,4 +16,4 @@ Identify the applicable hot paths, expected and worst-relevant workload, allocat
 | Existing threshold | Preserve and evaluate it; explain any deliberate change in the owning planning artifact. |
 | No representative environment | State the limitation and use bounded alternate evidence without claiming a measured improvement. |
 
-Prefer representative workloads over toy microbenchmarks. Inspect allocation, retention, cleanup, contention, queue growth, backpressure, caching, pooling, serialization, and buffering where relevant. Do not trade away correctness, public contracts, or resource cleanup without explicit artifact support.
+Prefer representative workloads over toy microbenchmarks. Inspect allocation, retention, cleanup, contention, queue growth, backpressure, caching, pooling, serialization, and buffering where relevant. Do not trade away correctness or resource cleanup without explicit artifact support.
