@@ -55,9 +55,9 @@ For every invocation, query current CLI JSON. The active schema and returned art
 
 The public apply-instructions payload reports `tasks`, `progress`, `state`, and `contextFiles`, but does not report the schema's concrete `apply.tracks` path. Do not invent such a field.
 
-- Apply may change a checkbox only when the exact pending checkbox text occurs in exactly one reported context file. If that mapping is absent or ambiguous, stop blocked, leave task state unchanged, and report the CLI limitation.
+- Apply's primary checkbox locator is exact unchecked text in reported `contextFiles`; the live task `id` disambiguates duplicate exact text. Only when both locators fail may apply inspect the schema directory returned by `openspec schema which <schemaName> --json`, from the resolved project or store root, and use its literal schema-declared `apply.tracks` path as a guarded last-resort fallback: the path is never an apply/status payload field or a precondition for beginning implementation, and must be one non-glob relative file beneath `changeRoot`. If the full chain remains absent or ambiguous, apply stops blocked, leaves task state unchanged, and reports the CLI limitation.
 - Archive readiness may use `openspec instructions apply --change "<name>" --json` and its live `tasks`, `progress`, and `state` for warnings without claiming a tracking path.
-- Bulk archive may use those fields for consolidated readiness. Onboarding may locate an exact checkbox only by the same unique-context-file rule; otherwise it pauses safely with the limitation.
+- Bulk archive may use those fields for consolidated readiness. Other actions do not inherit apply's extended locator chain; onboarding deliberately uses only the primary exact-text-in-reported-context-files locator and otherwise pauses safely with the limitation.
 
 `context` is a required project constraint; artifact-keyed `rules` constrain that artifact; `operationGuidance` is advisory. None changes CLI state or an action boundary. Delta sources remain only the reported existing spec outputs.
 

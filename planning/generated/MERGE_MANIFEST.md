@@ -56,6 +56,8 @@ No previous `planning/generated/MERGE_MANIFEST.md` existed, so this run has no e
 
 On 2026-08-11, the runtime packaging boundary was tightened without changing an OpenSpec action: custom-agent declarations stopped reading `planning/generated/MERGE_CONTRACT.md`; action agents now read only their installed action skill, specialists read only applicable installed shared references, and the merge contract/model/audit documents became removable target-project provenance. The regeneration prompt now requires this boundary.
 
+On 2026-08-13, the apply-action safeguards and three just-in-time reviewer prompts were manually backported to both the released apply skill and `prompts/generate_skills.md` for reproducible regeneration.
+
 ## Action model matrix
 
 | Action and action agent | Model | Effort | Sandbox |

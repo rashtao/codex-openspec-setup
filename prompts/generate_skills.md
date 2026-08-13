@@ -132,7 +132,13 @@ Output: `staging/global/MERGE_CONTRACT.md`, unambiguously defining:
 9. independent review/verification policy and its axes
 10. subagent delegation policy and the single verified dispatch mechanism
 11. concurrency / write-conflict policy
-12. task-completion criteria
+12. task-completion criteria, including the action-scoped checkbox locator chain: exact unchecked
+    text in a reported context file is the **primary** locator; the live task `id` disambiguates
+    duplicate exact text; apply alone may use a schema-declared tracking path as a **guarded
+    last-resort fallback**, never an apply/status payload field or a precondition for beginning
+    implementation; remaining ambiguity after the full chain stops blocked with task state unchanged
+    and a report of the CLI limitation; other actions — notably onboarding — deliberately use the
+    primary locator only
 13. archive-readiness rules
 14. model routing (§9)
 15. canonical terminology every skill must use
@@ -371,10 +377,59 @@ relevant; `explore` loads research or debugging guidance based on the problem.
   for any performance claim, specialists only when useful, verification before any task is
   marked complete. Preserve OpenSpec's ability to update artifacts when implementation
   exposes a legitimate spec/design problem — never silently code around a contradiction.
+  Handle `ready` with zero returned tasks as an untracked schema mode: derive one bounded,
+  verifiable outcome from the live instruction and reported artifacts, ask when it is
+  not bounded, create no tracking file or checkbox, establish completion by evidence, and
+  terminate without waiting for a state transition. Capture `git status --short` once as
+  the session baseline; never reset, revert, overwrite, or absorb pre-existing and
+  unrelated user work, and ask before touching an already-modified path of unclear
+  ownership. Read applicable `AGENTS.md`
+  files, all instructions they reference, and build manifests; record exact focused-test,
+  lint/format-check, type-check/build, and full-verification commands, distinguish
+  check-only commands from mutating formatters, append no guessed arguments or flags, and
+  ask only one clarifying question if a required command remains ambiguous. Any production
+  or test edit after review or a passing check invalidates it: re-establish affected
+  independent review first, then rerun affected checks; a mutating formatter is evidence
+  only after its check command or a clean diff inspection.
+  Keep exact unchecked text in reported `contextFiles` as the primary checkbox locator and
+  never invent a tracking-path payload field. Preserve marker, indentation, identifier,
+  and text while changing only `[ ]` to `[x]`; use the live task `id` to disambiguate
+  duplicate exact text. Only when those locators fail and the verified current CLI exposes
+  `schema which <schemaName> --json` may its schema-directory `path` lead to the literal
+  `apply.tracks` fallback: resolve the root as for other root-sensitive schema commands
+  (selected `stores[].root` or store-scoped context root, otherwise the local context root),
+  set it as the command's working directory, and never pass an unsupported `--store`; accept
+  one relative path beneath `changeRoot`, never a glob or set, and block on glob metacharacters
+  or escape. If the fallback is unavailable or still does not establish one target, stop
+  blocked with task state unchanged and report the CLI limitation. This fallback is never a
+  precondition for work or a field in apply/status JSON. This extended locator chain belongs
+  only to apply; no other action inherits it, and onboarding deliberately retains the primary
+  locator only. Before reporting `all_done` for a multi-slice implementation, inspect the
+  cumulative diff for interface/type/error-contract compatibility, one name per concept,
+  dead or superseded code, and scope creep, then rerun the recorded full verification
+  commands. Use `opsx-final-consistency-reviewer` for that pass only when the change is
+  high-consequence; the action agent owns fixes and re-establishes invalidated evidence in
+  the stated order.
   Emit a traceability comment immediately adjacent to every new class, method, or
   significant modified block, using the target file's native comment syntax (`//`, `#`,
   `<!-- -->`, `--`, `;`, etc.): `Change-Id: <change name> | Task: <task id>`, where the
   change name and task id come from the live apply status/instructions.
+  In zero-task mode do not fabricate an id; this comment applies only to task-bound slices.
+  Emit exactly `spec-compliance-reviewer-prompt.md`,
+  `code-quality-reviewer-prompt.md`, and `final-review-prompt.md` beside the apply skill;
+  load one only immediately before its relevant conditional dispatch and fill only its
+  fenced body verbatim with placeholders replaced. Each is read-only, nonrecursive, has a
+  bounded scope, per-item evidence matrix and verdicts, severity taxonomy, exact `STATUS:`
+  return sections, and its explicit §9 route (`gpt-5.6-sol`/`high`, except final
+  consistency at `gpt-5.6-sol`/`xhigh`). Each conditionally loads canonical review/evidence
+  references and the performance or integration reference only for an applicable axis and
+  restates no shared doctrine. The code-quality file is an explicitly bounded ad-hoc
+  `spawn_agent` review task: it has no role identity or standing role, `task_name` is only a
+  label, and it adds no agent to the specialist matrix. Do not emit
+  `implementer-prompt.md`; pass
+  `opsx-slice-implementer` the complete objective, scope, artifacts, constraints, raw
+  evidence, expected return, and no-recursion contract directly, with canonical
+  evidence/debugging references loaded only when triggered.
 - **verify** — deliberately independent and rigorous across completeness, spec
   correctness, design coherence, test strength, integration
   compatibility, perf/memory evidence, and error/resource/concurrency paths. A "passes"
@@ -463,8 +518,8 @@ Run mechanical checks in addition to the audit, and run the repository's existin
 4. all model names are in the GPT-5.6 family specified here
 5. only reasoning-effort values accepted by the installed Codex build are used
 6. no runtime dependency on, or instruction to invoke, `lib/openspec-plus`,
-   `lib/mattpocock`, or `lib/superpower`; no `openspec-plus-*` skill names remain anywhere,
-   including `release/openspec/config.yaml`, `README.md`, and `prompts/`
+   `lib/mattpocock`, or `lib/superpower`; no `openspec-plus-*` skill name appears in
+   generated runtime content, including `release/openspec/config.yaml`
 7. no foreign agent-platform syntax, slash commands, or pseudo-tools; no `.claude/` output
 8. no recursive action-agent dispatch
 9. every referenced file exists; every agent points at a real generated skill
@@ -478,6 +533,16 @@ Run mechanical checks in addition to the audit, and run the repository's existin
 15. `install.sh` and `tests/` still succeed against the generated tree
 16. no runtime skill, agent, or OpenSpec configuration references `staging/**` or
     `planning/generated/**`; generated planning documents remain removable provenance
+17. apply handles `ready` with zero tasks as one evidence-completed untracked outcome and
+    cannot loop waiting for `all_done`
+18. apply's primary exact-checkbox rule never invents a tracking payload field; task-id
+    disambiguation and any verified schema fallback retain the stated ambiguity and path
+    safeguards
+19. the distribution contains exactly one numeric failure counter, owned by
+    `openspec-shared/references/debugging.md`
+20. every generated action-specific prompt declares a model and effort matching §9; apply
+    emits exactly its three reviewer prompt files and no implementer prompt
+21. no `openspec-plus-*` string exists in any generated action-specific prompt file
 
 Search explicitly for stale or vendor-specific terms and inspect every hit rather than
 deleting blindly.
