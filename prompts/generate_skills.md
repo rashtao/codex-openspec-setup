@@ -423,7 +423,10 @@ relevant; `explore` loads research or debugging guidance based on the problem.
   return sections, and its explicit §9 route (`gpt-5.6-sol`/`high`, except final
   consistency at `gpt-5.6-sol`/`xhigh`). Each conditionally loads canonical review/evidence
   references and the performance or integration reference only for an applicable axis and
-  restates no shared doctrine. The code-quality file is an explicitly bounded ad-hoc
+  restates no shared doctrine, and every packet references shared references through a single
+  consistent installed-layout placeholder,
+  `{SKILLS_DIRECTORY}/openspec-shared/references/<file>.md`, used identically in every
+  packet. The code-quality file is an explicitly bounded ad-hoc
   `spawn_agent` review task: it has no role identity or standing role, `task_name` is only a
   label, and it adds no agent to the specialist matrix. Do not emit
   `implementer-prompt.md`; pass
