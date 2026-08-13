@@ -1,271 +1,453 @@
-# Regenerate ALL OpenSpec skills for Codex CLI + GPT-5.6
+# Generate the OpenSpec skill distribution for Codex CLI
 
-You are the **merge orchestrator**. Your job is to regenerate, from scratch, a complete
-OpenSpec skill distribution for this repository: every OpenSpec skill and every optional
-OpenSpec action found in the local OpenSpec checkout, hardened with engineering
-disciplines distilled from OpenSpec Plus, mattpocock/skills, and obra/superpowers.
+## Objective
 
-This is a **generation task**. Output is disposable and will be regenerated whenever any
-upstream source changes. Never hand-preserve previous generated behaviour.
+Regenerate from current local sources the complete OpenSpec skill distribution for this
+repository. Preserve every current OpenSpec skill, action, alias, artifact, CLI state, and
+action boundary. Strengthen those workflows with applicable engineering practices distilled
+from OpenSpec Plus, `mattpocock/skills`, and `obra/superpowers` without introducing another
+lifecycle or a runtime dependency on those projects.
 
-Target runtime: **Codex CLI only**, GPT-5.6 model family. This project develops **database
-connectors and framework integrations**: protocol correctness, performance and memory
-efficiency are first-class correctness concerns.
+Target Codex CLI and the GPT-5.6 model family. Treat protocol correctness, compatibility,
+performance, memory use, concurrency, and resource lifecycle as correctness concerns when
+they are relevant to a database connector or framework integration.
 
-## 0. Non-negotiable objective
+## Instruction precedence
 
-**OpenSpec is the one and only workflow.** The generated system may make an OpenSpec
-action markedly more rigorous. It MUST NOT:
+Apply this precedence while generating:
 
-- introduce a second lifecycle, or rename/reorder OpenSpec's artifact sequence;
-- replace OpenSpec change management or reinterpret OpenSpec CLI state;
-- substitute another framework's action for an OpenSpec action;
-- require the user to invoke OpenSpec Plus, mattpocock, or Superpowers skills at runtime;
-- add mandatory phase transitions or approval pauses that the current OpenSpec action
-  does not itself require;
-- grant any imported source authority over OpenSpec.
+1. System, safety, repository `AGENTS.md`, and explicit user constraints
+2. Current official OpenAI documentation for Codex CLI, GPT-5.6, and skill format
+3. The boundaries and deliverables in this prompt
+4. Current local OpenSpec templates, generators, schemas, and CLI behavior
+5. Imported engineering techniques
 
-Imported repositories are **source material to distil**, never runtime dependencies.
-If an imported rule conflicts with current OpenSpec behaviour, modify or discard it.
+Use this runtime precedence in every generated action skill:
 
-**The final generated set MUST be free of internal contradictions.** A single stated rule
-with one owner beats three nearly identical rules.
+1. An explicit user instruction compatible with the current OpenSpec action
+2. Current OpenSpec CLI state, schemas, generated instructions, artifact semantics, and
+   action boundaries
+3. Rules compiled from the generated merge contract
+4. Action-specific generated rules
+5. Imported engineering techniques
 
-## 1. Source trees (read-only)
+Never let a lower-priority source contradict a higher-priority source. When two requirements
+at the same level conflict, prefer safety and user constraints, then explicit output
+requirements, validation requirements, and workflow guidance. Record every material
+resolution in `MERGE_MANIFEST.md`.
 
-- `lib/openspec` — authoritative workflow
+## Inputs and assumptions
+
+Run this contract in Codex CLI with the root session on `gpt-5.6-sol` at `xhigh` reasoning.
+Run from the repository root. Use these local source trees as read-only inputs, including
+their uncommitted content:
+
+- `lib/openspec` — authoritative for OpenSpec behavior
 - `lib/openspec-plus`
 - `lib/mattpocock`
 - `lib/superpower`
 
-Never modify anything under `lib/**`. Never fetch other versions; the local trees are
-authoritative for this run, including any dirty working-tree content.
+Read the applicable `AGENTS.md` files before reading or acting within a covered directory.
+Read `install.sh`, `tests/`, the current `release/openspec/config.yaml`, and the installed
+Codex configuration and documentation before generating output. Use actual source files;
+do not reconstruct any project from memory or fetch another version of it. Official OpenAI
+documentation may be fetched only to verify current Codex, GPT-5.6, and skill requirements.
 
-Before rewriting anything, record for the manifest: each tree's commit hash, tag/version
-if any, dirty status, and license terms.
+Record each source tree's commit, tag or version when available, dirty status, license, and
+required attribution. Record `git status --short` before changing generated paths. Preserve
+unrelated user work and never reset, revert, commit, or modify `lib/**`.
 
-Use the actual files. Do not rely on recollection of these projects.
+Ask only when a missing input or materially consequential ambiguity cannot be resolved from
+the precedence above and an assumption would change public behavior, architecture, acceptance
+criteria, security, interoperability, a destructive migration, or a major performance or
+memory tradeoff. Ask the single highest-leverage blocking question, and do not bundle a
+checklist of secondary questions into it; follow up one question at a time only as needed.
+Otherwise make the narrowest reversible assumption, record it, and continue. Stop with a
+precise blocker instead of inventing unavailable source, CLI syntax, tool fields, or OpenSpec
+semantics.
 
-## 2. Discover the OpenSpec surface dynamically
+## Boundaries
 
-Do NOT hard-code a skill list.
+OpenSpec is the only runtime workflow. The generated distribution may make an action more
+rigorous, but must not:
 
-1. Read the skill **templates and generators** (e.g. `lib/openspec/src/core/templates/`,
-   `src/core/shared/skill-generation.ts`, `skill-paths.ts`, `skill-content-equivalence.ts`)
-   plus `lib/openspec/schemas/`, the CLI instruction machinery, and `lib/openspec/skills/`.
-2. Treat **templates/generators as the source of truth**; `lib/openspec/skills/*` is
-   generated output that may lag. Where they differ, follow the templates and note it.
-3. Enumerate: every skill, every command/action (including optional ones and aliases),
-   every artifact type, every CLI call and parsed field, and every documented action
-   boundary.
-4. Cover **every** skill/action present in this checkout. Include newly appeared ones
-   automatically. Do not resurrect ones that disappeared.
+- add, rename, reorder, or replace OpenSpec lifecycle stages or artifact transitions;
+- reinterpret OpenSpec CLI state or substitute an imported action for an OpenSpec action;
+- require OpenSpec Plus, Matt Pocock, or Superpowers skills at runtime;
+- add mandatory phase transitions or approval pauses absent from the current OpenSpec action;
+- grant imported material authority over OpenSpec;
+- commit, archive, branch, or create a worktree unless the current OpenSpec action and
+  explicit user request authorize it;
+- install packages or fetch dependencies during regeneration;
+- use unsupported slash commands, foreign agent syntax, pseudo-tools, or invented dispatch
+  parameters.
 
-For orientation only (NOT authoritative): `openspec-explore`, `openspec-propose`,
+Imported repositories are source material only. Distill useful behavior; do not preserve
+their names, structure, slogans, setup instructions, or user-facing orchestrators.
+
+Modify only the declared generated and staging paths. Build under `staging/`, validate there,
+then publish the accepted result to:
+
+```text
+release/.codex/skills/<one directory per discovered OpenSpec skill>/
+release/.codex/skills/openspec-shared/
+release/.codex/agents/<one custom agent per discovered action>.toml
+release/.codex/agents/opsx-*.toml
+release/openspec/config.yaml
+planning/generated/MERGE_CONTRACT.md
+planning/generated/MODEL_MATRIX.md
+planning/generated/MERGE_MANIFEST.md
+planning/generated/AUDIT_REPORT.md
+planning/generated/BEHAVIOR_EVAL.md
+```
+
+Do not publish generation-only reports into runtime skill directories. Do not retain any
+runtime reference to `staging/**` or `planning/generated/**`.
+
+## Ordered workflow
+
+### 1. Verify sources, discovery, and runtime contracts
+
+Perform these read-only tasks before writing:
+
+1. Inspect OpenSpec skill templates and generators, including
+   `lib/openspec/src/core/templates/`,
+   `lib/openspec/src/core/shared/skill-generation.ts`,
+   `lib/openspec/src/core/shared/skill-paths.ts`,
+   `lib/openspec/src/core/shared/skill-content-equivalence.ts`,
+   `lib/openspec/schemas/`, CLI instruction machinery, and `lib/openspec/skills/`.
+2. Treat templates and generators as authoritative. Treat `lib/openspec/skills/*` as
+   generated output that may lag; record discrepancies.
+3. Dynamically enumerate every skill, action, optional action, alias, artifact type, CLI
+   call, parsed field, state, and action boundary. Do not hard-code the surface or resurrect
+   removed actions.
+4. Inspect the installed Codex CLI and current official OpenAI guidance. Verify the custom
+   agent schema, model and reasoning fields, sandbox fields, supported reasoning efforts,
+   the expected `update_plan` and `apply_patch` tool names, and the exact subagent dispatch
+   mechanism. Use only verified names and one dispatch mechanism everywhere. If the installed
+   build cannot express a required agent or sandbox contract, stop and report the
+   compatibility blocker.
+5. Locate the installed `skill-creator` resources. Use its `init_skill.py`,
+   `generate_openai_yaml.py`, and `quick_validate.py` workflows instead of recreating their
+   behavior. If they are unavailable, stop and identify the missing requirement.
+6. Read packaging tests and verify the required installed layout before generation.
+
+The following names are orientation only: `openspec-explore`, `openspec-propose`,
 `openspec-new-change`, `openspec-continue-change`, `openspec-ff-change`,
 `openspec-update-change`, `openspec-apply-change`, `openspec-verify-change`,
-`openspec-sync-specs`, `openspec-archive-change`, `openspec-bulk-archive-change`,
+`openspec-sync-specs`, `openspec-archive-change`, `openspec-bulk-archive-change`, and
 `openspec-onboard`.
 
-## 3. Verify the Codex runtime contract before writing any dispatch syntax
+### 2. Freeze the merge contract
 
-Determine, from the locally installed Codex CLI and its configuration/docs (and, as a
-local sample, `lib/superpower/.codex-plugin/`):
+Dispatch one fresh `merge-policy-architect` subagent using `gpt-5.6-sol` at `xhigh`
+reasoning, or `high` only if the verified CLI rejects `xhigh`. Give it read-only access and
+only the verified runtime contract, OpenSpec templates/generators/schemas/CLI semantics, the
+four source indexes, `install.sh`, and the current OpenSpec config.
 
-- the exact custom-agent/subagent configuration format and field names;
-- accepted `model_reasoning_effort` values — **if `xhigh` is not accepted by this build,
-  use `high`** and record the substitution;
-- the exact subagent dispatch mechanism and its parameters;
-- the planning tool (`update_plan`) and patch tool (`apply_patch`) names.
+Require the architect to return a complete contract to the orchestrator. Because its sandbox
+is read-only, the orchestrator writes the returned content to
+`staging/global/MERGE_CONTRACT.md`. Do not start rewrite agents until that file exists and
+defines:
 
-Record the verified contract in the merge contract. **Every generated skill must use one
-single verified dispatch mechanism.** Never invent tool names. Never emit pseudo-tools
-(`todowrite`, generic "question tool", "skill tool"), slash commands, or Claude/OpenCode/
-Cursor/Windsurf/Gemini agent syntax.
+- OpenSpec authority, artifact sources of truth, per-action boundaries, canonical terms,
+  precedence, and forbidden substitutions;
+- one question and semantic-gate policy;
+- one evidence-first implementation policy;
+- one performance and memory policy;
+- one connector and framework-integration policy;
+- one version-specific primary-source research policy;
+- one diagnosis protocol with the distribution's only failure counter;
+- one independent review and verification policy;
+- one delegation, concurrency, write-conflict, and dispatch policy;
+- task completion, archive readiness, and model routing;
+- the apply-only task locator chain: exact unchecked text in reported `contextFiles` first;
+  live task `id` to disambiguate duplicates; then, only if verified, one guarded literal
+  path from schema-declared `apply.tracks`; otherwise stop blocked without changing task
+  state. Other actions, including onboarding, use only their current primary locator.
 
-## 4. Repository packaging constraints (hard)
+The merge contract is generation and audit authority, not a runtime dependency.
 
-Read `install.sh` and `tests/` before generating. The distribution MUST satisfy:
+### 3. Generate each skill in isolated context
 
-- skills live in `release/.codex/skills/openspec-*/`;
-- **every** such directory contains a real `SKILL.md`;
-- **no symlinks anywhere** in `release/.codex/skills/**` or `release/openspec/**`;
-- `release/openspec/config.yaml` exists and is valid;
-- shared references must live inside an `openspec-*` skill directory, otherwise the
-  installer will not ship them.
-- runtime files under `release/.codex/skills/**`, `release/.codex/agents/**`, and `release/openspec/**` must not
-  read from `staging/**` or `planning/generated/**`; those trees contain generation and
-  audit artifacts, not installed runtime dependencies.
+After the contract is frozen, dispatch one fresh `merge-skill-rewriter` subagent per
+discovered skill. Use `gpt-5.6-sol` at `high` reasoning and restrict writes to that skill's
+staging directory. Run independent rewrites concurrently only when their write scopes are
+disjoint.
 
-Therefore create `release/.codex/skills/openspec-shared/` holding all shared references plus a
-**passive** `SKILL.md` that is only a reference index — it defines no workflow, no gates,
-and no authority, and states that it is never invoked as an action.
+Give each rewriter only:
 
-Also regenerate `release/openspec/config.yaml`. It currently contains mandatory rules that invoke
-unavailable imported skills. Those skills will not exist.
-Repoint each rule at the corresponding shared reference path, keeping the rule's force and
-the file's existing comment structure.
+1. `MERGE_CONTRACT.md`;
+2. the authoritative source for its action and the minimum CLI/schema context needed to
+   preserve all calls, parsed fields, state handling, context precedence, and guidance;
+3. only imported excerpts mapped to that action;
+4. the shared-reference names and load contracts, not their full contents;
+5. its model route and the verified dispatch contract.
 
-Build everything under `staging/` first; publish to the final locations only after all
-audits pass.
+Do not give a rewriter another worker's output. Require it to initialize and write
+`staging/release/.codex/skills/<skill-name>/` and return a rewrite report. Save that report
+as `staging/reports/skills/<skill-name>/REWRITE_REPORT.md`, containing preserved behavior,
+imported and rejected concepts, conflict resolutions, required shared references and load
+reasons, action boundary, runtime model, and uncertainties. Reject any edit outside its
+assigned directory.
 
-## 5. Phase A — freeze the global merge contract (before any parallel work)
+For every optional action or actionable surface without a one-to-one skill, dispatch a fresh
+`merge-action-rewriter` with the same isolation rules using `gpt-5.6-sol` at `high`. Have it
+return an isolated action patch and report; let the orchestrator merge that patch into the
+owning staged skill after checking its boundary. Create a separate skill only when current
+OpenSpec exposes the action independently. Do not duplicate an action already covered by a
+skill.
 
-Dispatch one isolated subagent:
+### 4. Generate shared references and configuration
 
-**`merge-policy-architect`** — model `gpt-5.6-sol`, effort `xhigh` (or `high` per §3),
-sandbox read-only.
+Dispatch `merge-reference-editor` with `gpt-5.6-sol` at `high`, the merge contract, rewrite
+reports, and only needed source excerpts. Create a compact canonical set under
+`staging/release/.codex/skills/openspec-shared/references/`, normally:
 
-Inputs: OpenSpec templates/generators/schemas/CLI semantics; the skill indexes of all four
-repositories; `install.sh`; `release/openspec/config.yaml`; the verified Codex runtime contract.
+- `evidence-first.md`
+- `performance-memory.md`
+- `integration-correctness.md`
+- `debugging.md`
+- `review.md`
+- `research.md`
+- `subagents.md`
 
-Output: `staging/global/MERGE_CONTRACT.md`, unambiguously defining:
+Keep `debugging.md` as the exact owner of the failure counter; rename another reference only
+when a clearer name improves routing. Place each doctrine in exactly one reference and fix
+staged links mechanically. Create a passive `openspec-shared/SKILL.md` that only indexes
+references, defines no workflow or gate, and cannot be implicitly invoked. Use
+`agents/openai.yaml` with
+`policy.allow_implicit_invocation: false` for that skill.
 
-1. OpenSpec authority and per-action boundaries
-2. artifact source-of-truth rules
-3. question/semantic-gate policy
-4. evidence-first implementation policy
-5. performance & memory policy
-6. connector/framework-integration policy
-7. external research policy (primary sources, version-pinned)
-8. diagnosis-before-fix policy, with exactly ONE failure counter
-9. independent review/verification policy and its axes
-10. subagent delegation policy and the single verified dispatch mechanism
-11. concurrency / write-conflict policy
-12. task-completion criteria, including the action-scoped checkbox locator chain: exact unchecked
-    text in a reported context file is the **primary** locator; the live task `id` disambiguates
-    duplicate exact text; apply alone may use a schema-declared tracking path as a **guarded
-    last-resort fallback**, never an apply/status payload field or a precondition for beginning
-    implementation; remaining ambiguity after the full chain stops blocked with task state unchanged
-    and a report of the CLI limitation; other actions — notably onboarding — deliberately use the
-    primary locator only
-13. archive-readiness rules
-14. model routing (§9)
-15. canonical terminology every skill must use
-16. precedence rules
-17. forbidden workflow substitutions and forbidden vocabulary
+Dispatch `merge-codex-config-author` with `gpt-5.6-terra` at `high` to create, from the
+verified schema:
 
-### Required precedence (lower may never contradict higher)
+- one custom-agent file per discovered action that runs the corresponding installed skill,
+  has explicit name, description, instructions, model, effort, and sandbox, and forbids
+  self-redispatch;
+- all specialist agents in the model matrix below, each loading only relevant canonical
+  references;
+- `staging/release/openspec/config.yaml`, preserving its comment structure and rule force
+  while replacing unavailable imported-skill invocations with installed shared references;
+- `staging/MODEL_MATRIX.md` with every action and agent route.
 
-1. Explicit user instruction compatible with the current OpenSpec action
-2. Current OpenSpec CLI state, schemas, generated instructions, artifact semantics, boundaries
-3. `MERGE_CONTRACT.md`
-4. Action-specific generated rules
-5. Imported engineering techniques
+Runtime agents must be self-contained. They must not read the merge contract, model matrix,
+generation reports, `planning/generated/**`, or `staging/**`.
 
-No rewrite subagent may start before this file exists. The contract is a generation,
-integration, and audit authority; it is never a target-project runtime dependency.
+### 5. Audit, evaluate, and integrate
 
-## 6. Doctrine to encode exactly once
+Dispatch `merge-cross-skill-auditor` with `gpt-5.6-sol` at `xhigh` and read-only access.
+Give it authoritative OpenSpec definitions, all staged runtime output, reports, and the merge
+contract. Require a contradiction matrix covering workflow authority, action boundaries,
+artifact sources of truth, question policy, evidence and completion rules, implementation
+versus exploration, artifact updates, concurrency, delegation, performance, integration
+research, diagnosis and failure counters, review independence, model routing, sandbox and
+write permissions, archive readiness, and git/worktree policy. Classify findings as BLOCKER,
+MAJOR, MINOR, or NOTE. Treat a softer duplicate that defeats a hard rule as a contradiction.
+The orchestrator writes its returned report to
+`staging/AUDIT_REPORT.md`.
 
-### 6.1 Evidence-first implementation (replaces all three TDD doctrines)
+Dispatch `merge-behavior-evaluator` with `gpt-5.6-sol` at `high` and read-only access. Test
+an ordinary feature, bug fix, refactor, performance regression, memory or resource leak,
+connector protocol defect, framework-version incompatibility, ambiguous architecture,
+implementation discovery that invalidates design, bulk archive conflict, and every newly
+discovered action. Compare generated behavior with current OpenSpec semantics; treat any
+lifecycle change as MAJOR or BLOCKER. The orchestrator writes the returned report to
+`staging/BEHAVIOR_EVAL.md`.
 
-- **Behaviour/bug change** — prefer a failing executable test before the production fix
-  whenever intended behaviour can reasonably be expressed as one.
-- **Bug fix** — reproduce and minimise before fixing; fix the cause, not the symptom.
-- **Refactor** — establish characterisation evidence of current behaviour first.
-- **Performance/memory** — establish a reproducible baseline measurement first; record
-  environment and workload; rerun the same measurement plus correctness tests after.
-- **Connectors/integrations** — where unit tests cannot represent protocol or framework
-  behaviour, use the narrowest useful contract/integration test or reproducible fixture.
-  Do not substitute mocks for necessary integration evidence to satisfy a slogan.
-- **Genuinely inapplicable cases** — state the alternate verification evidence explicitly.
+If either report contains a BLOCKER or MAJOR, dispatch `merge-final-integrator` with
+`gpt-5.6-sol` at `xhigh`, write access only to affected staged paths, and only the contract,
+relevant authoritative sources, staged output, and findings. Resolve identified issues
+without adding methodology, then rerun affected audits and checks. Stop with the remaining
+evidence if the same failure recurs without new information; do not loop or hide findings.
 
-The principle is **evidence before claims**, not ritual. Never emit an unconditional
-"never write production code before a test" rule.
+### 6. Publish accepted output
 
-Never mask a failure with skips, todo markers, disabled tests, narrowed filters,
-suppressed output, or weakened assertions. Remove diagnostic instrumentation before
-returning.
+Publish atomically only after every required audit and deterministic check passes. Replace
+only declared generated targets, use explicit paths, and abort if an existing path contains
+user-owned work that the generation baseline cannot distinguish. Do not use broad recursive
+deletion.
 
-### 6.2 Diagnose-before-fix
+Move the accepted runtime output to `release/` and generation provenance to
+`planning/generated/`. Rewrite and validate relative links after moving reports. Runtime
+behavior must remain unchanged if `planning/generated/` is removed.
 
-One protocol: gather evidence → isolate the failing boundary by instrumenting each
-boundary once → state ONE hypothesis with its supporting evidence and its falsifying
-observation → fix the cause → verify with a fresh command. Wait on observable conditions,
-never fixed delays. Validate at each boundary, not only the outermost. On the **third**
-failed cycle for the same failure, stop, return a blocked status with the evidence trail,
-and escalate to the owning planning artifact. **Exactly one counter exists across the
-whole distribution.**
+## Skill authoring contract
 
-### 6.3 Performance & memory
+Apply current official Codex and `skill-creator` requirements to every generated skill:
 
-Relevant-change planning identifies hot paths, expected workload, allocation and resource
-risks, latency/throughput, concurrency, buffering/batching, connection and pool lifecycle,
-backpressure, caching, serialization/conversion cost, benchmark/profile strategy, and any
-existing regression thresholds. Quantitative claims require measurement; prefer
-representative benchmarks over toy microbenchmarks. Diagnose suspected regressions before
-optimising. Never trade away correctness or resource cleanup without explicit
-justification. This is **not** ceremony for changes that cannot plausibly affect
-performance.
+- Use a lowercase, digit, and hyphen name under 64 characters; make the directory match it.
+- Create a real `SKILL.md` with YAML frontmatter containing only `name` and `description`.
+- Front-load the description with the job and trigger terms. Keep it concise and at most
+  1,024 characters. State when the skill should and should not trigger; keep all trigger
+  guidance in the description.
+- Write the body in imperative language. Keep it focused on one action, under 500 lines, and
+  free of generic explanations, slogans, duplicated doctrine, and a redundant "when to use"
+  section.
+- Keep the minimum authoritative OpenSpec procedure in the body: purpose and hard boundary,
+  CLI/state procedure, decision rules, applicable invariants, conditional reference loads,
+  delegation constraints, completion criteria, and reporting contract.
+- Link each optional reference directly from `SKILL.md` and state exactly when to read it.
+  Put a table of contents in any reference longer than 100 lines. Do not duplicate material
+  between `SKILL.md` and references.
+- Prefer instructions. Add a script only for repeated deterministic behavior or required
+  external tooling; execute every added script against representative input. Add an asset
+  only when it is consumed in generated output. Remove unused placeholders and empty resource
+  directories.
+- Generate `agents/openai.yaml` deterministically with quoted
+  `interface.display_name`, `interface.short_description`, and
+  `interface.default_prompt`; keep the short description between 25 and 64 characters and
+  make the default prompt mention `$<skill-name>`. Add icons, colors, dependencies, or
+  invocation policy only when the source requires them.
+- Do not add `README.md`, changelogs, installation guides, quick references, generation
+  reports, or other auxiliary files to a skill.
+- Use installed-layout references only. Never reference `lib/**`, staging, generation
+  reports, or an imported skill at runtime.
 
-### 6.4 Connector / framework integration
+Shared references must live inside `openspec-shared`; the installer does not ship loose
+references. Every directory matching `release/.codex/skills/openspec-*` must contain a real
+`SKILL.md`. Do not create symlinks anywhere under `release/.codex/skills/**` or
+`release/openspec/**`.
 
-When relevant, reason explicitly about supported server/framework/runtime versions,
-protocol semantics, transactions, connection lifecycle, pooling, cancellation, timeouts,
-retries and idempotency, streaming, backpressure, thread/async safety, resource cleanup,
-error mapping, type and value conversion, nullability, timezone/encoding/locale, feature
-negotiation, optional dependencies, dependency version bounds, framework lifecycle hooks,
-observability, compatibility matrices, and test-environment realism. Never assume a
-dependency's behaviour from memory when the exact version matters — inspect pinned
-versions, source, changelogs, or version-specific primary documentation.
+## Engineering doctrine to distill
 
-## 7. What to import, and what to reject
+Encode each rule below once in its canonical owner and load it conditionally.
 
-The architect must read the actual current files before fixing wording. These mappings are
-architectural intent, not copy instructions.
+### Evidence before claims
 
-**OpenSpec Plus** — dynamically inspect its source skills `openspec-plus-proposal`, `spec`, `design`, `tasks`, `apply`, `tdd`, then merge their
-strengthening *directly into the owning OpenSpec action*: structured discovery, proposal
-quality, unambiguous and testable specifications, alternatives and tradeoffs in design,
-structural fidelity, vertical implementation slices, outcome-shaped tasks, implementation
-gates, artifact-aware evidence practices, and its subagent/review orchestration for apply.
-**Critical adaptation:** do not preserve a Plus confirmation gate where it would conflict
-with the current OpenSpec action. An action whose purpose is to produce several planning
-artifacts in one invocation must not become a per-artifact approval lifecycle. Convert
-those pauses into semantic gates that fire only on materially consequential unresolved
-choices (public behaviour, architecture, acceptance criteria, destructive
-migration, security, interoperability, major perf/memory tradeoff).
-**Do not emit standalone `openspec-plus-*` skills.** Their content becomes shared
-references owned by OpenSpec actions.
+- For behavior or bug changes, prefer a failing executable test before production changes
+  when intended behavior can reasonably be tested.
+- Reproduce and minimize bugs before fixing causes. Establish characterization evidence
+  before refactoring.
+- Establish a reproducible baseline, environment, and workload before a performance or
+  memory change; rerun the same measurement and correctness tests afterward.
+- Use the narrowest useful contract or integration test when mocks cannot represent protocol
+  or framework behavior. State alternate evidence when executable testing is inapplicable.
+- Never obtain a pass by skipping, disabling, filtering out, suppressing, or weakening a
+  relevant check. Remove diagnostic instrumentation before completion.
 
-**mattpocock/skills** — distil from `engineering/tdd` (+ `tests.md`, `mocking.md`),
-`engineering/diagnosing-bugs`, `engineering/codebase-design` (+ `DEEPENING.md`,
-`DESIGN-IT-TWICE.md`), `engineering/code-review`, `engineering/research`, and
-`engineering/domain-modeling` where useful. Keep: vertical slices; deep modules behind
-small stable interfaces; design-it-twice; minimising the reproduction before forming a
-fix; hypothesis-and-instrumentation diagnosis; independent code and spec review;
-primary-source research for external behaviour.
-**Reject** anything that becomes a competing lifecycle or user-facing orchestrator,
-including `to-spec`, `to-tickets`, `implement`, `wayfinder`, `triage`, `prototype`,
-`grill-me`, `ask-matt`, and all setup skills.
+### Diagnose before fixing
 
-**obra/superpowers** — distil from `systematic-debugging` (incl. root-cause-tracing,
-condition-based-waiting, defense-in-depth), `verification-before-completion`, the
-requesting/receiving code-review discipline, and its parallel-subagent hygiene.
-**Reject as runtime controllers** `using-superpowers`, brainstorming, `writing-plans`,
-`executing-plans`, `subagent-driven-development`, branch-finishing lifecycle, and anything
-else replacing OpenSpec's lifecycle. Do not impose worktree or branch management globally;
-a worktree is only a local concurrency technique when the task and project policy justify
-it. **Never commit or archive on the user's behalf outside OpenSpec's own semantics.**
+Use one protocol: gather evidence; instrument each relevant boundary once; isolate the
+failure; state one hypothesis, its supporting evidence, and a falsifying observation; fix
+the cause; verify with a fresh command. Wait on observable conditions, not fixed delays. On
+the third failed cycle for the same failure, stop blocked with the evidence trail and
+escalate to the owning planning artifact. This is the distribution's only numeric failure
+counter and belongs only in `openspec-shared/references/debugging.md`.
 
-## 8. Deduplicate aggressively
+### Performance, memory, and integrations
 
-Consolidate: all TDD variants → one evidence-first discipline; all debugging variants →
-one diagnosis protocol; all review variants → one review protocol with specialised axes;
-all planning-question heuristics → one question policy; all parallel-agent advice → one
-delegation/concurrency policy.
+When relevant, cover hot paths, workload, allocation and resource risks, latency,
+throughput, concurrency, buffering, batching, connection and pool lifecycle, backpressure,
+caching, serialization and conversion, profiling strategy, and existing thresholds. Require
+measurements for quantitative claims and preserve correctness and cleanup.
 
-A source skill is **not entitled to remain recognisable**. Preserve useful behaviour, not
-source structure. Delete slogans, motivational prose, "Bottom Line / Key Principles /
-Real-World Impact" sections, installation and update instructions, marketing language,
-generic AI advice, repeated examples, and performative rituals. The readers are capable
-models: write compact declarative contracts, decision tables, and precise imperatives.
+For connectors and integrations, inspect applicable server, framework, runtime, and
+dependency versions. Cover protocol semantics, transactions, pooling, cancellation,
+timeouts, retry/idempotency, streaming, backpressure, thread or async safety, cleanup, error
+mapping, conversions, nullability, timezone/encoding/locale, feature negotiation, optional
+dependencies, version bounds, lifecycle hooks, observability, compatibility matrices, and
+test realism. Use pinned source, changelogs, or version-specific primary documentation when
+exact behavior matters.
 
-## 9. Model routing (authoritative; upstream model advice is discarded)
+## Import mapping
 
-Every action and every subagent MUST have an explicit model and explicit reasoning effort.
-Never rely on inherited defaults.
+Read current files before distilling them.
+
+- From OpenSpec Plus, map proposal, spec, design, tasks, apply, TDD, and review strengths
+  directly into their owning OpenSpec actions. Convert imported confirmation pauses into
+  semantic questions only for unresolved consequential choices. Do not create
+  `openspec-plus-*` skills.
+- From `mattpocock/skills`, use relevant parts of TDD, diagnosing bugs, codebase design,
+  deep modules, design-it-twice, code review, research, and domain modeling. Reject its
+  competing orchestrators, including `to-spec`, `to-tickets`, `implement`, `wayfinder`,
+  `triage`, `prototype`, `grill-me`, `ask-matt`, and setup skills.
+- From Superpowers, use relevant systematic-debugging, root-cause-tracing,
+  condition-based-waiting, defense-in-depth, verification-before-completion, code-review,
+  and parallel-agent hygiene. Reject `using-superpowers` and runtime controllers for
+  brainstorming, planning, plan execution, subagent-driven development, branch finishing,
+  and global worktree policy.
+
+Consolidate all TDD variants into the evidence policy, debugging variants into the diagnosis
+protocol, review variants into the review reference, question heuristics into the question
+policy, and parallel-agent advice into the delegation policy.
+
+## Action-specific requirements
+
+- `explore`: investigate, model the domain, compare real alternatives, research exact
+  versions, reproduce defects, and consider compatibility and performance consequences;
+  never implement.
+- Proposal and artifact-producing actions: use structured discovery, explicit alternatives
+  for real choices, relevant measurable nonfunctional goals, risks, unknowns, and external
+  version assumptions; never implement.
+- Specs: define unambiguous behavioral requirements, testable scenarios, failure and error
+  semantics, integration contracts, compatibility, and meaningful resource requirements;
+  omit implementation detail unless contractual.
+- Design: record alternatives and tradeoffs, interface and deep-module reasoning, resource
+  and concurrency architecture, protocol constraints, and benchmark or profile design.
+- Tasks: define vertical behavioral slices with observable outcomes and evidence; add
+  benchmark or compatibility tasks only when relevant.
+- Verify: independently check completeness, spec correctness, design coherence, test
+  strength, compatibility, performance and memory evidence, and error/resource/concurrency
+  paths. Require fresh executable evidence when the environment permits it.
+- Sync and update: preserve semantic intent and detect accidental weakening or widening.
+- Archive: preserve current archive semantics, never substitute for verification, and fold
+  critical unresolved verification or compatibility concerns into existing readiness checks
+  without adding a lifecycle.
+
+### Apply
+
+Preserve current OpenSpec apply semantics and add these constraints:
+
+- Implement one coherent vertical slice at a time using evidence-first work,
+  diagnosis-before-fix, focused diffs, and relevant specialists. Update an OpenSpec artifact
+  when implementation exposes a genuine contradiction; never silently code around it.
+- Treat `ready` with zero tasks as one bounded untracked outcome derived from live
+  instructions and reported artifacts. Ask if it cannot be bounded. Create no tracking file
+  or checkbox, establish completion with evidence, and terminate without waiting for a state
+  transition.
+- Capture `git status --short` once as the session baseline. Preserve unrelated work and ask
+  before editing an already modified path whose ownership is unclear.
+- Read applicable `AGENTS.md` files, referenced instructions, and build manifests. Record
+  exact focused-test, lint/format-check, type-check/build, and full-verification commands.
+  Distinguish check-only commands from mutating formatters; never append guessed flags.
+- In tracked mode, locate the exact unchecked text in reported `contextFiles`; use the live
+  task `id` to resolve duplicate text. Change only `[ ]` to `[x]`, preserving marker,
+  indentation, identifier, and text. Never invent an apply/status tracking-path field.
+- Only if primary locators fail and the verified CLI exposes
+  `schema which <schemaName> --json`, resolve a literal `apply.tracks` path beneath
+  `changeRoot` from the selected store or context root and run the root-sensitive schema
+  lookup from that resolved root. Never pass an unsupported `--store`, accept a glob or path
+  escape, or treat this fallback as a work precondition or payload field. If one target is
+  not established, stop blocked without changing task state and report the CLI limitation.
+  Do not apply this fallback to another action.
+- Treat production or test edits after review or a passing check as invalidating affected
+  evidence. Re-establish affected independent review, then rerun affected checks. Treat a
+  mutating formatter as evidence only after its check command or clean-diff inspection.
+- Before reporting `all_done` for multiple slices, inspect the cumulative diff for
+  interface/type/error compatibility, one name per concept, dead code, superseded code, and
+  scope creep; rerun full verification. Use the final consistency reviewer only for
+  high-consequence changes.
+- Add an adjacent native-syntax comment to every new class, method, or significant modified
+  block in a tracked slice: `Change-Id: <change name> | Task: <task id>`. Derive both values
+  from live apply state. Do not fabricate an id in zero-task mode.
+- Emit exactly `spec-compliance-reviewer-prompt.md`,
+  `code-quality-reviewer-prompt.md`, and `final-review-prompt.md` beside the apply skill.
+  Each packet must be read-only, nonrecursive, bounded, declare its model and effort, use an
+  evidence matrix, verdicts, severity taxonomy, and exact `STATUS:` return section, and load
+  shared references through
+  `{SKILLS_DIRECTORY}/openspec-shared/references/<file>.md`. Load a packet only immediately
+  before its conditional dispatch and replace only fenced-body placeholders.
+- Route spec and code-quality review to `gpt-5.6-sol`/`high` and final consistency review to
+  `gpt-5.6-sol`/`xhigh`. Treat code-quality review as a bounded ad hoc subagent task, not a
+  standing role. Do not emit `implementer-prompt.md`; pass the slice implementer its bounded
+  objective, artifacts, constraints, evidence, expected return, and no-recursion rule.
+
+## Model and delegation contract
+
+Set an explicit model and effort for every action, custom agent, specialist, reviewer packet,
+and dispatched subagent. Never inherit a route. If the installed Codex build rejects `xhigh`,
+substitute `high` consistently and record it in the manifest.
 
 | Action | Model | Effort |
 |---|---|---|
@@ -282,357 +464,87 @@ Never rely on inherited defaults.
 | `openspec-bulk-archive-change` | `gpt-5.6-sol` | high |
 | `openspec-onboard` | `gpt-5.6-terra` | medium |
 
-Rules for actions not in that table: `sol`/`xhigh` for final independent verification,
-multi-change conflict reasoning, high-consequence compatibility synthesis;
-`sol`/`high` for design, exploration, artifact synthesis, implementation orchestration;
-`terra`/`high` for bounded semantic transformations, bounded research, implementation
-slices against a stable spec; `terra`/`medium` only for low-ambiguity scaffolding and
-guarded mechanical lifecycle operations.
+Route newly discovered actions by task shape: `sol`/`xhigh` for final independent
+verification, multi-change conflict reasoning, or high-consequence compatibility synthesis;
+`sol`/`high` for design, exploration, artifact synthesis, or implementation orchestration;
+`terra`/`high` for bounded semantic transformations, research, or implementation slices;
+`terra`/`medium` only for low-ambiguity scaffolding or guarded mechanical lifecycle work.
 
-Specialist runtime agents (all explicit):
-
-| Agent | Model | Effort | Sandbox | Purpose |
+| Specialist | Model | Effort | Sandbox | Scope |
 |---|---|---|---|---|
-| `opsx-code-explorer` | `gpt-5.6-terra` | high | read-only | focused codebase/dependency/test discovery |
+| `opsx-code-explorer` | `gpt-5.6-terra` | high | read-only | focused code, dependency, and test discovery |
 | `opsx-docs-researcher` | `gpt-5.6-terra` | high | read-only | version-specific primary-source research |
-| `opsx-slice-implementer` | `gpt-5.6-terra` | high | workspace-write | one bounded vertical slice against fixed artifacts |
-| `opsx-debugger` | `gpt-5.6-sol` | high | workspace-write | hard bugs, nondeterminism, concurrency, leaks, regressions |
-| `opsx-test-reviewer` | `gpt-5.6-sol` | high | read-only | can these tests actually fail for the intended defect? |
-| `opsx-spec-reviewer` | `gpt-5.6-sol` | high | read-only | implementation vs proposal/spec/design/tasks |
-| `opsx-perf-memory-reviewer` | `gpt-5.6-sol` | high | read-only | benchmark methodology, hot paths, allocations, evidence |
+| `opsx-slice-implementer` | `gpt-5.6-terra` | high | workspace-write | one bounded vertical slice |
+| `opsx-debugger` | `gpt-5.6-sol` | high | workspace-write | difficult bugs, nondeterminism, leaks, and regressions |
+| `opsx-test-reviewer` | `gpt-5.6-sol` | high | read-only | test sensitivity to the intended defect |
+| `opsx-spec-reviewer` | `gpt-5.6-sol` | high | read-only | implementation versus OpenSpec artifacts |
+| `opsx-perf-memory-reviewer` | `gpt-5.6-sol` | high | read-only | hot paths, allocations, and measurement quality |
 | `opsx-final-consistency-reviewer` | `gpt-5.6-sol` | xhigh | read-only | high-consequence cross-artifact consistency |
 
-Note the deliberate deviation from this repository's earlier contract: the implementer/
-fixer role runs at **`gpt-5.6-terra` high**, not medium, because connector slices involve
-concurrency, resource lifetimes, and conversion edge cases. Record this in the manifest.
+Record that the slice implementer intentionally uses `terra`/`high`. Delegate only when a
+bounded specialist improves reliability. Pass artifacts, diffs, and raw evidence, never an
+implementer's hidden reasoning. Run read-only tasks concurrently when independent. Run
+writes concurrently only for provably disjoint files with defined integration order. Never
+create overlapping implementers, allow recursive dispatch, or let an agent dispatch itself.
 
-Delegation is relevance-driven: never invoke every specialist unconditionally. Reviewers
-receive artifacts, diffs, and evidence — never the implementer's reasoning transcript;
-that independence is intentional. Parallelise read-only work freely; write in parallel
-only when scopes are demonstrably disjoint, no shared file is touched twice, dependencies
-do not force sequencing, and integration order is defined. Never create overlapping
-implementers just to raise concurrency. No agent may dispatch itself.
+## Validation and success criteria
 
-## 10. Phase B — rewrite each skill in its own clean-context subagent
+Perform a static consistency pass for terminology, precedence, Markdown structure, Codex CLI
+compatibility, skill triggering, progressive disclosure, paths, and current skill
+requirements. Then run all of these checks against staging:
 
-After `MERGE_CONTRACT.md` is frozen, dispatch **one fresh subagent invocation per
-discovered skill**. Never let one subagent rewrite two skills.
+1. Compare dynamic discovery with generated skills and actions one-to-one; include new
+   surfaces and exclude removed ones.
+2. Run the installed official `quick_validate.py` on every generated skill folder. Fix every
+   failure and rerun it. Validate every `agents/openai.yaml` against current field rules.
+3. Verify every action, custom agent, specialist, and prompt packet has an accepted explicit
+   GPT-5.6 route and one verified dispatch syntax.
+4. Verify all OpenSpec CLI names, flags, fields, artifact names, states, and boundaries against
+   current source.
+5. Verify all references exist, are installed-layout relative, and load conditionally. Verify
+   no runtime reference to `lib/**`, imported skills, `staging/**`, or
+   `planning/generated/**`.
+6. Search for foreign platform syntax, pseudo-tools, slash-command invocation, `.claude/`,
+   `openspec-plus-*`, recursive action dispatch, copied phase gates, duplicate doctrine,
+   multiple dispatch mechanisms, and multiple failure counters. Assert that `debugging.md`
+   contains the only numeric retry/failed-cycle counter in generated runtime content. Inspect
+   every match.
+7. Verify apply's zero-task termination, primary checkbox locator, task-id disambiguation,
+   guarded schema fallback, and exactly three reviewer packets with the declared routes and
+   no implementer packet.
+8. Verify packaging: real `SKILL.md` in every `openspec-*` skill directory, no symlinks,
+   valid frontmatter and YAML, valid `release/openspec/config.yaml`, and no generation reports
+   in runtime directories.
+9. Run the repository's existing deterministic checks and `tests/` suite, including
+   `install.sh` behavior against the staged tree. If a check assumes repository-root
+   `release/` paths, assemble the staged result at those paths in an isolated temporary copy
+   of the repository and run the unchanged check there. Do not publish early, weaken tests,
+   or install packages to obtain a pass.
+10. Confirm read-only agents cannot write, writers have bounded scope, no generated runtime
+    agent reads provenance files, and removing planning provenance cannot change runtime.
 
-**`merge-skill-rewriter`** — model `gpt-5.6-sol`, effort `high`, workspace-write confined
-to that skill's staging directory.
+Do not publish or claim success while any quick validation, required deterministic check, or
+test fails, or while an audit contains BLOCKER or MAJOR findings. Report environment-caused
+inability to run a required check as a limitation with the exact command and evidence.
 
-Each invocation receives ONLY:
+## Manifest and final report
 
-1. `MERGE_CONTRACT.md`
-2. the current OpenSpec template/generated source for that one action, plus the CLI/schema
-   context needed to preserve its exact semantics (every CLI call, parsed field, blocked/
-   ready/all-done handling, precedence of context and guidance)
-3. only the OpenSpec Plus sections mapped to that action
-4. only the mattpocock source skills mapped to that action
-5. only the Superpowers source skills mapped to that action
-6. the shared-reference names and contracts (not their full text)
-7. its assigned runtime model and the verified Codex dispatch contract
+Create `MERGE_MANIFEST.md` with the timestamp; source commits, versions, dirty states,
+licenses, and attributions; discovered and generated mappings; exact model routes; imported
+concept destinations; deliberate rejections; semantic conflict resolutions; reasoning-effort
+substitution; the slice-implementer route decision; previous-manifest differences; audit,
+validation, test, and behavior-evaluation results. Preserve required notices when source text
+is retained instead of distilled.
 
-Do **not** give a worker other workers' output. This isolation is deliberate.
+Report concisely:
 
-Each worker writes to `staging/release/.codex/skills/<skill-name>/`:
+- source revisions and discovered/generated counts;
+- action and specialist model matrices;
+- imported and rejected concepts;
+- contradictions and semantic resolutions;
+- quick-validation, deterministic-check, repository-test, and behavioral-evaluation status;
+- remaining MINOR and NOTE findings or any blocker;
+- exact published paths and a reminder to restart Codex.
 
-- `SKILL.md` — frontmatter with only the fields the Codex/OpenSpec schema allows
-  (`name`, `description`; trigger-rich description; no emoji, no slogans), then:
-  action purpose and hard boundary · minimum authoritative OpenSpec procedure ·
-  decision rules · applicable invariants · **conditional** reference loads ·
-  subagent delegation rules · completion and reporting contract
-- any genuinely action-specific prompt/reference files (kept as separate files loaded
-  just-in-time before dispatch, not inlined, so they stay out of orchestrator context)
-- `REWRITE_REPORT.md`: OpenSpec behaviours preserved · concepts imported · concepts
-  deliberately rejected · conflicts resolved · shared references required (with the exact
-  reason each may be loaded) · action boundary · runtime agent and model · uncertainties
-
-A worker MUST NOT touch another worker's directory.
-
-Reference loading must be conditional and justified — e.g. `new-change` must not load the
-performance reference; `apply-change` loads it only when tasks/design indicate
-performance-sensitive work; `verify-change` loads the perf reference only when
-relevant; `explore` loads research or debugging guidance based on the problem.
-
-### Per-action enhancement guidance
-
-- **explore** — focused investigation, domain modelling, alternatives, primary-source
-  research, reproduction when investigating a defect, compatibility consequences,
-  perf/memory hypotheses. Preserve its non-implementation boundary.
-- **propose / artifact-producing actions** — structured discovery, explicit alternatives
-  where a real choice exists, measurable nonfunctional goals
-  where relevant, unknowns and risks, external-version assumptions. Never start implementing.
-- **specs** — unambiguous behavioural requirements, testable scenarios,
-  failure and error semantics, integration contracts, compatibility
-  requirements, meaningful performance/resource requirements. No implementation detail
-  unless it is part of the contract.
-- **design** — alternatives and tradeoffs, deep-module/interface reasoning, resource and
-  concurrency architecture, protocol/framework constraints, benchmark/profile design.
-- **tasks** — vertical behavioural slices stating the observable result and how success is
-  established, without pre-scripting every edit. Dedicated benchmark/compat tasks only
-  when relevant.
-- **apply** — evidence-first implementation, one coherent slice at a time,
-  diagnosis-before-fix, project conventions, focused diffs, measurement
-  for any performance claim, specialists only when useful, verification before any task is
-  marked complete. Preserve OpenSpec's ability to update artifacts when implementation
-  exposes a legitimate spec/design problem — never silently code around a contradiction.
-  Handle `ready` with zero returned tasks as an untracked schema mode: derive one bounded,
-  verifiable outcome from the live instruction and reported artifacts, ask when it is
-  not bounded, create no tracking file or checkbox, establish completion by evidence, and
-  terminate without waiting for a state transition. Capture `git status --short` once as
-  the session baseline; never reset, revert, overwrite, or absorb pre-existing and
-  unrelated user work, and ask before touching an already-modified path of unclear
-  ownership. Read applicable `AGENTS.md`
-  files, all instructions they reference, and build manifests; record exact focused-test,
-  lint/format-check, type-check/build, and full-verification commands, distinguish
-  check-only commands from mutating formatters, append no guessed arguments or flags, and
-  ask only one clarifying question if a required command remains ambiguous. Any production
-  or test edit after review or a passing check invalidates it: re-establish affected
-  independent review first, then rerun affected checks; a mutating formatter is evidence
-  only after its check command or a clean diff inspection.
-  Keep exact unchecked text in reported `contextFiles` as the primary checkbox locator and
-  never invent a tracking-path payload field. Preserve marker, indentation, identifier,
-  and text while changing only `[ ]` to `[x]`; use the live task `id` to disambiguate
-  duplicate exact text. Only when those locators fail and the verified current CLI exposes
-  `schema which <schemaName> --json` may its schema-directory `path` lead to the literal
-  `apply.tracks` fallback: resolve the root as for other root-sensitive schema commands
-  (selected `stores[].root` or store-scoped context root, otherwise the local context root),
-  set it as the command's working directory, and never pass an unsupported `--store`; accept
-  one relative path beneath `changeRoot`, never a glob or set, and block on glob metacharacters
-  or escape. If the fallback is unavailable or still does not establish one target, stop
-  blocked with task state unchanged and report the CLI limitation. This fallback is never a
-  precondition for work or a field in apply/status JSON. This extended locator chain belongs
-  only to apply; no other action inherits it, and onboarding deliberately retains the primary
-  locator only. Before reporting `all_done` for a multi-slice implementation, inspect the
-  cumulative diff for interface/type/error-contract compatibility, one name per concept,
-  dead or superseded code, and scope creep, then rerun the recorded full verification
-  commands. Use `opsx-final-consistency-reviewer` for that pass only when the change is
-  high-consequence; the action agent owns fixes and re-establishes invalidated evidence in
-  the stated order.
-  Emit a traceability comment immediately adjacent to every new class, method, or
-  significant modified block, using the target file's native comment syntax (`//`, `#`,
-  `<!-- -->`, `--`, `;`, etc.): `Change-Id: <change name> | Task: <task id>`, where the
-  change name and task id come from the live apply status/instructions.
-  In zero-task mode do not fabricate an id; this comment applies only to task-bound slices.
-  Emit exactly `spec-compliance-reviewer-prompt.md`,
-  `code-quality-reviewer-prompt.md`, and `final-review-prompt.md` beside the apply skill;
-  load one only immediately before its relevant conditional dispatch and fill only its
-  fenced body verbatim with placeholders replaced. Each is read-only, nonrecursive, has a
-  bounded scope, per-item evidence matrix and verdicts, severity taxonomy, exact `STATUS:`
-  return sections, and its explicit §9 route (`gpt-5.6-sol`/`high`, except final
-  consistency at `gpt-5.6-sol`/`xhigh`). Each conditionally loads canonical review/evidence
-  references and the performance or integration reference only for an applicable axis and
-  restates no shared doctrine, and every packet references shared references through a single
-  consistent installed-layout placeholder,
-  `{SKILLS_DIRECTORY}/openspec-shared/references/<file>.md`, used identically in every
-  packet. The code-quality file is an explicitly bounded ad-hoc
-  `spawn_agent` review task: it has no role identity or standing role, `task_name` is only a
-  label, and it adds no agent to the specialist matrix. Do not emit
-  `implementer-prompt.md`; pass
-  `opsx-slice-implementer` the complete objective, scope, artifacts, constraints, raw
-  evidence, expected return, and no-recursion contract directly, with canonical
-  evidence/debugging references loaded only when triggered.
-- **verify** — deliberately independent and rigorous across completeness, spec
-  correctness, design coherence, test strength, integration
-  compatibility, perf/memory evidence, and error/resource/concurrency paths. A "passes"
-  claim requires fresh evidence whenever the environment permits verification.
-- **sync / update** — preserve semantic intent; detect accidental weakening or widening of
-  behavioural contracts.
-- **archive** — never a substitute for verification; preserve current archive semantics;
-  fold unresolved critical verification/compatibility concerns into the existing readiness
-  check without inventing a second lifecycle.
-
-## 11. Phase C — optional and non-skill actions
-
-For every optional action, command template, or actionable surface not represented
-one-to-one by a discovered skill directory, dispatch one fresh
-**`merge-action-rewriter`** (`gpt-5.6-sol`, `high`, isolated staging write) under the same
-contract and isolation rules. Do not skip an action because it is optional. Do not create
-a duplicate action where a skill already fully covers it.
-
-## 12. Phase D — shared references
-
-Dispatch **`merge-reference-editor`** (`gpt-5.6-sol`, `high`, workspace-write) with
-`MERGE_CONTRACT.md`, all `REWRITE_REPORT.md` files, and only the source excerpts needed.
-
-Produce compact canonical references under
-`staging/release/.codex/skills/openspec-shared/references/`, e.g. `evidence-first.md`,
-`performance-memory.md`, `integration-correctness.md`, `debugging.md`, `review.md`,
-`research.md`, `subagents.md` (rename where clearer). Each doctrine appears in exactly one
-file, with exactly one owner. Then mechanically fix reference links in staged skills.
-This stage must not change any OpenSpec action semantics.
-
-Also produce the passive `openspec-shared/SKILL.md` reference index described in §4.
-
-## 13. Phase E — Codex configuration and OpenSpec config
-
-Dispatch **`merge-codex-config-author`** (`gpt-5.6-terra`, `high`, workspace-write) to
-generate, using the schema verified in §3:
-
-- one custom-agent file under `staging/release/.codex/agents/` for **every** discovered action,
-  whose instructions tell it to execute the corresponding generated skill from disk and
-  forbid self-redispatch. Contract requirements must already be embodied by that skill,
-  its conditional shared references, and the agent's own bounded role constraints;
-- all specialist agents from §9, loading only the canonical shared references relevant to
-  their role and relying on their own complete bounded instructions for any role-specific
-  constraint not owned by a shared reference;
-- `staging/release/openspec/config.yaml` regenerated per §4;
-- `staging/MODEL_MATRIX.md` listing every action and agent with its exact model and effort.
-
-Each agent must explicitly set name, description, instructions, model, reasoning effort,
-and an appropriate sandbox mode. The skill remains the authoritative action definition;
-the agent exists to guarantee the model even when the parent session uses another one.
-No agent instruction may read `MERGE_CONTRACT.md`, `MODEL_MATRIX.md`, another file under
-`planning/generated/**`, or anything under `staging/**`. Contract compliance is compiled
-into installed skills, canonical shared references, and self-contained agent constraints.
-
-## 14. Phase F — contradiction audit (do not accept output before this)
-
-Dispatch **`merge-cross-skill-auditor`** (`gpt-5.6-sol`, `xhigh`, read-only) with the
-authoritative OpenSpec action definitions, `MERGE_CONTRACT.md`, every generated skill,
-action, reference, agent config, the regenerated `release/openspec/config.yaml`, and all
-`REWRITE_REPORT.md` files.
-
-It must build a contradiction matrix across at least: OpenSpec workflow authority; action
-boundaries; artifact source of truth; question/confirmation rules; evidence rules; task
-completion; artifact updates during implementation; implementation vs exploration;
-concurrency; subagent ownership; performance/memory; integration research;
-debugging and failure counters; review independence; model routing; sandbox and write
-permissions; archive readiness; git/worktree policy.
-
-Look for: direct contradictions; softer wording elsewhere that defeats a hard rule;
-circular delegation; duplicate authorities; conflicting always/never rules; incompatible
-completion definitions; skills that accidentally invoke another methodology; missing new
-OpenSpec actions; stale assumptions from older OpenSpec versions; more than one failure
-counter; more than one dispatch mechanism.
-
-Write `staging/AUDIT_REPORT.md`, classifying findings BLOCKER / MAJOR / MINOR / NOTE. Any
-BLOCKER or MAJOR means the set is not acceptable.
-
-## 15. Phase G — deterministic checks
-
-Run mechanical checks in addition to the audit, and run the repository's existing
-`tests/` suite:
-
-1. every discovered OpenSpec skill has exactly one generated counterpart
-2. every actionable OpenSpec surface is covered; no removed action resurrected
-3. every action and every agent has an explicit GPT-5.6 model and explicit effort
-4. all model names are in the GPT-5.6 family specified here
-5. only reasoning-effort values accepted by the installed Codex build are used
-6. no runtime dependency on, or instruction to invoke, `lib/openspec-plus`,
-   `lib/mattpocock`, or `lib/superpower`; no `openspec-plus-*` skill name appears in
-   generated runtime content, including `release/openspec/config.yaml`
-7. no foreign agent-platform syntax, slash commands, or pseudo-tools; no `.claude/` output
-8. no recursive action-agent dispatch
-9. every referenced file exists; every agent points at a real generated skill
-10. read-only reviewer agents have no write access without a documented reason
-11. all OpenSpec CLI names, flags, and artifact names match the current checkout
-12. no copied phase gate alters the semantics of `propose`, fast-forward, or any other
-    multi-artifact action
-13. no duplicated TDD/debug/review doctrine remains; exactly one failure counter
-14. packaging: `release/.codex/skills/openspec-*/SKILL.md` present for every skill directory, no
-    symlinks, valid YAML frontmatter everywhere, `release/openspec/config.yaml` valid
-15. `install.sh` and `tests/` still succeed against the generated tree
-16. no runtime skill, agent, or OpenSpec configuration references `staging/**` or
-    `planning/generated/**`; generated planning documents remain removable provenance
-17. apply handles `ready` with zero tasks as one evidence-completed untracked outcome and
-    cannot loop waiting for `all_done`
-18. apply's primary exact-checkbox rule never invents a tracking payload field; task-id
-    disambiguation and any verified schema fallback retain the stated ambiguity and path
-    safeguards
-19. the distribution contains exactly one numeric failure counter, owned by
-    `openspec-shared/references/debugging.md`
-20. every generated action-specific prompt declares a model and effort matching §9; apply
-    emits exactly its three reviewer prompt files and no implementer prompt
-21. no `openspec-plus-*` string exists in any generated action-specific prompt file
-
-Search explicitly for stale or vendor-specific terms and inspect every hit rather than
-deleting blindly.
-
-## 16. Phase H — behavioural evaluation
-
-Dispatch **`merge-behavior-evaluator`** (`gpt-5.6-sol`, `high`, read-only) to walk
-representative scenarios: ordinary feature; bug fix; refactor; performance regression;
-memory/resource leak; connector protocol defect; framework version incompatibility;
-ambiguous architectural change;
-implementation discovery that invalidates the design; bulk archive with conflicting
-changes; any newly discovered action.
-
-For each relevant action, compare the generated behaviour with current OpenSpec behaviour.
-Added rigour is acceptable; **any change to the underlying lifecycle semantics is MAJOR or
-BLOCKER**. Write `staging/BEHAVIOR_EVAL.md`.
-
-## 17. Phase I — central resolution and publication
-
-Independent workers never negotiate with each other. If audits report BLOCKER or MAJOR
-findings, dispatch **`merge-final-integrator`** (`gpt-5.6-sol`, `xhigh`, workspace-write)
-with the contract, the relevant OpenSpec sources, the staged output, `AUDIT_REPORT.md`,
-and `BEHAVIOR_EVAL.md`. It may edit staged files only to resolve identified cross-cutting
-issues and must introduce no new methodology. Re-run §14 and §15 afterwards. Repeat only
-until no BLOCKER or MAJOR remains. Never hide unresolved findings.
-
-Then publish atomically:
-
-    release/.codex/skills/<one dir per discovered OpenSpec skill>/SKILL.md (+ action-specific files)
-    release/.codex/skills/openspec-shared/SKILL.md
-    release/.codex/skills/openspec-shared/references/*.md
-    release/.codex/agents/<one per action>.toml
-    release/.codex/agents/opsx-*.toml
-    release/openspec/config.yaml
-    planning/generated/MERGE_CONTRACT.md
-    planning/generated/MODEL_MATRIX.md
-    planning/generated/MERGE_MANIFEST.md
-    planning/generated/AUDIT_REPORT.md
-    planning/generated/BEHAVIOR_EVAL.md
-
-Adapt names only where current OpenSpec or Codex conventions require it. Keep provenance
-out of runtime skills — centralise it in the manifest. Do not commit. Do not install
-anything via package managers.
-
-The files under `planning/generated/` are published for regeneration provenance and audit
-review only. Removing them from a target installation must not change skill, action-agent,
-specialist-agent, or OpenSpec runtime behaviour. Mechanically rewrite and validate relative
-links when moving reports from their staging directories to `planning/generated/`.
-
-`MERGE_MANIFEST.md` records: timestamp; each source repo's commit/version/dirty state;
-every discovered skill and action; every generated counterpart; exact model and effort per
-action and per agent; the mapping from imported source concepts to generated destinations;
-concepts deliberately rejected and why; global conflict-resolution decisions; any
-reasoning-effort substitution made under §3; the implementer-effort deviation noted in §9;
-licenses and required attributions; audit and behaviour-evaluation results. If substantial
-source text was retained rather than distilled, preserve the attribution notices the
-inspected licenses require.
-
-## 18. Regeneration semantics
-
-This prompt is rerun whenever OpenSpec or any source collection changes. Derive everything
-from the current `lib/**`; detect added, removed, and renamed skills; regenerate mappings,
-the model matrix, and all checks; diff the new manifest against the previous one and report
-meaningful upstream-driven behaviour changes. Never preserve old generated behaviour merely
-because it existed. Never edit upstream trees.
-
-## 19. Final report
-
-Report concisely: source commits used; skills and optional actions discovered; generated
-counts; the action model matrix; the specialist matrix; imported concepts by source;
-concepts rejected; contradictions found and how they were resolved; deterministic-check and
-test status; behavioural-evaluation status; remaining MINOR/NOTE findings; the exact output
-paths; and a reminder to restart Codex. Do not claim success while any BLOCKER or MAJOR
-finding remains.
-
-## 20. Operating principles
-
-OpenSpec owns the workflow. Other collections contribute techniques, never lifecycle
-authority. Local source beats remembered behaviour. One skill rewrite = one clean-context
-subagent. Cross-skill policy is frozen before parallel rewriting. Audits happen after
-isolated rewrites. One canonical rule beats three near-duplicates. Performance claims
-require measurement. Hard bugs are diagnosed before fixes are guessed. Subagents help only
-when their responsibility is
-narrow. Parallel reads are cheap; conflicting parallel writes are not. Every action and
-every subagent has an explicit GPT-5.6 model and effort. The generated skills must be
-compact enough to help the model rather than bury it.
-
-Begin by inventorying the four source trees, verifying the Codex runtime contract, and
-discovering the OpenSpec action surface. Do not rewrite any skill until
-`staging/global/MERGE_CONTRACT.md` exists.
+Regenerate from the current sources on every run. Do not preserve obsolete generated behavior
+because it existed previously. Begin with the read-only inventory and runtime-contract checks.
