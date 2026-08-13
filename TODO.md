@@ -1,0 +1,1 @@
+- simplify user documentation diagrams
