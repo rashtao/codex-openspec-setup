@@ -7,8 +7,9 @@ current published distribution. Run this prompt manually from the repository roo
 `prompts/generate_skills.md` has completed successfully.
 
 The guide must help a user choose and invoke the installed OpenSpec actions, understand
-their boundaries and results, and see how each action routes through its skill, action
-agent, shared references, specialists, and bounded reviewer tasks.
+their boundaries and results, and see a compact relationship map from each action through
+its skill and action agent to its explicitly available shared references, specialists,
+and bounded subagent tasks.
 
 ## Source of truth and write boundary
 
@@ -103,11 +104,13 @@ relevant release reference or packet needed to document it. Extract, without bro
 - the one-hop action-skill-to-action-agent routing contract;
 - principal workflow stages and explicitly significant decisions, loops, early stops,
   approvals, or blocked outcomes;
-- conditional shared-reference loads;
+- exact unconditional and conditional shared-reference loads by the action agent;
 - named specialist agents the action is genuinely eligible to dispatch and the exact
   conditions under which it may do so;
 - anonymous bounded subagent or reviewer tasks explicitly allowed by the action, including
-  the conditions and packet used when applicable.
+  the conditions and packet used when applicable;
+- exact shared references that each eligible specialist definition or bounded task packet
+  explicitly requires that subagent to load.
 
 For every specialist agent, read the complete TOML and extract its exact name, purpose,
 model, effort, sandbox, scope/boundaries, and explicitly loaded references. For every
@@ -119,7 +122,9 @@ actually declares.
 
 Do not equate sandbox access with an action's effects: describe both when they differ. Do
 not attach every shared reference, specialist, or reviewer task to every action. Absence of
-an explicit route is evidence that no diagram edge should be drawn.
+an explicit eligibility, dispatch, or load fact is evidence that no diagram edge should be
+drawn. Generic permission to load unspecified guidance does not establish a
+shared-reference dependency.
 
 ## Required guide structure
 
@@ -137,16 +142,21 @@ Write concise, durable user documentation in this stable order:
    external-side-effect behavior, model, effort, sandbox, and optional status. Make the
    examples phrases a user could naturally say, not invented slash-command syntax.
 4. Diagram legend. Provide one common prose legend for all action diagrams: solid arrows
-   are mandatory flow; dashed labeled arrows are conditional flow; nodes prefixed
-   `named agent:` are installed custom agents; nodes prefixed `ad hoc subagent task:` are
-   anonymous bounded tasks, even when a reviewer packet configures them. This is the only
-   legend; do not add legend nodes to individual graphs.
+   are the mandatory action route or an unconditional shared-reference load; dashed
+   labeled arrows are conditional dispatches or shared-reference loads; nodes prefixed
+   `named agent:` are installed custom specialist agents; nodes prefixed
+   `ad hoc subagent task:` are anonymous bounded tasks, even when a reviewer packet
+   configures them; and nodes prefixed `shared reference:` are passive files owned by the
+   non-invocable `openspec-shared` support skill, not independently invocable skills. This
+   is the only legend; do not add legend nodes to individual graphs.
 5. Actions. Add exactly one lexically ordered section for every discovered action pair.
    Each section must contain when-to-use guidance, several natural-language invocation
    examples supported by that action's triggers, boundaries and non-goals, expected output
    or terminal states, exact runtime route facts, relevant conditional support, and exactly
-   one Mermaid diagram meeting the diagram contract below. Link the skill, action agent,
-   and every shown release asset.
+   one Mermaid diagram for each configured diagram direction, in the configured order,
+   meeting the diagram contract below. Link the skill, action agent, every shown release
+   asset, and any reviewer packet discussed in the prose even though packets are omitted
+   from diagrams.
 6. Passive shared support. Provide a complete catalog of every passive skill and every
    owned reference, with links, purpose, load condition, and explicitly documented action
    consumers. State that passive skills are not user actions and have no action diagram.
@@ -155,8 +165,9 @@ Write concise, durable user documentation in this stable order:
    callers. Do not list anonymous reviewer tasks as installed specialist agents.
 8. Supporting assets. Catalog every discovered reviewer prompt packet with its link,
    caller, purpose, model/effort when declared, boundary, dispatch condition, and expected
-   result. Also link and accurately describe `openspec/config.yaml`. Do not describe
-   planning or source-tree artifacts.
+   result. Reviewer packets belong in this catalog and relevant action prose, never as
+   diagram nodes. Also link and accurately describe `openspec/config.yaml`. Do not
+   describe planning or source-tree artifacts.
 
 Use repository-relative Markdown links resolved from the guide's location in `release/`.
 For example, a release skill link begins `.codex/skills/`, and the configuration link is
@@ -171,41 +182,75 @@ rewrite for stylistic novelty.
 
 ## Mermaid action-diagram contract
 
-Include exactly one Mermaid fence in each action section and no Mermaid fence anywhere
-else. Every action graph must be independently understandable and satisfy all of these
-rules:
+Required diagram directions: LR, TD
 
-1. Start the fence with `flowchart TD`.
-2. Make the first node declaration `action["<exact-canonical-action-name>"]`, substituting
-   the discovered action name verbatim as the label. The node identifier `action` is local
-   to that graph. This must be the unique graph root: it has no incoming edge, and every
-   other declared node has at least one incoming edge.
-3. Show the action skill, then the one-hop routed matching action agent, as mandatory flow
-   immediately after the action. Do not route through another action or action skill.
-4. Show the principal workflow stages and every significant explicit branch, loop, stop,
-   approval, or conditional outcome needed to avoid a misleading linear workflow.
-5. Show a shared reference only when the action explicitly loads it, with a dashed edge
-   labeled by the release-stated condition. Show a named specialist only when the action
-   explicitly makes that specialist eligible, also with its real condition. Show an ad hoc
-   reviewer or subagent task only when explicitly authorized.
-6. Label installed specialists `named agent: <exact-agent-name>`. Label anonymous work
-   `ad hoc subagent task: <bounded-purpose>`. A prompt packet does not turn an anonymous
-   task into a named installed agent.
-7. Use only solid `-->` edges for mandatory flow. Use only dashed, non-empty labeled
-   `-. <condition> .->` edges for conditional flow, including optional branches and loops.
-   Keep condition text single-line and free of Mermaid control characters. Do not use an
-   unlabeled dashed edge or label a conditional edge as mandatory.
-8. Use ASCII node identifiers matching `[A-Za-z][A-Za-z0-9_]*`. Give every node one unique
-   identifier and an explicit quoted label. Keep labels single-line and escape characters
-   that Mermaid or Markdown would otherwise parse. Do not use `subgraph`, `click`, HTML,
-   custom initialization directives, or legend nodes.
-9. Ensure the graph's edges, not visual ordering alone, express control flow. Connect every
-   support node from the stage that conditionally loads or dispatches it. If it returns to
-   the workflow, draw the explicit conditional return edge only when release content says
-   it does.
-10. Derive every relationship from release content. Never make all specialists appear
-    universally available and never add a relationship merely to make a graph look
-    complete.
+This setting is the single source of truth for diagram directions and counts. Parse its
+comma-separated values in order and require one or more values, each a unique supported
+Mermaid flowchart direction (`LR` or `TD`). For every action, emit one Mermaid fence per
+configured value in that exact order, and emit no Mermaid fences elsewhere. If this
+setting is later reduced to one value, generation and every validation rule below must
+expect only one fence per action without any other prompt edit.
+
+The diagrams are routing and dependency maps, not chronological execution flows. Every
+directional variant for an action must be independently understandable and satisfy all of
+these rules:
+
+1. Start each fence with `flowchart <configured-direction>`. After that line, declare these
+   three nodes first and in this order, substituting the discovered canonical name
+   verbatim in every label:
+
+   ```text
+   action["OpenSpec action: <exact-canonical-action-name>"]
+   skill["action skill: <exact-canonical-action-name>"]
+   agent["action agent: <exact-canonical-action-name>"]
+   ```
+
+   Add the mandatory route edges `action --> skill` and `skill --> agent`. `action` must
+   be the unique graph root: it has no incoming edge, every other node has positive
+   indegree, and every node is reachable from it.
+2. The node allowlist is strict: the action, its matching action skill, its matching routed
+   action agent, every named specialist agent that action is explicitly eligible to
+   dispatch, every anonymous bounded subagent task that action explicitly authorizes, and
+   every exact shared reference explicitly loaded by the action agent or by a shown
+   subagent. Do not omit an eligible specialist, authorized bounded task, or qualifying
+   shared-reference dependency.
+3. Label installed specialists `named agent: <exact-agent-name>`, anonymous work
+   `ad hoc subagent task: <concise-bounded-purpose>`, and reference files
+   `shared reference: <exact-reference-file-name>`. These exact prefixes distinguish
+   component kinds. Shared references belong to the passive `openspec-shared` support
+   skill and are not standalone specialist skills or independently invocable skills. A
+   reviewer packet may configure an anonymous task, but the packet itself is never a
+   diagram node.
+4. Connect each specialist or anonymous bounded task from the component that explicitly
+   dispatches it, normally the routed action agent, with a dashed edge labeled by the
+   concise release-stated eligibility condition. Connect `agent` to each reference that
+   the action route explicitly loads. Connect a shown specialist or ad hoc task to every
+   reference that its own definition or task packet explicitly requires it to load. Reuse
+   one reference node when multiple shown consumers load the same file.
+5. Use solid `-->` edges only for the mandatory action route and unconditional
+   shared-reference loads. Use dashed `-. <condition> .->` edges for conditional
+   dispatches and conditional reference loads. Every dashed edge must have a non-empty,
+   short, single-line condition grounded in release content and free of Mermaid control
+   characters. Do not use other edge forms, unlabeled dashed edges, return edges, or edges
+   that portray chronological sequencing.
+6. Use ASCII node identifiers matching `[A-Za-z][A-Za-z0-9_]*`. Give every node one unique
+   identifier and an explicit quoted, single-line label, escaping characters Mermaid or
+   Markdown would otherwise parse. Do not use `subgraph`, `click`, HTML, custom
+   initialization directives, comments, or legend nodes.
+7. Aside from their first `flowchart` line, all directional variants for the same action
+   must be byte-for-byte identical. Thus their node declarations, identifiers, labels,
+   ordering, edges, edge types, and condition text are identical; only the configured
+   direction changes.
+8. Do not add workflow stages, artifact or document handling, decisions, approvals, loops,
+   stops, terminal states, results, reviewer-packet nodes, or other explanatory components.
+   Keep those facts in the action prose and the supporting catalogs. Also forbid any other
+   OpenSpec action, action skill, or action agent in the map, even when the current action
+   teaches, prepares for, or performs work similar to another action.
+9. Derive every node, relationship, consumer, condition, and mandatory/conditional
+   classification from explicit release content. Generic delegation permission does not
+   create a specialist or bounded-task node, and generic permission to read unspecified
+   guidance does not create a reference node or edge. Never add a component merely to make
+   a graph look complete.
 
 Protect these especially easy-to-misstate boundaries whenever they occur in the current
 release:
@@ -215,8 +260,8 @@ release:
 - archive readiness is not a verification-action invocation;
 - an inline synchronization stage is not an invocation of the separate sync action.
 
-Represent those behaviors as ordinary local workflow stages when release content supports
-them, without an edge to another action skill or action agent.
+Describe those behaviors only in prose when release content supports them; do not represent
+them as local stages or as edges to another action skill or action agent.
 
 ## Validation before publication
 
@@ -233,28 +278,53 @@ change:
   packet, and the OpenSpec configuration must appear exactly once in the appropriate
   complete catalog.
 - Compare every documented model, effort, sandbox, action boundary, side effect, output,
-  stage, branch, route, reference load, specialist eligibility, and ad hoc task against its
-  cited release file. Remove unsupported inferences.
-- Assert that no action invokes a different action skill or action agent unless release
-  content explicitly requires such invocation. Specifically audit onboarding, archive,
-  and inline sync representations against the boundary rules above.
+  stage, branch, and route in the prose or catalogs against its cited release file. For
+  diagrams, compare every specialist and bounded-task eligibility, dispatch condition,
+  shared-reference consumer, load condition, and mandatory/conditional classification
+  against explicit release content. Remove unsupported inferences and fail on omissions.
+- Assert that no diagram contains a different OpenSpec action, action skill, or action agent.
+  Specifically audit onboarding, archive, and inline sync representations against the
+  boundary rules above while retaining their relevant facts in prose.
 - Assert that optional actions receive the same required coverage as other actions and are
   clearly labeled optional only when release content says so.
 
 ### Markdown, links, and Mermaid structure
 
-- Parse Markdown fences. Require exactly one `mermaid` fence per action pair, zero for each
-  passive support skill, and no additional Mermaid fences. Require every fence to close.
-- For every diagram, require `flowchart TD` first and
-  `action["<exact-canonical-action-name>"]` as the first node. Parse all node declarations
-  and edges; reject duplicate or invalid identifiers, missing or unsafe labels, references
-  to undeclared nodes, unsupported syntax, and malformed conditional edges.
+- Parse the ordered direction list only from `Required diagram directions:` above. Parse
+  Markdown fences and require, in every discovered action section, exactly one `mermaid`
+  fence for each configured direction in the same order. The total expected fence count is
+  the discovered action-pair count multiplied by the configured direction count. Require
+  no Mermaid fences in passive-support or other sections, and require every fence to close.
+- For every diagram, require `flowchart <expected-configured-direction>` first, followed by
+  the required `action`, `skill`, and `agent` declarations with exact quoted labels and the
+  mandatory `action --> skill --> agent` route. Parse all node declarations and edges;
+  require an explicit quoted label on every node, and reject duplicate or invalid
+  identifiers, missing or unsafe labels, references to undeclared nodes, unsupported
+  syntax, and malformed conditional edges.
+- For every action with multiple configured variants, remove only the first `flowchart`
+  line and compare the remaining bytes. Reject any difference in node or edge sets,
+  declarations, ordering, identifiers, labels, edge types, or condition text.
 - Compute indegree from all diagram edges. Require `action` to have indegree zero, every
   other node to have positive indegree, and therefore `action` to be the first and only
   zero-incoming-edge node. Require all nodes to be reachable from `action`.
-- Require every mandatory edge to use `-->`. Require every conditional edge to use exactly
-  `-. non-empty label .->`. Reject other edge forms. Check that the diagram relationships
-  and mandatory/conditional classification agree with the linked release instructions.
+- Enforce the node allowlist and exact component-label prefixes. Reject workflow-stage,
+  artifact-handling, decision, approval, loop, stop, terminal-state, result, packet,
+  legend, cross-action, and any other unsupported component nodes. Require every eligible
+  named specialist, authorized bounded task, and qualifying exact reference dependency;
+  do not accept generic delegation or guidance permissions as evidence.
+- Require solid `-->` edges only for the two mandatory route edges and unconditional
+  reference loads. Require conditional dispatches and reference loads to use exactly
+  `-. non-empty label .->`. Reject all other edge forms. Verify the edge consumer,
+  relationship, concise condition, and mandatory/conditional classification against the
+  linked release instructions, including references loaded by shown subagents.
+- Exercise representative structural cases from the discovered release content: an action
+  with no delegation or shared-reference dependency has only the three-node route;
+  `openspec-new-change`, when present and still supported by its release content, has a
+  small conditional fanout containing `ad hoc subagent task: complex read-only discovery`
+  and `shared reference: subagents.md`; and `openspec-apply-change`, when present, includes
+  every eligible named or ad hoc subagent and each explicit shared-reference dependency
+  without internal implementation stages. Apply each assertion to every configured
+  directional variant without using these names as the action-discovery list.
 - Resolve every relative Markdown link from `release/USER_GUIDE.md`, including the file
   component of links with fragments. Reject path escapes, missing targets, incorrect case,
   and unresolved local fragments. Ignore only explicitly external URI schemes.

@@ -30,7 +30,7 @@ An action's semantic effects and an agent's sandbox are separate facts. `workspa
 
 ## Diagram legend
 
-In every action diagram, solid arrows are mandatory flow and dashed labeled arrows are conditional flow. Nodes prefixed `named agent:` are installed custom agents. Nodes prefixed `ad hoc subagent task:` are anonymous bounded tasks, even when a reviewer packet configures them.
+In every action diagram, solid arrows are the mandatory action route or an unconditional shared-reference load; dashed labeled arrows are conditional dispatches or shared-reference loads. Nodes prefixed `named agent:` are installed custom specialist agents; nodes prefixed `ad hoc subagent task:` are anonymous bounded tasks, even when a reviewer packet configures them; and nodes prefixed `shared reference:` are passive files owned by the non-invocable `openspec-shared` support skill, not independently invocable skills. This is the common legend for all action diagrams; individual graphs contain no legend nodes.
 
 ## Actions
 
@@ -42,102 +42,136 @@ Runtime assets: [action skill](.codex/skills/openspec-apply-change/SKILL.md) and
 
 **Boundaries and result.** It may edit implementation and tests and may check an exact tracked checkbox only after fresh evidence supports the task. It does not edit planning artifacts, silently code around an artifact contradiction, sync, archive, commit, publish, or start another action. It stops on `all_done`, a verified zero-task outcome, user interruption, an unsafe overlap, missing evidence, or a genuine blocker; its report names progress, changed files, evidence, findings, unchecked work, and the next required correction. `all_done` only suggests archive—it does not invoke it.
 
-**Runtime route.** `openspec-apply-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. The [published configuration](openspec/config.yaml) requires [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md) when apply is invoked. Other conditional support is [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [debugging](.codex/skills/openspec-shared/references/debugging.md), [review](.codex/skills/openspec-shared/references/review.md), [research](.codex/skills/openspec-shared/references/research.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md), under their stated triggers.
+**Runtime route.** `openspec-apply-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. The [published configuration](openspec/config.yaml) requires [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md) when apply is invoked. The shown spec reviewer also requires [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md). Other conditional support is [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [debugging](.codex/skills/openspec-shared/references/debugging.md), [review](.codex/skills/openspec-shared/references/review.md), [research](.codex/skills/openspec-shared/references/research.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md), under their stated triggers.
 
 The action explicitly makes these installed specialists eligible only for the matching bounded need: [code explorer](.codex/agents/opsx-code-explorer.toml), [docs researcher](.codex/agents/opsx-docs-researcher.toml), [slice implementer](.codex/agents/opsx-slice-implementer.toml), [debugger](.codex/agents/opsx-debugger.toml), [test reviewer](.codex/agents/opsx-test-reviewer.toml), [spec reviewer](.codex/agents/opsx-spec-reviewer.toml), [performance/memory reviewer](.codex/agents/opsx-perf-memory-reviewer.toml), and [final consistency reviewer](.codex/agents/opsx-final-consistency-reviewer.toml). Review packets are loaded only when useful: [spec compliance](.codex/skills/openspec-apply-change/spec-compliance-reviewer-prompt.md) configures the named spec reviewer, [code quality](.codex/skills/openspec-apply-change/code-quality-reviewer-prompt.md) configures an anonymous standalone task, and [final review](.codex/skills/openspec-apply-change/final-review-prompt.md) configures the named final reviewer for a high-consequence cumulative pass.
 
 ```mermaid
-flowchart TD
-action["openspec-apply-change"]
+flowchart LR
+action["OpenSpec action: openspec-apply-change"]
 skill["action skill: openspec-apply-change"]
 agent["action agent: openspec-apply-change"]
-resolve["Resolve store and change"]
-status["Read live status"]
-instructions["Obtain live apply instructions"]
-blocked["Stop and report missing artifacts or blocker"]
-alreadyDone["Report fresh all done state"]
-context["Read all implementation context"]
-zeroTask["Derive one bounded zero-task outcome"]
-baseline["Capture ownership baseline and project commands"]
-evidenceRef["shared reference: evidence-first.md"]
-performanceRef["shared reference: performance-memory.md"]
-integrationRef["shared reference: integration-correctness.md"]
-debugRef["shared reference: debugging.md"]
-reviewRef["shared reference: review.md"]
-researchRef["shared reference: research.md"]
-subagentsRef["shared reference: subagents.md"]
-slice["Implement one coherent slice"]
 codeExplorer["named agent: opsx-code-explorer"]
-docsResearcher["named agent: opsx-docs-researcher"]
-sliceImplementer["named agent: opsx-slice-implementer"]
 debugger["named agent: opsx-debugger"]
-testReviewer["named agent: opsx-test-reviewer"]
-perfReviewer["named agent: opsx-perf-memory-reviewer"]
-specPacket["reviewer packet: spec compliance"]
-specReviewer["named agent: opsx-spec-reviewer"]
-codePacket["reviewer packet: code quality"]
-codeTask["ad hoc subagent task: standalone code quality review"]
-verify["Run fresh focused and required verification"]
-checkbox["Check exact tracked task only after evidence"]
-refresh["Refresh live apply instructions"]
-cumulative["Run cumulative diff and full verification pass"]
-finalPacket["reviewer packet: final consistency"]
+docsResearcher["named agent: opsx-docs-researcher"]
 finalReviewer["named agent: opsx-final-consistency-reviewer"]
-success["Report completed action result"]
-paused["Report pause and required input"]
+perfReviewer["named agent: opsx-perf-memory-reviewer"]
+sliceImplementer["named agent: opsx-slice-implementer"]
+specReviewer["named agent: opsx-spec-reviewer"]
+testReviewer["named agent: opsx-test-reviewer"]
+codeQualityTask["ad hoc subagent task: standalone code quality review"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+debuggingRef["shared reference: debugging.md"]
+evidenceFirstRef["shared reference: evidence-first.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
 action --> skill
 skill --> agent
-agent --> resolve
-resolve --> status
-status --> instructions
-instructions -. blocked state .-> blocked
-instructions -. all done state .-> alreadyDone
-alreadyDone --> success
-instructions -. ready with tracked tasks .-> context
-instructions -. ready with zero tasks .-> zeroTask
-context --> baseline
-zeroTask --> baseline
-baseline --> slice
-agent -. published config requires on apply invocation .-> evidenceRef
-slice -. performance or memory can plausibly change .-> performanceRef
-slice -. integration boundary is involved .-> integrationRef
-slice -. failure or defect needs diagnosis .-> debugRef
-slice -. independent implementation review is requested .-> reviewRef
-slice -. repository evidence is insufficient .-> researchRef
-slice -. optional delegation or concurrency is considered .-> subagentsRef
-slice -. focused discovery adds value .-> codeExplorer
-slice -. version specific primary research adds value .-> docsResearcher
-slice -. bounded disjoint implementation adds value .-> sliceImplementer
-slice -. hard defect diagnosis and repair adds value .-> debugger
-slice -. test strength review adds value .-> testReviewer
-slice -. performance or memory review adds value .-> perfReviewer
-slice -. artifact compliance review adds value .-> specPacket
-specPacket --> specReviewer
-slice -. standalone code quality review adds value .-> codePacket
-codePacket --> codeTask
-slice -. planning contradiction or unsafe overlap appears .-> paused
-slice -. coherent slice implementation completes .-> verify
-codeExplorer -. evidence is returned .-> slice
-docsResearcher -. evidence is returned .-> slice
-sliceImplementer -. bounded implementation result is returned .-> verify
-debugger -. diagnosis or repair result is returned .-> verify
-testReviewer -. findings are returned .-> verify
-perfReviewer -. findings are returned .-> verify
-specReviewer -. findings are returned .-> verify
-codeTask -. findings are returned .-> verify
-verify -. tracked task evidence is complete .-> checkbox
-verify -. zero task outcome is verified .-> refresh
-verify -. tracked checkbox cannot be resolved .-> paused
-checkbox --> refresh
-refresh -. more ready work remains .-> slice
-refresh -. all done after one slice .-> success
-refresh -. all done after multiple slices .-> cumulative
-refresh -. blocked or required evidence unavailable .-> paused
-cumulative -. change is high consequence .-> finalPacket
-finalPacket --> finalReviewer
-cumulative -. change is not high consequence .-> success
-finalReviewer -. confirmed findings require fixes .-> slice
-finalReviewer -. review supports the cumulative result .-> success
+agent --> evidenceFirstRef
+agent -. bug or failure needs diagnosis .-> debuggingRef
+agent -. integration boundary is involved .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. repository evidence is insufficient .-> researchRef
+agent -. independent review is requested .-> reviewRef
+agent -. specialist dispatch or parallel work is considered .-> subagentsRef
+agent -. focused code discovery adds value .-> codeExplorer
+agent -. hard defect repair adds value .-> debugger
+agent -. version specific primary research adds value .-> docsResearcher
+agent -. high consequence cumulative review adds value .-> finalReviewer
+agent -. performance or memory review adds value .-> perfReviewer
+agent -. bounded vertical slice delegation adds value .-> sliceImplementer
+agent -. artifact compliance review adds value .-> specReviewer
+agent -. test strength review adds value .-> testReviewer
+agent -. standalone code quality review adds value .-> codeQualityTask
+debugger --> debuggingRef
+debugger --> evidenceFirstRef
+docsResearcher --> researchRef
+finalReviewer --> reviewRef
+finalReviewer --> evidenceFirstRef
+finalReviewer -. integration axis applies .-> integrationCorrectnessRef
+finalReviewer -. performance axis applies .-> performanceMemoryRef
+perfReviewer --> performanceMemoryRef
+perfReviewer --> reviewRef
+perfReviewer --> evidenceFirstRef
+sliceImplementer --> evidenceFirstRef
+specReviewer --> artifactQualityRef
+specReviewer --> reviewRef
+specReviewer --> evidenceFirstRef
+specReviewer -. integration axis applies .-> integrationCorrectnessRef
+specReviewer -. performance axis applies .-> performanceMemoryRef
+testReviewer --> reviewRef
+testReviewer --> evidenceFirstRef
+codeQualityTask --> reviewRef
+codeQualityTask --> evidenceFirstRef
+codeQualityTask -. integration axis applies .-> integrationCorrectnessRef
+codeQualityTask -. performance axis applies .-> performanceMemoryRef
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-apply-change"]
+skill["action skill: openspec-apply-change"]
+agent["action agent: openspec-apply-change"]
+codeExplorer["named agent: opsx-code-explorer"]
+debugger["named agent: opsx-debugger"]
+docsResearcher["named agent: opsx-docs-researcher"]
+finalReviewer["named agent: opsx-final-consistency-reviewer"]
+perfReviewer["named agent: opsx-perf-memory-reviewer"]
+sliceImplementer["named agent: opsx-slice-implementer"]
+specReviewer["named agent: opsx-spec-reviewer"]
+testReviewer["named agent: opsx-test-reviewer"]
+codeQualityTask["ad hoc subagent task: standalone code quality review"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+debuggingRef["shared reference: debugging.md"]
+evidenceFirstRef["shared reference: evidence-first.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent --> evidenceFirstRef
+agent -. bug or failure needs diagnosis .-> debuggingRef
+agent -. integration boundary is involved .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. repository evidence is insufficient .-> researchRef
+agent -. independent review is requested .-> reviewRef
+agent -. specialist dispatch or parallel work is considered .-> subagentsRef
+agent -. focused code discovery adds value .-> codeExplorer
+agent -. hard defect repair adds value .-> debugger
+agent -. version specific primary research adds value .-> docsResearcher
+agent -. high consequence cumulative review adds value .-> finalReviewer
+agent -. performance or memory review adds value .-> perfReviewer
+agent -. bounded vertical slice delegation adds value .-> sliceImplementer
+agent -. artifact compliance review adds value .-> specReviewer
+agent -. test strength review adds value .-> testReviewer
+agent -. standalone code quality review adds value .-> codeQualityTask
+debugger --> debuggingRef
+debugger --> evidenceFirstRef
+docsResearcher --> researchRef
+finalReviewer --> reviewRef
+finalReviewer --> evidenceFirstRef
+finalReviewer -. integration axis applies .-> integrationCorrectnessRef
+finalReviewer -. performance axis applies .-> performanceMemoryRef
+perfReviewer --> performanceMemoryRef
+perfReviewer --> reviewRef
+perfReviewer --> evidenceFirstRef
+sliceImplementer --> evidenceFirstRef
+specReviewer --> artifactQualityRef
+specReviewer --> reviewRef
+specReviewer --> evidenceFirstRef
+specReviewer -. integration axis applies .-> integrationCorrectnessRef
+specReviewer -. performance axis applies .-> performanceMemoryRef
+testReviewer --> reviewRef
+testReviewer --> evidenceFirstRef
+codeQualityTask --> reviewRef
+codeQualityTask --> evidenceFirstRef
+codeQualityTask -. integration axis applies .-> integrationCorrectnessRef
+codeQualityTask -. performance axis applies .-> performanceMemoryRef
 ```
 
 ### `openspec-archive-change`
@@ -148,58 +182,48 @@ Runtime assets: [action skill](.codex/skills/openspec-archive-change/SKILL.md) a
 
 **Boundaries and result.** Readiness warnings are disclosure plus the action's existing confirmation, not a verification-action invocation or a new gate. Incomplete artifacts/tasks may proceed after confirmation; a chosen sync must succeed and match before moving. The inline semantic synchronization is a local archive stage, not an invocation of `openspec-sync-specs`. The action may write main specs, create the archive directory, and move the whole `changeRoot`; it does not implement, overwrite a target, or move after a failed sync. Success reports the exact archive path, sync status, and warnings; cancellation, collision, or sync failure reports that outcome and whether `changeRoot` remained intact.
 
-**Runtime route and conditional support.** `openspec-archive-change` → skill → matching agent, using `gpt-5.6-terra`, effort `high`, sandbox `workspace-write`. It conditionally loads [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). If the runtime can perform the chosen sync only through delegation, it may dispatch one anonymous bounded `gpt-5.6-sol`/`high` sync task, wait, and verify the writes.
+**Runtime route and conditional support.** `openspec-archive-change` → skill → matching agent, using `gpt-5.6-terra`, effort `high`, sandbox `workspace-write`. When a selected sync writes specifications, the generated rules require [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md). It also conditionally loads [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). If the runtime can perform the chosen sync only through delegation, it may dispatch one anonymous bounded `gpt-5.6-sol`/`high` sync task, wait, and verify the writes.
+
+```mermaid
+flowchart LR
+action["OpenSpec action: openspec-archive-change"]
+skill["action skill: openspec-archive-change"]
+agent["action agent: openspec-archive-change"]
+syncTask["ad hoc subagent task: bounded synchronous semantic sync"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+evidenceFirstRef["shared reference: evidence-first.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. selected sync writes specifications .-> artifactQualityRef
+agent -. readiness claim needs interpretation .-> evidenceFirstRef
+agent -. integration concern affects readiness .-> integrationCorrectnessRef
+agent -. review evidence affects readiness .-> reviewRef
+agent -. runtime requires delegated sync .-> subagentsRef
+agent -. runtime requires delegated sync .-> syncTask
+```
 
 ```mermaid
 flowchart TD
-action["openspec-archive-change"]
+action["OpenSpec action: openspec-archive-change"]
 skill["action skill: openspec-archive-change"]
 agent["action agent: openspec-archive-change"]
-resolve["Select store and one active change"]
-archiveInputs["Load optional archive instruction inputs"]
-status["Read live status and task readiness"]
-readiness["Disclose warnings and available evidence"]
-stopped["Stop without moving the change"]
-compare["Compare reported delta specs with main specs"]
-integrationRef["shared reference: integration-correctness.md"]
-evidenceRef["shared reference: evidence-first.md"]
+syncTask["ad hoc subagent task: bounded synchronous semantic sync"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+evidenceFirstRef["shared reference: evidence-first.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
 reviewRef["shared reference: review.md"]
 subagentsRef["shared reference: subagents.md"]
-rules["Snapshot specs rules once"]
-inlineSync["Perform synchronous inline semantic sync"]
-syncTask["ad hoc subagent task: bounded synchronous semantic sync"]
-postCompare["Compare and validate every original capability"]
-target["Resolve date-prefixed archive target"]
-failed["Report collision or failed sync with no move"]
-move["Move the complete change directory"]
-report["Report archive path sync status and warnings"]
 action --> skill
 skill --> agent
-agent --> resolve
-resolve --> archiveInputs
-archiveInputs --> status
-status --> readiness
-readiness -. user declines readiness warning .-> stopped
-readiness -. warnings accepted or none exist .-> compare
-readiness -. integration concern affects disclosure .-> integrationRef
-readiness -. pass or readiness claim needs interpretation .-> evidenceRef
-readiness -. prior review evidence needs interpretation .-> reviewRef
-compare -. no delta specs .-> target
-compare -. user chooses archive without sync .-> target
-compare -. user cancels sync choice .-> stopped
-compare -. user chooses sync .-> rules
-rules -. rule snapshot fails .-> failed
-rules -. rule snapshot succeeds .-> inlineSync
-inlineSync -. runtime requires delegation for sync .-> subagentsRef
-inlineSync -. runtime requires delegation for sync .-> syncTask
-inlineSync -. runtime performs sync directly .-> postCompare
-syncTask -. bounded sync result is returned .-> postCompare
-postCompare -. merge comparison or validation fails .-> failed
-postCompare -. all capabilities match and validate .-> target
-target -. destination already exists .-> failed
-target -. destination is available .-> move
-move -. directory move succeeds .-> report
-move -. directory move fails .-> failed
+agent -. selected sync writes specifications .-> artifactQualityRef
+agent -. readiness claim needs interpretation .-> evidenceFirstRef
+agent -. integration concern affects readiness .-> integrationCorrectnessRef
+agent -. review evidence affects readiness .-> reviewRef
+agent -. runtime requires delegated sync .-> subagentsRef
+agent -. runtime requires delegated sync .-> syncTask
 ```
 
 ### `openspec-bulk-archive-change`
@@ -210,54 +234,44 @@ Runtime assets: [action skill](.codex/skills/openspec-bulk-archive-change/SKILL.
 
 **Boundaries and result.** All selected status is gathered before mutation, rule snapshots precede the first write/move, and mutations are sequential. The action investigates code/tests read-only, resolves per-delta inclusion centrally, performs synchronization inline rather than invoking another action, validates, and moves changes. It never implements code, edits change planning artifacts, commits, publishes, or invents deltas. Failures and destination collisions can yield partial results; every selected change is reported once as `Success`, `Failed`, or `Skipped`, with separate `sync skipped` entries where applicable.
 
-**Runtime route and conditional support.** `openspec-bulk-archive-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. Conflict investigation conditionally loads [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). Anonymous read-only discovery/investigation may be delegated only when independent reads materially reduce latency; children cannot decide, write, validate, move, confirm, or redispatch.
+**Runtime route and conditional support.** `openspec-bulk-archive-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. Selected specification merges apply the generated [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md) rule. Conflict investigation conditionally loads [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). Anonymous read-only discovery/investigation may be delegated only when independent reads materially reduce latency; children cannot decide, write, validate, move, confirm, or redispatch.
+
+```mermaid
+flowchart LR
+action["OpenSpec action: openspec-bulk-archive-change"]
+skill["action skill: openspec-bulk-archive-change"]
+agent["action agent: openspec-bulk-archive-change"]
+conflictTask["ad hoc subagent task: bounded read-only conflict investigation"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. included deltas are merged into specifications .-> artifactQualityRef
+agent -. conflict crosses an integration boundary .-> integrationCorrectnessRef
+agent -. conflict is high consequence or ambiguous .-> reviewRef
+agent -. independent investigation reduces latency .-> subagentsRef
+agent -. independent investigation reduces latency .-> conflictTask
+```
 
 ```mermaid
 flowchart TD
-action["openspec-bulk-archive-change"]
+action["OpenSpec action: openspec-bulk-archive-change"]
 skill["action skill: openspec-bulk-archive-change"]
 agent["action agent: openspec-bulk-archive-change"]
-select["Discover and explicitly select active changes"]
-gather["Gather all selected status tasks and deltas"]
-conflicts["Build exact-path conflicts and inspect implementation"]
-integrationRef["shared reference: integration-correctness.md"]
+conflictTask["ad hoc subagent task: bounded read-only conflict investigation"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
 reviewRef["shared reference: review.md"]
 subagentsRef["shared reference: subagents.md"]
-readTask["ad hoc subagent task: bounded read-only conflict investigation"]
-plan["Present one consolidated plan"]
-confirm["Ask one batch confirmation"]
-cancelled["Stop with no writes or moves"]
-rederive["Exclude incomplete changes and rederive conflicts"]
-freeze["Freeze targets delta decisions and rule snapshots"]
-stopped["Stop before mutation on missing controlling state or rules"]
-execute["Sequentially inline merge validate and move each change"]
-partial["Record failed change or destination collision"]
-report["Report every selected change and batch totals"]
 action --> skill
 skill --> agent
-agent --> select
-select -. no active changes or no selection .-> cancelled
-select -. explicit selection exists .-> gather
-gather -. controlling status is unavailable .-> stopped
-gather -. complete selected state is available .-> conflicts
-conflicts -. integration semantics affect a conflict .-> integrationRef
-conflicts -. conflict is high consequence or ambiguous .-> reviewRef
-conflicts -. independent reads materially reduce latency .-> subagentsRef
-conflicts -. independent reads materially reduce latency .-> readTask
-readTask -. evidence is returned .-> conflicts
-conflicts --> plan
-plan --> confirm
-confirm -. user cancels .-> cancelled
-confirm -. archive all selected changes .-> freeze
-confirm -. archive ready changes only .-> rederive
-rederive --> freeze
-freeze -. required rule snapshot fails .-> stopped
-freeze -. required rule snapshots are complete .-> execute
-execute -. another confirmed change remains .-> execute
-execute -. operation fails or destination collides .-> partial
-partial -. remaining deterministic plan stays valid .-> execute
-partial -. no safe continuation remains .-> report
-execute -. all confirmed changes were attempted .-> report
+agent -. included deltas are merged into specifications .-> artifactQualityRef
+agent -. conflict crosses an integration boundary .-> integrationCorrectnessRef
+agent -. conflict is high consequence or ambiguous .-> reviewRef
+agent -. independent investigation reduces latency .-> subagentsRef
+agent -. independent investigation reduces latency .-> conflictTask
 ```
 
 ### `openspec-continue-change`
@@ -271,55 +285,45 @@ Runtime assets: [action skill](.codex/skills/openspec-continue-change/SKILL.md) 
 **Runtime route and conditional support.** `openspec-continue-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. It conditionally loads [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [research](.codex/skills/openspec-shared/references/research.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). A narrow anonymous read-only discovery, version research, or materially different design comparison is allowed only when it materially benefits this artifact; artifact writing is not delegated to overlapping writers.
 
 ```mermaid
-flowchart TD
-action["openspec-continue-change"]
+flowchart LR
+action["OpenSpec action: openspec-continue-change"]
 skill["action skill: openspec-continue-change"]
 agent["action agent: openspec-continue-change"]
-resolve["Resolve store and one change"]
-status["Read live ordered planning status"]
-complete["Report planning complete and stop"]
-blocked["Report blockers or state contradiction"]
-instructions["Load first ready artifact instructions"]
-frontier["Refresh the ready frontier"]
-context["Read dependencies and artifact constraints"]
-artifactRef["shared reference: artifact-quality.md"]
-performanceRef["shared reference: performance-memory.md"]
-integrationRef["shared reference: integration-correctness.md"]
+discoveryTask["ad hoc subagent task: artifact discovery research or design comparison"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
 researchRef["shared reference: research.md"]
 subagentsRef["shared reference: subagents.md"]
-readTask["ad hoc subagent task: narrow read-only artifact investigation"]
-draft["Draft only the resolved artifact"]
-write["Write and verify the selected output"]
-metadata["Apply the narrow proposal metadata transition"]
-recheck["Recheck live status"]
-report["Report one artifact and the fresh frontier"]
 action --> skill
 skill --> agent
-agent --> resolve
-resolve --> status
-status -. planning is complete .-> complete
-status -. no artifact is ready .-> blocked
-status -. first ready artifact exists .-> instructions
-instructions -. artifact is reported skipped .-> frontier
-frontier --> status
-instructions -. identity dependency or path conflicts .-> blocked
-instructions -. instructions are usable .-> context
-context -. artifact semantics need quality guidance .-> artifactRef
-context -. performance or memory can plausibly change .-> performanceRef
-context -. integration semantics matter .-> integrationRef
-context -. exact external behavior matters .-> researchRef
-context -. bounded delegation materially benefits the artifact .-> subagentsRef
-context -. bounded delegation materially benefits the artifact .-> readTask
-readTask -. evidence is returned .-> context
-context --> draft
-draft --> write
-write -. output write or existence check fails .-> blocked
-write -. live proposal instruction requires metadata classification .-> metadata
-metadata -. metadata status transition succeeds .-> recheck
-metadata -. metadata transition fails .-> blocked
-write -. output is verified and no metadata transition is required .-> recheck
-recheck -. selected artifact is done .-> report
-recheck -. status did not advance .-> blocked
+agent -. next artifact needs quality guidance .-> artifactQualityRef
+agent -. next artifact crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. bounded artifact investigation adds value .-> subagentsRef
+agent -. bounded artifact investigation adds value .-> discoveryTask
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-continue-change"]
+skill["action skill: openspec-continue-change"]
+agent["action agent: openspec-continue-change"]
+discoveryTask["ad hoc subagent task: artifact discovery research or design comparison"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. next artifact needs quality guidance .-> artifactQualityRef
+agent -. next artifact crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. bounded artifact investigation adds value .-> subagentsRef
+agent -. bounded artifact investigation adds value .-> discoveryTask
 ```
 
 ### `openspec-explore`
@@ -333,51 +337,49 @@ Runtime assets: [action skill](.codex/skills/openspec-explore/SKILL.md) and [one
 **Runtime route and conditional support.** `openspec-explore` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. It loads only applicable [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [debugging](.codex/skills/openspec-shared/references/debugging.md), [research](.codex/skills/openspec-shared/references/research.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). Anonymous bounded independent reads or comparisons are allowed only when they materially improve latency or add an evidence axis; exploration specialists remain read-only.
 
 ```mermaid
-flowchart TD
-action["openspec-explore"]
+flowchart LR
+action["OpenSpec action: openspec-explore"]
 skill["action skill: openspec-explore"]
 agent["action agent: openspec-explore"]
-resolve["Resolve store active changes and project config"]
-existing["Read live state for a relevant existing change"]
-investigate["Investigate evidence options and uncertainty"]
-scaffold["Scaffold a new change for requested capture"]
-capture["Capture only explicitly requested planning artifacts"]
-refresh["Refresh status after each captured artifact"]
-artifactRef["shared reference: artifact-quality.md"]
-performanceRef["shared reference: performance-memory.md"]
-integrationRef["shared reference: integration-correctness.md"]
-debugRef["shared reference: debugging.md"]
+readTask["ad hoc subagent task: bounded independent read or comparison"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+debuggingRef["shared reference: debugging.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
 researchRef["shared reference: research.md"]
 subagentsRef["shared reference: subagents.md"]
-readTask["ad hoc subagent task: bounded independent read or comparison"]
-boundary["Stop at analysis when implementation is requested"]
-blocked["Report material decision or evidence blocker"]
-report["Report analysis and any verified captured paths"]
 action --> skill
 skill --> agent
-agent --> resolve
-resolve -. no change is relevant .-> investigate
-resolve -. existing change is relevant .-> existing
-existing --> investigate
-resolve -. user explicitly requests capture in a new change .-> scaffold
-scaffold -. new change scaffold succeeds .-> capture
-scaffold -. scaffold fails .-> blocked
-investigate -. user explicitly requests planning capture .-> capture
-investigate -. no capture is requested .-> report
-investigate -. implementation or defect fixing is requested .-> boundary
-investigate -. artifact substance needs assessment .-> artifactRef
-investigate -. performance or memory matters .-> performanceRef
-investigate -. an integration boundary matters .-> integrationRef
-investigate -. a failure needs diagnosis .-> debugRef
-investigate -. exact external version behavior matters .-> researchRef
-investigate -. bounded delegation materially improves evidence .-> subagentsRef
-investigate -. bounded delegation materially improves evidence .-> readTask
-readTask -. evidence is returned .-> investigate
-capture -. requested artifact is written and verified .-> refresh
-capture -. capture is blocked or unsafe .-> blocked
-refresh -. another requested artifact is ready .-> capture
-refresh -. requested capture is terminal .-> report
-refresh -. unresolved dependency or decision remains .-> blocked
+agent -. planning artifact substance is assessed .-> artifactQualityRef
+agent -. defect or failure needs diagnosis .-> debuggingRef
+agent -. subject crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory is relevant .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. independent evidence work adds value .-> subagentsRef
+agent -. independent evidence work adds value .-> readTask
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-explore"]
+skill["action skill: openspec-explore"]
+agent["action agent: openspec-explore"]
+readTask["ad hoc subagent task: bounded independent read or comparison"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+debuggingRef["shared reference: debugging.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. planning artifact substance is assessed .-> artifactQualityRef
+agent -. defect or failure needs diagnosis .-> debuggingRef
+agent -. subject crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory is relevant .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. independent evidence work adds value .-> subagentsRef
+agent -. independent evidence work adds value .-> readTask
 ```
 
 ### `openspec-feedback`
@@ -391,33 +393,21 @@ Runtime assets: [action skill](.codex/skills/openspec-feedback/SKILL.md) and [on
 **Runtime route.** `openspec-feedback` → skill → matching agent, using `gpt-5.6-terra`, effort `high`, sandbox `read-only`. No shared reference, named specialist, or reviewer packet is routed by this action.
 
 ```mermaid
-flowchart TD
-action["openspec-feedback"]
+flowchart LR
+action["OpenSpec action: openspec-feedback"]
 skill["action skill: openspec-feedback"]
 agent["action agent: openspec-feedback"]
-gather["Gather supported feedback from recent conversation"]
-draft["Draft title and body inputs"]
-anonymize["Anonymize the complete draft"]
-display["Display the exact sanitized draft"]
-nothing["Report that nothing was submitted"]
-submit["Invoke openspec feedback exactly once"]
-success["Report submitted issue URL"]
-manual["Report no automatic submission and manual fallback"]
-failure["Report failed submission and fallback"]
-unknown["Report unknown submission state and preserve draft"]
 action --> skill
 skill --> agent
-agent --> gather
-gather --> draft
-draft --> anonymize
-anonymize --> display
-display -. user requests a revision .-> draft
-display -. user declines or withdraws .-> nothing
-display -. user explicitly approves this exact draft .-> submit
-submit -. CLI confirms success .-> success
-submit -. CLI cannot submit automatically .-> manual
-submit -. CLI confirms failure .-> failure
-submit -. interruption or uncertain outcome .-> unknown
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-feedback"]
+skill["action skill: openspec-feedback"]
+agent["action agent: openspec-feedback"]
+action --> skill
+skill --> agent
 ```
 
 ### `openspec-ff-change`
@@ -431,62 +421,49 @@ Runtime assets: [action skill](.codex/skills/openspec-ff-change/SKILL.md) and [o
 **Runtime route and conditional support.** `openspec-ff-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. It conditionally loads [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [research](.codex/skills/openspec-shared/references/research.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). Anonymous narrow read-only investigation or high-consequence planning review is allowed only when it materially improves an artifact; the action remains the artifact owner.
 
 ```mermaid
-flowchart TD
-action["openspec-ff-change"]
+flowchart LR
+action["OpenSpec action: openspec-ff-change"]
 skill["action skill: openspec-ff-change"]
 agent["action agent: openspec-ff-change"]
-intent["Resolve intent new name store and schema"]
-create["Create exactly one new change"]
-status["Read live status and compute apply-required closure"]
-instructions["Load current artifact instructions"]
-artifactRef["shared reference: artifact-quality.md"]
-performanceRef["shared reference: performance-memory.md"]
-integrationRef["shared reference: integration-correctness.md"]
+reviewTask["ad hoc subagent task: bounded planning investigation or review"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
 researchRef["shared reference: research.md"]
 reviewRef["shared reference: review.md"]
 subagentsRef["shared reference: subagents.md"]
-reviewTask["ad hoc subagent task: bounded planning investigation or review"]
-draft["Draft one eligible planning artifact"]
-write["Write and verify the resolved output"]
-metadata["Apply the narrow proposal metadata transition"]
-skip["Record an instruction-declared conditional skip"]
-refresh["Refresh status and recompute closure"]
-final["Run final live status"]
-report["Report implementation-ready planning closure"]
-blocked["Report exact partial state and blocker"]
 action --> skill
 skill --> agent
-agent --> intent
-intent -. intent name store or schema is unresolved .-> blocked
-intent -. intent name store and schema are resolved .-> create
-create -. name exists or creation fails .-> blocked
-create -. change creation succeeds .-> status
-status -. closure is empty .-> final
-status -. graph is invalid or cyclic .-> blocked
-status -. next closure artifact is eligible .-> instructions
-instructions -. explicit artifact condition is false .-> skip
-skip --> refresh
-instructions -. instruction template or path conflicts .-> blocked
-instructions -. artifact semantics need quality guidance .-> artifactRef
-instructions -. performance or memory can plausibly change .-> performanceRef
-instructions -. integration or version boundary matters .-> integrationRef
-instructions -. exact external behavior matters .-> researchRef
-instructions -. high consequence artifact merits review .-> reviewRef
-instructions -. optional bounded delegation is considered .-> subagentsRef
-instructions -. bounded investigation or review adds value .-> reviewTask
-instructions -. artifact must be created .-> draft
-reviewTask -. evidence or findings are returned .-> draft
-draft --> write
-write -. output write or existence check fails .-> blocked
-write -. live proposal instruction requires metadata classification .-> metadata
-metadata -. metadata status transition succeeds .-> refresh
-metadata -. metadata transition fails .-> blocked
-write -. output is verified and no metadata transition is required .-> refresh
-refresh -. another closure artifact remains .-> instructions
-refresh -. closure is terminal .-> final
-refresh -. no safe progress is possible .-> blocked
-final -. final status supports readiness .-> report
-final -. final status cannot support readiness .-> blocked
+agent -. artifact needs quality guidance .-> artifactQualityRef
+agent -. change crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. high consequence artifact merits review .-> reviewRef
+agent -. bounded investigation or review is considered .-> subagentsRef
+agent -. bounded investigation or review adds value .-> reviewTask
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-ff-change"]
+skill["action skill: openspec-ff-change"]
+agent["action agent: openspec-ff-change"]
+reviewTask["ad hoc subagent task: bounded planning investigation or review"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. artifact needs quality guidance .-> artifactQualityRef
+agent -. change crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. high consequence artifact merits review .-> reviewRef
+agent -. bounded investigation or review is considered .-> subagentsRef
+agent -. bounded investigation or review adds value .-> reviewTask
 ```
 
 ### `openspec-new-change`
@@ -500,33 +477,29 @@ Runtime assets: [action skill](.codex/skills/openspec-new-change/SKILL.md) and [
 **Runtime route and conditional support.** `openspec-new-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. It normally uses no specialist. Only an unusually complex, materially useful read-only subtask may trigger [bounded delegation](.codex/skills/openspec-shared/references/subagents.md); such an anonymous task cannot scaffold, create an artifact, or choose workflow state.
 
 ```mermaid
-flowchart TD
-action["openspec-new-change"]
+flowchart LR
+action["OpenSpec action: openspec-new-change"]
 skill["action skill: openspec-new-change"]
 agent["action agent: openspec-new-change"]
-resolve["Resolve intent name store and schema"]
+discoveryTask["ad hoc subagent task: complex read-only discovery"]
 subagentsRef["shared reference: subagents.md"]
-readTask["ad hoc subagent task: unusually complex read-only discovery"]
-scaffold["Scaffold exactly one change"]
-status["Read live artifact status"]
-instructions["Fetch first ready artifact instructions"]
-report["Report scaffold and instructions without writing artifact"]
-stopped["Report error or live-state contradiction"]
 action --> skill
 skill --> agent
-agent --> resolve
-resolve -. unusually complex read-only discovery is materially useful .-> subagentsRef
-resolve -. unusually complex read-only discovery is materially useful .-> readTask
-readTask -. evidence is returned .-> resolve
-resolve -. required intent name store or schema is unresolved .-> stopped
-resolve -. required intent name store and schema are resolved .-> scaffold
-scaffold -. creation fails or name exists .-> stopped
-scaffold -. scaffold creation succeeds .-> status
-status -. planning complete no artifacts or no ready artifact .-> report
-status -. live first ready artifact exists .-> instructions
-status -. status identity or state contradicts scaffold .-> stopped
-instructions -. instruction identity or dependency contradicts status .-> stopped
-instructions -. instruction payload is consistent .-> report
+agent -. unusually complex read only discovery is justified .-> subagentsRef
+agent -. unusually complex read only discovery is justified .-> discoveryTask
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-new-change"]
+skill["action skill: openspec-new-change"]
+agent["action agent: openspec-new-change"]
+discoveryTask["ad hoc subagent task: complex read-only discovery"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. unusually complex read only discovery is justified .-> subagentsRef
+agent -. unusually complex read only discovery is justified .-> discoveryTask
 ```
 
 ### `openspec-onboard`
@@ -537,56 +510,36 @@ Runtime assets: [action skill](.codex/skills/openspec-onboard/SKILL.md) and [one
 
 **Boundaries and result.** This is intentionally interactive: task choice, post-exploration acknowledgement, proposal approval when present, implementation readiness when a task artifact is present, and post-archive acknowledgement are teaching pauses. It demonstrates exploration and later mentions other actions, but does not invoke their skills or agents. It does not delegate teaching or implementation. Live schema state controls artifacts; implementation follows fresh apply state; archive runs the tutorial command `openspec archive "<name>" --yes` directly, without a separate verification phase, sync-choice interaction, or pre-archive approval. It never commits, publishes, creates branches/worktrees, or submits external data. Completion is the real planned, implemented, archived change plus recap; otherwise it reports exact resumable state.
 
-**Runtime route and conditional support.** `openspec-onboard` → skill → matching agent, using `gpt-5.6-terra`, effort `medium`, sandbox `workspace-write`. During each implementation slice it loads [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md); [debugging](.codex/skills/openspec-shared/references/debugging.md) is loaded only when diagnosis is needed. No specialist or anonymous reviewer task is authorized beyond the mandatory action route.
+**Runtime route and conditional support.** `openspec-onboard` → skill → matching agent, using `gpt-5.6-terra`, effort `medium`, sandbox `workspace-write`. Configured proposal, specification, design, and task writes apply [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md). During each implementation slice it loads [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md); [debugging](.codex/skills/openspec-shared/references/debugging.md) is loaded only when diagnosis is needed. No specialist or anonymous reviewer task is authorized beyond the mandatory action route.
+
+```mermaid
+flowchart LR
+action["OpenSpec action: openspec-onboard"]
+skill["action skill: openspec-onboard"]
+agent["action agent: openspec-onboard"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+debuggingRef["shared reference: debugging.md"]
+evidenceFirstRef["shared reference: evidence-first.md"]
+action --> skill
+skill --> agent
+agent -. configured planning artifact is written .-> artifactQualityRef
+agent -. implementation needs diagnosis .-> debuggingRef
+agent -. implementation work begins .-> evidenceFirstRef
+```
 
 ```mermaid
 flowchart TD
-action["openspec-onboard"]
+action["OpenSpec action: openspec-onboard"]
 skill["action skill: openspec-onboard"]
 agent["action agent: openspec-onboard"]
-preflight["Check OpenSpec CLI and welcome the learner"]
-exit["Stop gracefully with guidance or quick reference"]
-candidates["Inspect repository and present small real tasks"]
-choice["Pause for task choice"]
-exploreDemo["Demonstrate read-only exploration"]
-ack["Pause for post-exploration acknowledgement"]
-create["Create the named real change"]
-planning["Build the next live planning artifact"]
-proposalPause["Pause for proposal approval when present"]
-taskPause["Pause for implementation readiness when tasks are present"]
-implementation["Implement coherent tracked work with fresh evidence"]
-evidenceRef["shared reference: evidence-first.md"]
-debugRef["shared reference: debugging.md"]
-blocked["Report exact saved state and blocker"]
-archive["Run direct tutorial archive command"]
-postArchive["Pause for post-archive acknowledgement"]
-recap["Recap the real completed change cycle"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+debuggingRef["shared reference: debugging.md"]
+evidenceFirstRef["shared reference: evidence-first.md"]
 action --> skill
 skill --> agent
-agent --> preflight
-preflight -. CLI is unavailable or learner requests quick reference .-> exit
-preflight -. guided journey continues .-> candidates
-candidates --> choice
-choice --> exploreDemo
-exploreDemo --> ack
-ack --> create
-create -. change scaffold succeeds .-> planning
-create -. change scaffold fails .-> blocked
-planning -. live proposal artifact is present .-> proposalPause
-proposalPause -. approved after feedback .-> planning
-planning -. live task artifact is present .-> taskPause
-taskPause -. user is ready after feedback .-> planning
-planning -. another live artifact remains .-> planning
-planning -. planning is complete .-> implementation
-planning -. no ready artifact or state conflict .-> blocked
-implementation -. each coherent implementation slice .-> evidenceRef
-implementation -. diagnosis is required .-> debugRef
-implementation -. more incomplete tasks remain .-> implementation
-implementation -. real blocker remains .-> blocked
-implementation -. apply state is all done .-> archive
-archive -. tutorial archive succeeds .-> postArchive
-archive -. tutorial archive fails .-> blocked
-postArchive --> recap
+agent -. configured planning artifact is written .-> artifactQualityRef
+agent -. implementation needs diagnosis .-> debuggingRef
+agent -. implementation work begins .-> evidenceFirstRef
 ```
 
 ### `openspec-propose`
@@ -597,65 +550,52 @@ Runtime assets: [action skill](.codex/skills/openspec-propose/SKILL.md) and [one
 
 **Boundaries and result.** The action creates exactly one new change, computes the transitive apply-required closure from live status, and produces it in dependency order with no per-artifact approval ritual. A build/implement/fix request authorizes planning here, not application-code edits. Existing names are not adopted or overwritten. Only live-resolved outputs and the proposal-specific metadata transition may be written. It does not implement, sync, archive, commit, publish, or touch artifacts outside the closure. It reports closure membership, paths, skipped reasons, assumptions, status evidence, and says artifacts are ready for review only when live closure state supports it.
 
-**Runtime route and conditional support.** `openspec-propose` → skill → matching agent, using `gpt-5.6-sol`, effort `xhigh`, sandbox `workspace-write`. Conditional references are [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [research](.codex/skills/openspec-shared/references/research.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). Anonymous narrow read-only research/discovery or independent high-consequence artifact review is allowed only when it materially improves the artifact; it adds no gate and does not transfer ownership.
+**Runtime route and conditional support.** `openspec-propose` → skill → matching agent, using `gpt-5.6-sol`, effort `xhigh`, sandbox `workspace-write`. Conditional references are [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [research](.codex/skills/openspec-shared/references/research.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). An anonymous independent read-only high-consequence artifact review is allowed only when it materially improves the artifact; it adds no gate and does not transfer ownership.
 
 ```mermaid
-flowchart TD
-action["openspec-propose"]
+flowchart LR
+action["OpenSpec action: openspec-propose"]
 skill["action skill: openspec-propose"]
 agent["action agent: openspec-propose"]
-intent["Resolve cohesive intent name store and schema"]
-create["Create exactly one new change"]
-status["Read live graph and compute apply-required closure"]
-instructions["Load next eligible artifact instructions"]
-artifactRef["shared reference: artifact-quality.md"]
-performanceRef["shared reference: performance-memory.md"]
-integrationRef["shared reference: integration-correctness.md"]
+reviewTask["ad hoc subagent task: high-consequence artifact review"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
 researchRef["shared reference: research.md"]
 reviewRef["shared reference: review.md"]
 subagentsRef["shared reference: subagents.md"]
-reviewTask["ad hoc subagent task: bounded planning research or review"]
-draft["Draft one artifact from live semantics"]
-write["Write and verify only eligible output"]
-metadata["Apply the narrow proposal metadata transition"]
-skip["Record explicit conditional or CLI skip"]
-refresh["Refresh status and recompute closure"]
-final["Run final live status"]
-report["Report planning closure and stop before apply"]
-blocked["Report exact planning blocker"]
 action --> skill
 skill --> agent
-agent --> intent
-intent -. material intent name store or schema choice is unresolved .-> blocked
-intent -. cohesive intent name store and schema are resolved .-> create
-create -. existing name or creation failure .-> blocked
-create -. change creation succeeds .-> status
-status -. invalid graph cycle or stuck frontier .-> blocked
-status -. closure is empty .-> final
-status -. eligible closure artifact remains .-> instructions
-instructions -. CLI or explicit instruction skips artifact .-> skip
-skip --> refresh
-instructions -. instruction template dependency or path conflicts .-> blocked
-instructions -. artifact substance needs quality guidance .-> artifactRef
-instructions -. performance or memory may change .-> performanceRef
-instructions -. integration or version boundary matters .-> integrationRef
-instructions -. exact external behavior matters .-> researchRef
-instructions -. high consequence artifact merits review .-> reviewRef
-instructions -. optional delegation is considered .-> subagentsRef
-instructions -. bounded research or review adds value .-> reviewTask
-instructions -. artifact must be created .-> draft
-reviewTask -. evidence or findings are returned .-> draft
-draft --> write
-write -. output write or existence check fails .-> blocked
-write -. live proposal instruction requires metadata classification .-> metadata
-metadata -. metadata status transition succeeds .-> refresh
-metadata -. metadata transition fails .-> blocked
-write -. output is verified and no metadata transition is required .-> refresh
-refresh -. another closure artifact remains .-> instructions
-refresh -. closure is satisfied .-> final
-refresh -. safe progress is impossible .-> blocked
-final -. final status supports closure completion .-> report
-final -. final status cannot support completion .-> blocked
+agent -. artifact needs quality guidance .-> artifactQualityRef
+agent -. change crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. high consequence artifact merits review .-> reviewRef
+agent -. optional delegation is considered .-> subagentsRef
+agent -. high consequence artifact benefits from independent review .-> reviewTask
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-propose"]
+skill["action skill: openspec-propose"]
+agent["action agent: openspec-propose"]
+reviewTask["ad hoc subagent task: high-consequence artifact review"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. artifact needs quality guidance .-> artifactQualityRef
+agent -. change crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. high consequence artifact merits review .-> reviewRef
+agent -. optional delegation is considered .-> subagentsRef
+agent -. high consequence artifact benefits from independent review .-> reviewTask
 ```
 
 ### `openspec-sync-specs`
@@ -669,54 +609,41 @@ Runtime assets: [action skill](.codex/skills/openspec-sync-specs/SKILL.md) and [
 **Runtime route and conditional support.** `openspec-sync-specs` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. It conditionally loads [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). An anonymous read-only investigation or review is allowed only for a narrow high-consequence or semantically ambiguous merge; writes remain owned and non-overlapping.
 
 ```mermaid
-flowchart TD
-action["openspec-sync-specs"]
+flowchart LR
+action["OpenSpec action: openspec-sync-specs"]
 skill["action skill: openspec-sync-specs"]
 agent["action agent: openspec-sync-specs"]
-select["Select one active change and root"]
-status["Read live status"]
-freeze["Freeze exact eligible delta subset"]
-rules["Snapshot specs rules once"]
-model["Read and model every selected semantic merge"]
-decision["Resolve a material contract ambiguity"]
-artifactRef["shared reference: artifact-quality.md"]
-integrationRef["shared reference: integration-correctness.md"]
+reviewTask["ad hoc subagent task: bounded merge review or investigation"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
 reviewRef["shared reference: review.md"]
 subagentsRef["shared reference: subagents.md"]
-reviewTask["ad hoc subagent task: bounded read-only merge investigation"]
-merge["Apply semantic operations to selected main specs"]
-retirement["Check every guarded capability retirement condition"]
-validate["Run fresh validation for main specs"]
-report["Report merged operations and active change"]
-stopped["Report no-op contradiction ambiguity or validation failure"]
 action --> skill
 skill --> agent
-agent --> select
-select --> status
-status -. status lookup fails or is invalid .-> stopped
-status -. no reported delta outputs .-> stopped
-status -. concrete reported delta outputs exist .-> freeze
-freeze -. requested subset is empty or ineligible .-> stopped
-freeze -. eligible subset is frozen .-> rules
-rules -. rule snapshot is invalid or unavailable .-> stopped
-rules -. rule snapshot is valid .-> model
-model -. material behavior ambiguity exists .-> decision
-decision -. user resolves the ambiguity .-> model
-decision -. ambiguity remains unresolved .-> stopped
-model -. requirements need quality assessment .-> artifactRef
-model -. integration semantics matter .-> integrationRef
-model -. merge is high consequence or ambiguous .-> reviewRef
-model -. bounded review or investigation is delegated .-> subagentsRef
-model -. bounded review or investigation is delegated .-> reviewTask
-reviewTask -. evidence or findings are returned .-> model
-model -. intended contract is unambiguous .-> merge
-merge -. removal would retire a capability .-> retirement
-retirement -. every retirement guard passes .-> validate
-retirement -. any retirement guard fails .-> stopped
-merge -. no capability retirement is requested .-> validate
-merge -. semantic operation contradicts main spec .-> stopped
-validate -. validation fails .-> stopped
-validate -. validation succeeds .-> report
+agent -. merged requirements need quality assessment .-> artifactQualityRef
+agent -. requirements concern an integration boundary .-> integrationCorrectnessRef
+agent -. merge is high consequence or ambiguous .-> reviewRef
+agent -. bounded review or investigation is delegated .-> subagentsRef
+agent -. bounded review or investigation is delegated .-> reviewTask
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-sync-specs"]
+skill["action skill: openspec-sync-specs"]
+agent["action agent: openspec-sync-specs"]
+reviewTask["ad hoc subagent task: bounded merge review or investigation"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. merged requirements need quality assessment .-> artifactQualityRef
+agent -. requirements concern an integration boundary .-> integrationCorrectnessRef
+agent -. merge is high consequence or ambiguous .-> reviewRef
+agent -. bounded review or investigation is delegated .-> subagentsRef
+agent -. bounded review or investigation is delegated .-> reviewTask
 ```
 
 ### `openspec-update-change`
@@ -727,64 +654,52 @@ Runtime assets: [action skill](.codex/skills/openspec-update-change/SKILL.md) an
 
 **Boundaries and result.** Only artifacts with live state `done` and their concrete `existingOutputPaths` are eligible; `resolvedOutputPath`, globs, missing outputs, and `skipped`/`ready`/`blocked` artifacts never authorize creation. The action reads all eligible artifacts, traces the revision in every direction, proposes and confirms one artifact at a time, refreshes before each write, and stops rather than overwriting drift. It may make only the confirmed proposal-specific metadata transition outside those outputs. It never edits implementation, creates an artifact, advances the frontier, syncs, verifies, archives, or starts apply. The final report lists applied, skipped/rejected, and deferred revisions, drift, status, and unresolved conflicts.
 
-**Runtime route and conditional support.** `openspec-update-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. It conditionally loads [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [research](.codex/skills/openspec-shared/references/research.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). Anonymous read-only discovery or independent assessment may be delegated only when useful; user confirmation and artifact writes cannot be delegated.
+**Runtime route and conditional support.** `openspec-update-change` → skill → matching agent, using `gpt-5.6-sol`, effort `high`, sandbox `workspace-write`. It conditionally loads [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [integration correctness](.codex/skills/openspec-shared/references/integration-correctness.md), [research](.codex/skills/openspec-shared/references/research.md), [review](.codex/skills/openspec-shared/references/review.md), and [bounded delegation](.codex/skills/openspec-shared/references/subagents.md). An anonymous high-consequence read-only revision assessment may be delegated only when useful; user confirmation and artifact writes cannot be delegated.
 
 ```mermaid
-flowchart TD
-action["openspec-update-change"]
+flowchart LR
+action["OpenSpec action: openspec-update-change"]
 skill["action skill: openspec-update-change"]
 agent["action agent: openspec-update-change"]
-select["Select exactly one existing change"]
-status["Read live status and compute eligible outputs"]
-stopped["Report no eligible output or state conflict"]
-read["Read every eligible artifact and relevant instructions"]
-reconcile["Build coherent artifact-level revisions"]
-artifactRef["shared reference: artifact-quality.md"]
-performanceRef["shared reference: performance-memory.md"]
-integrationRef["shared reference: integration-correctness.md"]
+reviewTask["ad hoc subagent task: high-consequence revision assessment"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
 researchRef["shared reference: research.md"]
 reviewRef["shared reference: review.md"]
 subagentsRef["shared reference: subagents.md"]
-reviewTask["ad hoc subagent task: bounded read-only planning assessment"]
-proposal["Present one artifact revision for confirmation"]
-next["Record outcome and choose next meaningful revision"]
-refresh["Refresh status and compare preview basis"]
-patch["Patch only confirmed existing output paths"]
-metadata["Apply confirmed proposal metadata transition"]
-recheck["Recheck artifact and cross-artifact coherence"]
-final["Refresh final live status"]
-report["Report revised rejected and deferred work"]
 action --> skill
 skill --> agent
-agent --> select
-select --> status
-status -. no eligible existing output .-> stopped
-status -. eligible outputs exist .-> read
-read --> reconcile
-reconcile -. requested revision replaces the core intent .-> stopped
-reconcile -. artifact substance needs quality guidance .-> artifactRef
-reconcile -. performance or memory may change .-> performanceRef
-reconcile -. integration or version boundary matters .-> integrationRef
-reconcile -. exact external behavior matters .-> researchRef
-reconcile -. high consequence revision merits review .-> reviewRef
-reconcile -. optional delegation is considered .-> subagentsRef
-reconcile -. bounded read-only assessment adds value .-> reviewTask
-reviewTask -. evidence or findings are returned .-> reconcile
-reconcile -. coherent artifact revision remains .-> proposal
-proposal -. user requests proposal revision .-> proposal
-proposal -. user skips this artifact .-> next
-proposal -. user approves this artifact .-> refresh
-refresh -. state path instructions or content drifted .-> proposal
-refresh -. artifact remains eligible and unchanged .-> patch
-patch -. patch fails or overlap becomes unsafe .-> stopped
-patch -. approved proposal semantics require metadata change .-> metadata
-metadata -. metadata status transition succeeds .-> recheck
-metadata -. metadata transition fails .-> stopped
-patch -. no metadata transition is required .-> recheck
-recheck --> next
-next -. another meaningful revision remains .-> proposal
-next -. update is complete or user ends it .-> final
-final --> report
+agent -. artifact substance is revised or assessed .-> artifactQualityRef
+agent -. revision crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. high consequence revision merits review .-> reviewRef
+agent -. optional delegation is considered .-> subagentsRef
+agent -. high consequence revision benefits from assessment .-> reviewTask
+```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-update-change"]
+skill["action skill: openspec-update-change"]
+agent["action agent: openspec-update-change"]
+reviewTask["ad hoc subagent task: high-consequence revision assessment"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. artifact substance is revised or assessed .-> artifactQualityRef
+agent -. revision crosses an integration boundary .-> integrationCorrectnessRef
+agent -. performance or memory can change .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. high consequence revision merits review .-> reviewRef
+agent -. optional delegation is considered .-> subagentsRef
+agent -. high consequence revision benefits from assessment .-> reviewTask
 ```
 
 ### `openspec-verify-change`
@@ -800,56 +715,75 @@ Runtime assets: [action skill](.codex/skills/openspec-verify-change/SKILL.md) an
 The skill authorizes five anonymous, read-only packet tasks when the matching axis is relevant and independent context materially improves confidence: test strength (`gpt-5.6-sol`/`high`), spec correctness/completeness (`gpt-5.6-sol`/`high`), performance/memory (`gpt-5.6-sol`/`high`), focused integration/error/resource/concurrency discovery (`gpt-5.6-terra`/`high`), and final synthesis across at least three applicable axes for a high-consequence change (`gpt-5.6-sol`/`xhigh`). These are not installed specialist-agent invocations.
 
 ```mermaid
-flowchart TD
-action["openspec-verify-change"]
+flowchart LR
+action["OpenSpec action: openspec-verify-change"]
 skill["action skill: openspec-verify-change"]
 agent["action agent: openspec-verify-change"]
-select["Select planning root and change"]
-live["Load live status apply state and context files"]
-evidence["Build authoritative evidence packet and run fresh checks"]
-artifactRef["shared reference: artifact-quality.md"]
-evidenceRef["shared reference: evidence-first.md"]
+consistencyTask["ad hoc subagent task: cross-axis consistency synthesis"]
+integrationTask["ad hoc subagent task: focused integration discovery"]
+performanceTask["ad hoc subagent task: performance and memory assessment"]
+specTask["ad hoc subagent task: spec correctness and completeness assessment"]
+testsTask["ad hoc subagent task: test strength assessment"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+debuggingRef["shared reference: debugging.md"]
+evidenceFirstRef["shared reference: evidence-first.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
 reviewRef["shared reference: review.md"]
 subagentsRef["shared reference: subagents.md"]
-integrationRef["shared reference: integration-correctness.md"]
-performanceRef["shared reference: performance-memory.md"]
-debugRef["shared reference: debugging.md"]
-researchRef["shared reference: research.md"]
-axes["Verify completeness correctness coherence and applicable axes"]
-testsTask["ad hoc subagent task: test strength assessment"]
-specTask["ad hoc subagent task: spec completeness assessment"]
-performanceTask["ad hoc subagent task: performance and memory assessment"]
-integrationTask["ad hoc subagent task: focused integration discovery"]
-consistencyTask["ad hoc subagent task: cross-axis consistency synthesis"]
-findings["Validate and classify every finding"]
-report["Report evidence severities and final assessment"]
 action --> skill
 skill --> agent
-agent --> select
-select --> live
-live --> evidence
-evidence -. artifact substance or coherence is assessed .-> artifactRef
-evidence -. pass completion or readiness claim is interpreted .-> evidenceRef
-evidence -. independent review is performed .-> reviewRef
-evidence -. any specialist task is dispatched .-> subagentsRef
-evidence -. integration boundary is relevant .-> integrationRef
-evidence -. performance or memory is relevant .-> performanceRef
-evidence -. evidence fails flakes or contradicts a claim .-> debugRef
-evidence -. exact external behavior matters .-> researchRef
-evidence --> axes
-axes -. test strength axis benefits from independence .-> testsTask
-axes -. spec completeness axis benefits from independence .-> specTask
-axes -. performance or memory axis benefits from independence .-> performanceTask
-axes -. focused integration axis benefits from independence .-> integrationTask
-axes -. high consequence change has three or more axes .-> consistencyTask
-axes --> findings
-testsTask -. findings are returned .-> findings
-specTask -. findings are returned .-> findings
-performanceTask -. findings are returned .-> findings
-integrationTask -. evidence is returned .-> findings
-consistencyTask -. findings are returned .-> findings
-findings --> report
+agent -. artifact substance or coherence is assessed .-> artifactQualityRef
+agent -. evidence fails flakes or contradicts a claim .-> debuggingRef
+agent -. pass completion or readiness claim is interpreted .-> evidenceFirstRef
+agent -. integration boundary is relevant .-> integrationCorrectnessRef
+agent -. performance or memory is relevant .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. independent review is performed .-> reviewRef
+agent -. any independent task is dispatched .-> subagentsRef
+agent -. high consequence change has three or more axes .-> consistencyTask
+agent -. focused integration axis benefits from independence .-> integrationTask
+agent -. performance or memory axis benefits from independence .-> performanceTask
+agent -. spec completeness axis benefits from independence .-> specTask
+agent -. test strength axis benefits from independence .-> testsTask
 ```
+
+```mermaid
+flowchart TD
+action["OpenSpec action: openspec-verify-change"]
+skill["action skill: openspec-verify-change"]
+agent["action agent: openspec-verify-change"]
+consistencyTask["ad hoc subagent task: cross-axis consistency synthesis"]
+integrationTask["ad hoc subagent task: focused integration discovery"]
+performanceTask["ad hoc subagent task: performance and memory assessment"]
+specTask["ad hoc subagent task: spec correctness and completeness assessment"]
+testsTask["ad hoc subagent task: test strength assessment"]
+artifactQualityRef["shared reference: artifact-quality.md"]
+debuggingRef["shared reference: debugging.md"]
+evidenceFirstRef["shared reference: evidence-first.md"]
+integrationCorrectnessRef["shared reference: integration-correctness.md"]
+performanceMemoryRef["shared reference: performance-memory.md"]
+researchRef["shared reference: research.md"]
+reviewRef["shared reference: review.md"]
+subagentsRef["shared reference: subagents.md"]
+action --> skill
+skill --> agent
+agent -. artifact substance or coherence is assessed .-> artifactQualityRef
+agent -. evidence fails flakes or contradicts a claim .-> debuggingRef
+agent -. pass completion or readiness claim is interpreted .-> evidenceFirstRef
+agent -. integration boundary is relevant .-> integrationCorrectnessRef
+agent -. performance or memory is relevant .-> performanceMemoryRef
+agent -. exact external behavior matters .-> researchRef
+agent -. independent review is performed .-> reviewRef
+agent -. any independent task is dispatched .-> subagentsRef
+agent -. high consequence change has three or more axes .-> consistencyTask
+agent -. focused integration axis benefits from independence .-> integrationTask
+agent -. performance or memory axis benefits from independence .-> performanceTask
+agent -. spec completeness axis benefits from independence .-> specTask
+agent -. test strength axis benefits from independence .-> testsTask
+```
+
 
 ## Passive shared support
 
@@ -857,7 +791,7 @@ findings --> report
 
 | Owned reference | Purpose and exact load condition | Explicit action consumers | Other explicit consumers |
 |---|---|---|---|
-| [`artifact-quality.md`](.codex/skills/openspec-shared/references/artifact-quality.md) | Apply only the section matching live artifact semantics when drafting or assessing intent/proposal, behavioral specification, technical design, implementation tasks, or an unknown custom artifact; live instruction/template/context/rules remain authoritative. | `openspec-continue-change`, `openspec-explore`, `openspec-ff-change`, `openspec-propose`, `openspec-sync-specs`, `openspec-update-change`, `openspec-verify-change` | `opsx-spec-reviewer`; `openspec/config.yaml` rules for proposal, specs, design, and tasks |
+| [`artifact-quality.md`](.codex/skills/openspec-shared/references/artifact-quality.md) | Apply only the section matching live artifact semantics when drafting or assessing intent/proposal, behavioral specification, technical design, implementation tasks, or an unknown custom artifact; live instruction/template/context/rules remain authoritative. | `openspec-archive-change`, `openspec-bulk-archive-change`, `openspec-continue-change`, `openspec-explore`, `openspec-ff-change`, `openspec-onboard`, `openspec-propose`, `openspec-sync-specs`, `openspec-update-change`, `openspec-verify-change` | `opsx-spec-reviewer`; `openspec/config.yaml` rules for proposal, specs, design, and tasks |
 | [`debugging.md`](.codex/skills/openspec-shared/references/debugging.md) | Diagnose a bug, failure, nondeterminism, leak, regression, or contradiction before fixing; stop blocked on the third failed hypothesis-to-fresh-verification cycle for the same failure. | `openspec-apply-change`, `openspec-explore`, `openspec-onboard`, `openspec-verify-change` | `opsx-debugger` |
 | [`evidence-first.md`](.codex/skills/openspec-shared/references/evidence-first.md) | Select evidence proportionate to behavior change, bug fix, refactor, performance/memory, or integration claims; fresh applicable evidence is required for pass/complete/fixed/ready claims, and unavailable evidence is degraded rather than passing. | `openspec-apply-change`, `openspec-archive-change`, `openspec-onboard`, `openspec-verify-change` | `opsx-debugger`, `opsx-final-consistency-reviewer`, `opsx-perf-memory-reviewer`, `opsx-slice-implementer`, `opsx-spec-reviewer`, `opsx-test-reviewer`; all three apply reviewer packets; `openspec/config.yaml` apply context |
 | [`integration-correctness.md`](.codex/skills/openspec-shared/references/integration-correctness.md) | Load when connector, protocol, framework, server/runtime, database, external-service, transaction, streaming, retry, cancellation, version, lifecycle, error-mapping, or conversion semantics matter. | `openspec-apply-change`, `openspec-archive-change`, `openspec-bulk-archive-change`, `openspec-continue-change`, `openspec-explore`, `openspec-ff-change`, `openspec-propose`, `openspec-sync-specs`, `openspec-update-change`, `openspec-verify-change` | The three apply reviewer packets load it only when their supplied contract/review axis applies |
@@ -877,7 +811,7 @@ These are installed custom-agent TOMLs without `ROUTED_ACTION`; they are special
 | [`opsx-docs-researcher`](.codex/agents/opsx-docs-researcher.toml) | Version-specific primary-source research for one precise claim. | `gpt-5.6-terra` | `high` | `read-only` | [research](.codex/skills/openspec-shared/references/research.md) | Exact bounded research question; returns evidence only; no artifacts, implementation decisions, workflow choice, recursion, or redispatch. | `openspec-apply-change` when exact version-specific primary research is needed |
 | [`opsx-final-consistency-reviewer`](.codex/agents/opsx-final-consistency-reviewer.toml) | High-consequence consistency across three or more applicable review axes. | `gpt-5.6-sol` | `xhigh` | `read-only` | [review](.codex/skills/openspec-shared/references/review.md), [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md) | Synthesizes only the complete supplied packet; returns findings; no fixes, workflow choice, recursion, or redispatch. | `openspec-apply-change` only for a high-consequence cumulative pass, using the final-review packet |
 | [`opsx-perf-memory-reviewer`](.codex/agents/opsx-perf-memory-reviewer.toml) | Assess performance/memory methodology, hot paths, allocations, and measurements. | `gpt-5.6-sol` | `high` | `read-only` | [performance and memory](.codex/skills/openspec-shared/references/performance-memory.md), [review](.codex/skills/openspec-shared/references/review.md), [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md) | Supplied performance/memory scope only; returns findings; no fixes, workflow choice, recursion, or redispatch. | `openspec-apply-change` when performance/memory methodology and evidence warrant independent review |
-| [`opsx-slice-implementer`](.codex/agents/opsx-slice-implementer.toml) | Implement one bounded vertical slice against fixed artifacts. | `gpt-5.6-terra` | `high` | `workspace-write` | [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md); other canonical references only when packet scope triggers them | Fixed file/behavior boundary; cannot choose workflow state, broaden scope, alter unrelated files, recurse, or redispatch; stops on contradiction/overlap. | `openspec-apply-change` for one dependency-independent bounded slice |
+| [`opsx-slice-implementer`](.codex/agents/opsx-slice-implementer.toml) | Implement one bounded vertical slice against fixed artifacts. | `gpt-5.6-terra` | `high` | `workspace-write` | [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md); no other exact reference file is declared | Fixed file/behavior boundary; cannot choose workflow state, broaden scope, alter unrelated files, recurse, or redispatch; stops on contradiction/overlap. | `openspec-apply-change` for one dependency-independent bounded slice |
 | [`opsx-spec-reviewer`](.codex/agents/opsx-spec-reviewer.toml) | Compare implementation completeness with supplied proposal, specs, design, and tasks. | `gpt-5.6-sol` | `high` | `read-only` | [artifact quality](.codex/skills/openspec-shared/references/artifact-quality.md), [review](.codex/skills/openspec-shared/references/review.md), [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md) | Supplied planning/implementation packet only; returns findings; no fixes, workflow choice, recursion, or redispatch. | `openspec-apply-change` for independent task/artifact compliance, using the spec-compliance packet |
 | [`opsx-test-reviewer`](.codex/agents/opsx-test-reviewer.toml) | Assess whether supplied tests can fail for the intended defect or behavior. | `gpt-5.6-sol` | `high` | `read-only` | [review](.codex/skills/openspec-shared/references/review.md), [evidence-first](.codex/skills/openspec-shared/references/evidence-first.md) | Supplied test-strength packet only; returns findings; no fixes, workflow choice, recursion, or redispatch. | `openspec-apply-change` when independent test-strength assessment adds value |
 
