@@ -142,6 +142,14 @@ Choose the smallest pending vertical slice that produces one observable outcome.
 
 Load and follow the applicable canonical references from step 5 before choosing evidence or making a claim. Implement the minimum complete outcome supported by the artifacts and project conventions, within a focused diff.
 
+Add a traceability comment immediately adjacent to every new class, method, or significant modified block introduced by the slice, using the target file's native comment syntax (`//`, `#`, `<!-- -->`, `--`, `;`, etc.):
+
+```text
+Change-Id: <changeName> | Task: <task id>
+```
+
+Use the `changeName` from status and the `id` of the task the block implements (from the `tasks` array).
+
 If implementation exposes an artifact or design contradiction, stop coding around it. Identify the exact artifact text, observed repository fact, and consequence; suggest the appropriate artifact update; report the pause; and wait for user guidance. Do not edit the artifact or resume within this invocation merely because a correction appears safe. Resume apply only after the separately authorized artifact update has occurred and fresh apply instructions have been obtained.
 
 If a failure requires diagnosis, load and follow the shared debugging reference.

@@ -371,6 +371,10 @@ relevant; `explore` loads research or debugging guidance based on the problem.
   for any performance claim, specialists only when useful, verification before any task is
   marked complete. Preserve OpenSpec's ability to update artifacts when implementation
   exposes a legitimate spec/design problem — never silently code around a contradiction.
+  Emit a traceability comment immediately adjacent to every new class, method, or
+  significant modified block, using the target file's native comment syntax (`//`, `#`,
+  `<!-- -->`, `--`, `;`, etc.): `Change-Id: <change name> | Task: <task id>`, where the
+  change name and task id come from the live apply status/instructions.
 - **verify** — deliberately independent and rigorous across completeness, spec
   correctness, design coherence, test strength, integration
   compatibility, perf/memory evidence, and error/resource/concurrency paths. A "passes"
