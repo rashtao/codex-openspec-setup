@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Skill Workbench"
+  short_description: "Create, validate, and evaluate Codex skills"
+  default_prompt: "Use $codex-skill-creator to create or improve a Codex skill and validate it."

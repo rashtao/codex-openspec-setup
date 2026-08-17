@@ -1,0 +1,1064 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex evaluation review</title>
+  <!-- Design informed by audited evaluation concepts and rewritten for Codex without vendor runtime mechanics or copied viewer code. -->
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f3ee;
+      --surface: #ffffff;
+      --surface-muted: #f8f7f3;
+      --text: #1f2724;
+      --muted: #66706c;
+      --line: #d7d9d3;
+      --accent: #176b52;
+      --accent-soft: #dcefe7;
+      --warning: #9a5b08;
+      --warning-soft: #fff0d6;
+      --danger: #a33939;
+      --danger-soft: #fbe4e4;
+      --info: #315f8f;
+      --info-soft: #e4eef8;
+      --radius: 12px;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121715;
+        --surface: #1b211e;
+        --surface-muted: #222925;
+        --text: #edf1ee;
+        --muted: #a9b2ad;
+        --line: #3a443f;
+        --accent: #72d0ad;
+        --accent-soft: #173d30;
+        --warning: #f2bd69;
+        --warning-soft: #493318;
+        --danger: #ef9a9a;
+        --danger-soft: #482323;
+        --info: #9ac3ec;
+        --info-soft: #20364d;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); }
+    button, input, select, textarea { font: inherit; }
+    button, select, input, textarea { color: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    a { color: var(--accent); overflow-wrap: anywhere; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem clamp(1rem, 3vw, 2.5rem);
+      background: color-mix(in srgb, var(--surface) 94%, transparent);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+    .topbar h1 { margin: 0; font-size: 1.15rem; }
+    .topbar p { margin: .2rem 0 0; color: var(--muted); font-size: .82rem; }
+    .top-actions { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+
+    .button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .55rem .8rem;
+      background: var(--surface);
+      font-weight: 650;
+    }
+    .button:hover:not(:disabled) { border-color: var(--accent); }
+    .button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    @media (prefers-color-scheme: dark) { .button.primary { color: #10221b; } }
+
+    .tabs {
+      display: flex;
+      gap: .4rem;
+      padding: .8rem clamp(1rem, 3vw, 2.5rem) 0;
+      max-width: 1500px;
+      margin: auto;
+    }
+    .tab {
+      border: 0;
+      border-bottom: 3px solid transparent;
+      padding: .65rem .85rem;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(210px, 290px) minmax(0, 1fr);
+      gap: 1rem;
+      max-width: 1500px;
+      margin: auto;
+      padding: 1rem clamp(1rem, 3vw, 2.5rem) 2.5rem;
+    }
+    .page { max-width: 1500px; margin: auto; padding: 1rem clamp(1rem, 3vw, 2.5rem) 2.5rem; }
+
+    .sidebar, .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .sidebar { align-self: start; position: sticky; top: 5.4rem; overflow: hidden; }
+    .sidebar-header { padding: .85rem 1rem; border-bottom: 1px solid var(--line); }
+    .sidebar-header strong { display: block; }
+    .sidebar-header span { color: var(--muted); font-size: .78rem; }
+    .case-list { display: grid; max-height: calc(100vh - 10rem); overflow: auto; }
+    .case-button {
+      text-align: left;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      padding: .85rem 1rem;
+    }
+    .case-button:last-child { border-bottom: 0; }
+    .case-button.active { background: var(--accent-soft); box-shadow: inset 3px 0 var(--accent); }
+    .case-button small { display: block; color: var(--muted); margin-top: .25rem; line-height: 1.35; }
+
+    .content { min-width: 0; display: grid; gap: 1rem; }
+    .card { padding: 1rem; min-width: 0; }
+    .card h2, .card h3, .card h4 { margin: 0 0 .7rem; }
+    .section-title { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
+    .section-title p { margin: 0; color: var(--muted); font-size: .85rem; }
+    .prompt { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+    .muted { color: var(--muted); }
+    .small { font-size: .8rem; }
+    .grid { display: grid; gap: 1rem; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stack { display: grid; gap: .7rem; }
+
+    .arm-card { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; }
+    .arm-head { padding: .8rem; background: var(--surface-muted); border-bottom: 1px solid var(--line); }
+    .arm-head strong { display: block; }
+    .arm-head small { color: var(--muted); overflow-wrap: anywhere; }
+    .run { padding: .85rem; border-bottom: 1px solid var(--line); }
+    .run:last-child { border-bottom: 0; }
+    .run-title { display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; margin-bottom: .6rem; }
+    .run-title strong { overflow-wrap: anywhere; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: .14rem .48rem;
+      font-size: .72rem;
+      font-weight: 750;
+      white-space: nowrap;
+      background: var(--surface-muted);
+    }
+    .badge.pass, .badge.accepted, .badge.completed { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+    .badge.fail, .badge.changes_requested, .badge.executor_error, .badge.grading_error { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+    .badge.invalid, .badge.warning { color: var(--warning); background: var(--warning-soft); border-color: transparent; }
+    .badge.unvisited, .badge.missing { color: var(--muted); }
+
+    .details { margin: .6rem 0 0; }
+    .details summary { color: var(--muted); cursor: pointer; font-weight: 650; }
+    .metadata { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .35rem .65rem; margin: .65rem 0 0; font-size: .8rem; }
+    .metadata dt { color: var(--muted); }
+    .metadata dd { margin: 0; overflow-wrap: anywhere; }
+    .error { margin-top: .6rem; padding: .65rem; border-radius: 8px; background: var(--danger-soft); color: var(--danger); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+    .criterion { border: 1px solid var(--line); border-radius: 8px; padding: .65rem; margin-top: .55rem; }
+    .criterion-head { display: flex; align-items: start; justify-content: space-between; gap: .5rem; }
+    .criterion p { margin: .35rem 0 0; }
+    .evidence { margin: .45rem 0 0; padding-left: 1.15rem; color: var(--muted); font-size: .78rem; }
+    .evidence li { margin: .2rem 0; overflow-wrap: anywhere; }
+
+    .artifacts { margin: .6rem 0 0; padding: 0; list-style: none; display: grid; gap: .4rem; }
+    .artifact { padding: .55rem; background: var(--surface-muted); border-radius: 8px; font-size: .8rem; }
+    .artifact strong { overflow-wrap: anywhere; }
+    .artifact-meta { display: block; margin-top: .2rem; color: var(--muted); overflow-wrap: anywhere; }
+
+    .review-box { margin-top: .8rem; padding-top: .8rem; border-top: 1px dashed var(--line); }
+    .review-box label { display: block; font-size: .8rem; font-weight: 700; margin: .55rem 0 .3rem; }
+    .review-box select, .review-box textarea, .reviewer input, .reviewer textarea, .judgment select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: .55rem;
+    }
+    .review-box textarea { min-height: 82px; resize: vertical; }
+    .field-error { color: var(--danger); min-height: 1.2em; margin-top: .25rem; font-size: .76rem; }
+
+    .judgment { display: grid; grid-template-columns: minmax(170px, .7fr) minmax(0, 1fr) auto; gap: .6rem; align-items: end; }
+    .judgment label { font-size: .8rem; font-weight: 700; }
+    .judgment input { width: 100%; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: .55rem; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    th, td { padding: .6rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .03em; }
+    tr:last-child td { border-bottom: 0; }
+    .stat { white-space: nowrap; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .7rem; }
+    .metric { background: var(--surface-muted); border: 1px solid var(--line); border-radius: 9px; padding: .75rem; }
+    .metric strong { display: block; font-size: 1.15rem; margin-top: .2rem; }
+    .metric span { color: var(--muted); font-size: .75rem; }
+    .note { border-left: 3px solid var(--info); padding: .75rem; background: var(--info-soft); border-radius: 0 8px 8px 0; }
+    .note.warning { border-left-color: var(--warning); background: var(--warning-soft); }
+    .note h3 { font-size: .95rem; margin: 0 0 .35rem; }
+    .note p { margin: 0; line-height: 1.45; }
+
+    .reviewer { display: grid; grid-template-columns: minmax(180px, .6fr) minmax(260px, 1fr); gap: .8rem; }
+    .reviewer label { display: block; font-size: .8rem; font-weight: 700; margin-bottom: .3rem; }
+    .reviewer textarea { min-height: 70px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .download-status { margin-top: .55rem; min-height: 1.3em; color: var(--muted); font-size: .8rem; }
+    .empty { color: var(--muted); padding: .5rem 0; }
+
+    @media (max-width: 880px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .case-list { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); max-height: none; }
+      .case-button { border-right: 1px solid var(--line); }
+      .grid.two, .reviewer { grid-template-columns: 1fr; }
+      .judgment { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .topbar { align-items: start; flex-direction: column; }
+      .tabs { overflow-x: auto; }
+      .grid.two { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Codex evaluation review</h1>
+      <p id="suite-line">Loading embedded benchmark…</p>
+      <p class="small muted">Blindness covers this ordinary UI, not raw page source or downloaded feedback.</p>
+    </div>
+    <div class="top-actions">
+      <button class="button" id="unblind" type="button">Unblind configurations</button>
+      <button class="button primary" id="download" type="button">Download feedback.json</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Review sections">
+    <button class="tab" type="button" role="tab" aria-selected="true" data-panel="cases-panel">Cases</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-panel="summary-panel">Aggregate summary</button>
+    <button class="tab" type="button" role="tab" aria-selected="false" data-panel="notes-panel">Analyzer notes</button>
+  </nav>
+
+  <main>
+    <section class="panel active" id="cases-panel" role="tabpanel">
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <strong>Evaluation cases</strong>
+            <span id="review-progress"></span>
+          </div>
+          <div class="case-list" id="case-list"></div>
+        </aside>
+        <div class="content" id="case-content"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="summary-panel" role="tabpanel">
+      <div class="page content" id="summary-content"></div>
+    </section>
+
+    <section class="panel" id="notes-panel" role="tabpanel">
+      <div class="page content" id="notes-content"></div>
+    </section>
+  </main>
+
+  <script id="review-data" type="application/json">__CODEX_EVAL_DATA__</script>
+  <script>
+    "use strict";
+
+    const embedded = JSON.parse(document.getElementById("review-data").textContent);
+    const benchmark = embedded.benchmark;
+    const configurations = benchmark.aggregates.configurations;
+    const cases = benchmark.cases;
+    const benchmarkLinkBase = embedded.benchmark_link_base;
+    const configById = new Map(configurations.map((item) => [item.configuration_id, item]));
+    const feedbackByRun = new Map();
+    const visibleRuns = [];
+    let currentCase = 0;
+    let unblinded = false;
+
+    function armRuns(arm) {
+      return arm.runs;
+    }
+
+    cases.forEach((caseItem) => {
+      (caseItem.configurations || []).forEach((arm) => {
+        armRuns(arm).forEach((run) => {
+          run.__configuration_id = arm.configuration_id;
+          run.__case_id = caseItem.case_id;
+          run.__review_key = "review-" + (visibleRuns.length + 1);
+          visibleRuns.push(run);
+        });
+      });
+    });
+
+    const initialFeedback = embedded.feedback;
+    const blindMapping = initialFeedback.blind_mapping;
+    const mappingByPair = new Map(
+      blindMapping.assignments.map((item) => [item.case_id + "\u0000" + item.pair_id, item])
+    );
+
+    visibleRuns.forEach((run) => {
+      feedbackByRun.set(run.run_id, { status: "unvisited", text: "" });
+    });
+    initialFeedback.reviews.forEach((review) => {
+      feedbackByRun.set(review.run_id, {
+        status: review.status,
+        text: typeof review.text === "string" ? review.text : ""
+      });
+    });
+
+    let reviewerNameState = initialFeedback.reviewer.name;
+    let reviewerMetadataText = JSON.stringify(
+      initialFeedback.reviewer.metadata,
+      null,
+      2
+    );
+
+    function element(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined && text !== null) node.textContent = String(text);
+      return node;
+    }
+
+    function append(parent, ...children) {
+      children.filter(Boolean).forEach((child) => parent.appendChild(child));
+      return parent;
+    }
+
+    function badge(value) {
+      const text = value === null || value === undefined ? "missing" : String(value);
+      return element("span", "badge " + text.replace(/[^a-z0-9_-]/gi, "_"), text.replaceAll("_", " "));
+    }
+
+    function formatValue(value) {
+      if (value === null || value === undefined) return "not observed";
+      if (typeof value === "number") return Number.isInteger(value) ? String(value) : value.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+      if (typeof value === "string") return value;
+      return JSON.stringify(value);
+    }
+
+    function errorText(error) {
+      if (!error) return "";
+      if (typeof error === "string") return error;
+      const code = error.code ? error.code + ": " : "";
+      return code + (error.message || JSON.stringify(error));
+    }
+
+    function configLabel(configId) {
+      const config = configById.get(configId) || {};
+      return (config.label || configId) + " · " + (config.role || "role unknown");
+    }
+
+    function blindAssignment(caseId, pairId) {
+      return mappingByPair.get(caseId + "\u0000" + pairId) || {};
+    }
+
+    function blindLetter(run) {
+      const assignment = blindAssignment(run.__case_id, run.pair_id);
+      if (assignment.A === run.__configuration_id) return "A";
+      if (assignment.B === run.__configuration_id) return "B";
+      return "?";
+    }
+
+    function publicRunLabel(run) {
+      if (unblinded) return configLabel(run.__configuration_id) + " · " + run.run_id;
+      return "Arm " + blindLetter(run);
+    }
+
+    function safeRelativeHref(path) {
+      if (typeof path !== "string" || !path || path.startsWith("/") || path.includes("\\") || path.includes("\0") || path.includes(":")) return null;
+      const values = [benchmarkLinkBase, path];
+      const stack = [];
+      for (const value of values) {
+        if (typeof value !== "string" || !value || value.startsWith("/") || value.includes("\\") || value.includes("\0") || value.includes(":")) return null;
+        for (const part of value.split("/")) {
+          if (!part) return null;
+          if (part === ".") continue;
+          if (part === "..") {
+            if (stack.length && stack[stack.length - 1] !== "..") stack.pop();
+            else stack.push("..");
+          } else {
+            stack.push(part);
+          }
+        }
+      }
+      return stack.map((part) => part === ".." ? part : encodeURIComponent(part)).join("/");
+    }
+
+    function localPathNode(path, label) {
+      const href = safeRelativeHref(path);
+      if (!href) return element("span", "", label || path || "not captured");
+      const link = element("a", "", label || path);
+      link.href = href;
+      return link;
+    }
+
+    function metadataList(entries) {
+      const list = element("dl", "metadata");
+      entries.forEach(([name, value, node]) => {
+        append(list, element("dt", "", name));
+        const item = element("dd");
+        if (node) item.appendChild(node);
+        else item.textContent = formatValue(value);
+        list.appendChild(item);
+      });
+      return list;
+    }
+
+    function redactProvenance(value) {
+      return typeof value === "string" ? value : JSON.stringify(value);
+    }
+
+    function evidenceList(items) {
+      const values = Array.isArray(items) ? items : [];
+      if (!values.length) return element("p", "muted small", "No trustworthy evidence reference was recorded.");
+      if (!unblinded) return element("p", "muted small", values.length + " evidence reference(s) recorded; source locations are hidden until unblinding.");
+      const list = element("ul", "evidence");
+      values.forEach((item) => {
+        list.appendChild(element("li", "", redactProvenance(item)));
+      });
+      return list;
+    }
+
+    function criterionDefinition(caseItem, criterionId) {
+      const item = (caseItem.criteria || []).find((candidate) => (candidate.id || candidate.criterion_id) === criterionId);
+      return item ? item.text : "Criterion text unavailable";
+    }
+
+    function renderCriterion(caseItem, criterion, index) {
+      const box = element("div", "criterion");
+      const head = element("div", "criterion-head");
+      const id = criterion.criterion_id || criterion.id || "criterion";
+      append(head, element("strong", "", unblinded ? id : "Criterion " + (index + 1)), badge(criterion.verdict || "invalid"));
+      append(box, head, element("p", "small", criterionDefinition(caseItem, id)), evidenceList(criterion.evidence));
+      return box;
+    }
+
+    function renderClaimsAndWarnings(run) {
+      const details = element("details", "details");
+      const claims = run.claims_checked;
+      const warnings = run.evaluator_quality_warnings;
+      details.open = warnings.length > 0 || claims.some((claim) => claim.evaluation !== "verified");
+      details.appendChild(element("summary", "", "Claims and evaluator warnings (" + (claims.length + warnings.length) + ")"));
+      claims.forEach((claim, index) => {
+        const box = element("div", "criterion");
+        append(box, badge(claim.evaluation), element("p", "small", unblinded ? claim.claim : "Checked claim " + (index + 1) + "; text hidden until unblinding."), evidenceList(claim.evidence));
+        details.appendChild(box);
+      });
+      warnings.forEach((warning, index) => {
+        const box = element("div", "criterion");
+        append(box, badge("warning"), element("strong", "", unblinded ? warning.code : "Evaluator warning " + (index + 1)), element("p", "small", unblinded ? warning.message : "Warning details hidden until unblinding."), evidenceList(warning.evidence));
+        details.appendChild(box);
+      });
+      if (!claims.length && !warnings.length) details.appendChild(element("p", "empty", "No checked claims or evaluator-quality warnings were supplied."));
+      return details;
+    }
+
+    function renderArtifacts(run) {
+      const section = element("details", "details");
+      const artifacts = Array.isArray(run.artifacts) ? run.artifacts : [];
+      const summary = element("summary", "", "Artifacts and transcript (" + artifacts.length + ")");
+      section.appendChild(summary);
+      const list = element("ul", "artifacts");
+      artifacts.forEach((artifact, index) => {
+        const item = element("li", "artifact");
+        if (unblinded) item.appendChild(localPathNode(artifact.path, artifact.path));
+        else item.appendChild(element("span", "", "Artifact " + (index + 1) + " · source hidden until unblinding"));
+        const bits = [];
+        if (unblinded && artifact.media_type) bits.push(artifact.media_type);
+        if (unblinded && artifact.sha256) bits.push(artifact.sha256);
+        item.appendChild(element("span", "artifact-meta", bits.join(" · ") || "No additional artifact metadata"));
+        list.appendChild(item);
+      });
+      if (!artifacts.length) list.appendChild(element("li", "empty", "No artifacts were declared."));
+      section.appendChild(list);
+      const transcript = element("p", "small");
+      append(
+        transcript,
+        element("span", "muted", "Transcript: "),
+        unblinded
+          ? localPathNode(run.transcript_path, run.transcript_path || "not captured")
+          : element("span", "", run.transcript_path ? "captured; source hidden until unblinding" : "not captured")
+      );
+      section.appendChild(transcript);
+      return section;
+    }
+
+    function validateReview(runId, showMessage) {
+      const review = feedbackByRun.get(runId);
+      let message = "";
+      if (review.status === "unvisited" && review.text.trim()) message = "Choose a review status or clear the note.";
+      if (review.status === "changes_requested" && !review.text.trim()) message = "Changes requested requires a nonempty explanation.";
+      const target = [...document.querySelectorAll("[data-review-error]")]
+        .find((node) => node.dataset.reviewError === visibleRuns.find((run) => run.run_id === runId).__review_key);
+      if (target && showMessage) target.textContent = message;
+      return message;
+    }
+
+    function renderReviewBox(run) {
+      const review = feedbackByRun.get(run.run_id);
+      const box = element("div", "review-box");
+      append(box, element("strong", "", "Review state"));
+      const statusLabel = element("label", "", "Status");
+      const select = element("select");
+      [
+        ["unvisited", "Unvisited"],
+        ["accepted", "Accepted"],
+        ["changes_requested", "Changes requested"]
+      ].forEach(([value, label]) => {
+        const option = element("option", "", label);
+        option.value = value;
+        option.selected = review.status === value;
+        select.appendChild(option);
+      });
+      select.addEventListener("change", () => {
+        review.status = select.value;
+        validateReview(run.run_id, true);
+        renderProgress();
+      });
+      const textLabel = element("label", "", "Reviewer note");
+      const textarea = element("textarea");
+      textarea.value = review.text;
+      textarea.placeholder = "Evidence-based note. Required when requesting changes; optional for acceptance.";
+      textarea.addEventListener("input", () => {
+        review.text = textarea.value;
+        validateReview(run.run_id, true);
+      });
+      const error = element("div", "field-error");
+      error.dataset.reviewError = run.__review_key;
+      append(box, statusLabel, select, textLabel, textarea, error);
+      return box;
+    }
+
+    function renderRun(caseItem, run) {
+      const section = element("article", "run");
+      const title = element("div", "run-title");
+      append(title, element("strong", "", publicRunLabel(run)), badge(run.run_status), badge(run.grading_status));
+      section.appendChild(title);
+      const runError = errorText(run.run_error);
+      const gradingError = errorText(run.grading_error);
+      if (runError) section.appendChild(element("div", "error", unblinded ? "Run error — " + runError : "Run error recorded; details hidden until unblinding."));
+      if (gradingError) section.appendChild(element("div", "error", unblinded ? "Grading error — " + gradingError : "Grading error recorded; details hidden until unblinding."));
+      const metadata = [
+        ["Quality score", run.quality.score],
+        ["Duration (seconds)", run.duration_seconds],
+        ["Input tokens", run.input_tokens],
+        ["Output tokens", run.output_tokens],
+        ["Total tokens", run.total_tokens]
+      ];
+      if (unblinded) {
+        const config = configById.get(run.__configuration_id) || {};
+        metadata.unshift(
+          ["Configuration ID", run.__configuration_id],
+          ["Role", config.role],
+          ["Skill digest", config.skill_digest],
+          ["Run ID", run.run_id],
+          ["Pair ID", run.pair_id]
+        );
+      }
+      section.appendChild(metadataList(metadata));
+      section.appendChild(renderArtifacts(run));
+      const criteria = Array.isArray(run.criteria) ? run.criteria : [];
+      const details = element("details", "details");
+      details.open = criteria.some((item) => item.verdict === "fail" || item.verdict === "invalid");
+      details.appendChild(element("summary", "", "Criterion verdicts (" + criteria.length + ")"));
+      criteria.forEach((criterion, index) => details.appendChild(renderCriterion(caseItem, criterion, index)));
+      if (!criteria.length) details.appendChild(element("p", "empty", "No grading criteria were supplied for this run."));
+      section.appendChild(details);
+      section.appendChild(renderClaimsAndWarnings(run));
+      section.appendChild(renderReviewBox(run));
+      return section;
+    }
+
+    function renderArm(caseItem, arm) {
+      const card = element("section", "arm-card");
+      const head = element("div", "arm-head");
+      const config = configById.get(arm.configuration_id) || arm;
+      head.appendChild(element("strong", "", configLabel(arm.configuration_id)));
+      if (unblinded) {
+        const provenance = [config.configuration_id, config.skill_digest, config.baseline_kind].filter(Boolean).join(" · ");
+        head.appendChild(element("small", "", provenance));
+      } else {
+        head.appendChild(element("small", "", "Configuration label, role, and digest are hidden."));
+      }
+      card.appendChild(head);
+      const runs = armRuns(arm);
+      runs.forEach((run) => card.appendChild(renderRun(caseItem, run)));
+      if (!runs.length) card.appendChild(element("p", "empty run", "No indexed run for this arm."));
+      return card;
+    }
+
+    function addJudgmentNote(caseItem, pair, value, detail) {
+      if (!value) return;
+      const labels = {
+        prefer_a: "Arm A preferred",
+        prefer_b: "Arm B preferred",
+        tie: "tie",
+        insufficient_evidence: "insufficient evidence"
+      };
+      const suffix = detail.trim() ? " — " + detail.trim() : "";
+      const note = "[Blind pair judgment: " + labels[value] + suffix + "]";
+      const pairRunIds = new Set([pair.candidate_run_id, pair.baseline_run_id].filter(Boolean));
+      caseRecords(caseItem).filter((run) => pairRunIds.has(run.run_id)).forEach((run) => {
+        const review = feedbackByRun.get(run.run_id);
+        if (!review.text.includes(note)) review.text = (review.text.trim() ? review.text.trim() + "\n" : "") + note;
+      });
+      renderCase(currentCase);
+      document.getElementById("download-status").textContent = "Comparison note added. Choose each run's review status before download.";
+    }
+
+    function comparisonCard(caseItem, pair) {
+      const card = element("section", "card");
+      append(card, element("h3", "", "Pair judgment"), element("p", "muted small", "Record a pair-specific preference, tie, or insufficient evidence without changing run review statuses."));
+      const row = element("div", "judgment");
+      const selectWrap = element("div");
+      append(selectWrap, element("label", "", "Judgment"));
+      const select = element("select");
+      [
+        ["", "Choose a judgment"],
+        ["prefer_a", "Arm A preferred"],
+        ["prefer_b", "Arm B preferred"],
+        ["tie", "Tie"],
+        ["insufficient_evidence", "Insufficient evidence"]
+      ].forEach(([value, text]) => {
+        const option = element("option", "", text);
+        option.value = value;
+        select.appendChild(option);
+      });
+      selectWrap.appendChild(select);
+      const detailWrap = element("div");
+      append(detailWrap, element("label", "", "Evidence note (optional)"));
+      const detail = element("input");
+      detail.type = "text";
+      detail.placeholder = "Why this judgment is supported";
+      detailWrap.appendChild(detail);
+      const apply = element("button", "button", "Add to case feedback");
+      apply.type = "button";
+      apply.addEventListener("click", () => addJudgmentNote(caseItem, pair, select.value, detail.value));
+      append(row, selectWrap, detailWrap, apply);
+      card.appendChild(row);
+      return card;
+    }
+
+    function normalizedPairs(caseItem) {
+      return caseItem.pairs;
+    }
+
+    function caseRecords(caseItem) {
+      return (caseItem.configurations || []).flatMap((arm) => armRuns(arm));
+    }
+
+    function renderPair(caseItem, pair, index) {
+      const card = element("section", "card stack");
+      const heading = unblinded ? pair.pair_id : "Pair " + (index + 1);
+      append(card, element("h3", "", heading), element("p", "muted small", pair.status === "included" ? "Matched observations available." : "One or more observations are unavailable."));
+      const runById = new Map(caseRecords(caseItem).map((run) => [run.run_id, run]));
+      const runs = [runById.get(pair.candidate_run_id), runById.get(pair.baseline_run_id)].filter(Boolean);
+      runs.sort((left, right) => blindLetter(left).localeCompare(blindLetter(right)));
+      const grid = element("section", "grid two");
+      runs.forEach((run) => grid.appendChild(renderRun(caseItem, run)));
+      const presentLetters = new Set(runs.map(blindLetter));
+      ["A", "B"].filter((letter) => !presentLetters.has(letter)).forEach((letter) => {
+        grid.appendChild(element("article", "run empty", unblinded ? "Indexed counterpart unavailable." : "Arm " + letter + " · indexed counterpart unavailable."));
+      });
+      card.appendChild(grid);
+      card.appendChild(comparisonCard(caseItem, pair));
+      return card;
+    }
+
+    function pairTable(caseItem) {
+      const card = element("section", "card");
+      card.appendChild(element("h3", "", "Per-case paired comparison"));
+      const pairs = normalizedPairs(caseItem);
+      if (!pairs.length) {
+        card.appendChild(element("p", "empty", "No included matched pairs. Excluded or incomplete attempts remain visible in the run cards."));
+      } else {
+        const records = caseRecords(caseItem);
+        const recordById = new Map(records.map((run) => [run.run_id, run]));
+        const tableWrap = element("div", "table-wrap");
+        const table = element("table");
+        const header = element("tr");
+        ["Pair", "Arm A score", "Arm B score", "Status", unblinded ? "Candidate − baseline" : "Directional delta"].forEach((text) => header.appendChild(element("th", "", text)));
+        const thead = element("thead");
+        thead.appendChild(header);
+        const tbody = element("tbody");
+        pairs.forEach((pair, index) => {
+          const candidate = recordById.get(pair.candidate_run_id);
+          const baseline = recordById.get(pair.baseline_run_id);
+          const byLetter = {};
+          [candidate, baseline].filter(Boolean).forEach((run) => { byLetter[blindLetter(run)] = run; });
+          const row = element("tr");
+          const status = pair.status;
+          const delta = pair.quality_delta;
+          [
+            unblinded ? pair.pair_id : "Pair " + (index + 1),
+            byLetter.A ? formatValue(byLetter.A.quality.score) : "not available",
+            byLetter.B ? formatValue(byLetter.B.quality.score) : "not available",
+            status + (pair.exclusion_reason ? (unblinded ? ": " + pair.exclusion_reason : ": observation unavailable") : ""),
+            unblinded ? formatValue(delta) : "hidden until unblinding"
+          ].forEach((value) => row.appendChild(element("td", "", value)));
+          tbody.appendChild(row);
+        });
+        append(table, thead, tbody);
+        tableWrap.appendChild(table);
+        card.appendChild(tableWrap);
+      }
+      card.appendChild(element("p", "muted small", unblinded ? "Paired delta: " + formatStatistic(caseItem.paired_quality.statistics) : "Directional statistics are available after explicit unblinding."));
+      return card;
+    }
+
+    function renderCase(index) {
+      currentCase = index;
+      const caseItem = cases[index];
+      const content = document.getElementById("case-content");
+      content.replaceChildren();
+      if (!caseItem) {
+        content.appendChild(element("div", "card empty", "No evaluation cases are embedded."));
+        return;
+      }
+      const promptCard = element("section", "card");
+      const heading = element("div", "section-title");
+      const headingText = element("div");
+      append(headingText, element("h2", "", unblinded ? caseItem.case_id : "Case " + (index + 1)), element("p", "", "Exact submitted prompt"));
+      append(heading, headingText);
+      append(promptCard, heading, element("p", "prompt", caseItem.prompt));
+      content.appendChild(promptCard);
+      const pairStack = element("section", "stack");
+      normalizedPairs(caseItem).forEach((pair, pairIndex) => pairStack.appendChild(renderPair(caseItem, pair, pairIndex)));
+      if (!normalizedPairs(caseItem).length) pairStack.appendChild(element("p", "empty", "No pair records are visible."));
+      content.appendChild(pairStack);
+      content.appendChild(pairTable(caseItem));
+      renderCaseList();
+    }
+
+    function caseReviewState(caseItem) {
+      const states = caseRecords(caseItem).map((run) => feedbackByRun.get(run.run_id).status);
+      if (!states.length || states.every((state) => state === "unvisited")) return "unvisited";
+      if (states.some((state) => state === "changes_requested")) return "changes requested";
+      if (states.every((state) => state === "accepted")) return "accepted";
+      return "in progress";
+    }
+
+    function renderCaseList() {
+      const list = document.getElementById("case-list");
+      list.replaceChildren();
+      cases.forEach((caseItem, index) => {
+        const button = element("button", "case-button" + (index === currentCase ? " active" : ""));
+        button.type = "button";
+        const state = caseReviewState(caseItem);
+        append(button, element("strong", "", (unblinded ? caseItem.case_id : "Case " + (index + 1)) + " · " + state), element("small", "", caseItem.prompt));
+        button.addEventListener("click", () => renderCase(index));
+        list.appendChild(button);
+      });
+    }
+
+    function renderProgress() {
+      const reviews = [...feedbackByRun.values()];
+      const visited = reviews.filter((item) => item.status !== "unvisited").length;
+      document.getElementById("review-progress").textContent = visited + " of " + reviews.length + " runs reviewed";
+      renderCaseList();
+    }
+
+    function formatStatistic(stat) {
+      if (!stat || typeof stat !== "object") return "not available";
+      const parts = ["n=" + formatValue(stat.sample_count)];
+      parts.push("mean=" + formatValue(stat.mean));
+      parts.push("sample SD=" + formatValue(stat.sample_stddev));
+      const interval = stat.bootstrap_interval;
+      if (interval) {
+        parts.push("bootstrap interval=" + formatValue(interval.lower) + " to " + formatValue(interval.upper));
+      } else {
+        parts.push("bootstrap interval=not available");
+      }
+      return parts.join(" · ");
+    }
+
+    function summaryCard(title, body) {
+      const card = element("section", "card");
+      append(card, element("h2", "", title), body);
+      return card;
+    }
+
+    function renderCounts() {
+      const grid = element("div", "summary-grid");
+      Object.entries(benchmark.counts || {}).forEach(([name, value]) => {
+        const metric = element("div", "metric");
+        append(metric, element("span", "", name.replaceAll("_", " ")), element("strong", "", formatValue(value)));
+        grid.appendChild(metric);
+      });
+      if (!grid.children.length) grid.appendChild(element("p", "empty", "No denominator counts supplied."));
+      return summaryCard("Run counts and denominators", grid);
+    }
+
+    function renderQuality() {
+      const card = element("section", "card");
+      card.appendChild(element("h2", "", "Aggregate quality and paired comparison"));
+      if (!unblinded) {
+        card.appendChild(element("p", "empty", "Configuration-specific aggregates and directional details are hidden until explicit unblinding. Review pair-scoped A/B scores in Cases."));
+        return card;
+      }
+      const tableWrap = element("div", "table-wrap");
+      const table = element("table");
+      const thead = element("thead");
+      const header = element("tr");
+      ["Configuration", "Quality statistics"].forEach((text) => header.appendChild(element("th", "", text)));
+      thead.appendChild(header);
+      const tbody = element("tbody");
+      configurations.forEach((config) => {
+        const row = element("tr");
+        append(row, element("td", "", configLabel(config.configuration_id)), element("td", "", formatStatistic(config.quality.statistics)));
+        tbody.appendChild(row);
+      });
+      append(table, thead, tbody);
+      tableWrap.appendChild(table);
+      card.appendChild(tableWrap);
+      card.appendChild(element("p", "muted small", unblinded ? "Candidate − baseline: " + formatStatistic(benchmark.aggregates.paired_quality.statistics) : "Directional aggregate values are hidden until unblinding."));
+      return card;
+    }
+
+    function renderResources() {
+      const card = element("section", "card");
+      card.appendChild(element("h2", "", "Resource observations"));
+      if (!unblinded) {
+        card.appendChild(element("p", "empty", "Configuration-specific resource aggregates and directional quality/cost deltas are hidden until explicit unblinding."));
+        return card;
+      }
+      const tableWrap = element("div", "table-wrap");
+      const table = element("table");
+      const thead = element("thead");
+      const header = element("tr");
+      ["Configuration", "Resource", "Observed", "Missing", "Statistics"].forEach((text) => header.appendChild(element("th", "", text)));
+      thead.appendChild(header);
+      const tbody = element("tbody");
+      configurations.forEach((config) => {
+        const fields = config.resources;
+        ["duration_seconds", "input_tokens", "output_tokens", "total_tokens"].forEach((name) => {
+          const resource = fields[name] || {};
+          const row = element("tr");
+          [configLabel(config.configuration_id), name.replaceAll("_", " "), formatValue(resource.observed_count), formatValue(resource.missing_count), formatStatistic(resource.statistics || resource)].forEach((value) => row.appendChild(element("td", "", value)));
+          tbody.appendChild(row);
+        });
+      });
+      append(table, thead, tbody);
+      tableWrap.appendChild(table);
+      card.appendChild(tableWrap);
+      card.appendChild(element("p", "muted small", unblinded ? "Quality/cost comparison: " + formatValue(benchmark.quality_cost) : "Directional quality/cost deltas are hidden until unblinding."));
+      return card;
+    }
+
+    function renderMethods() {
+      const card = element("section", "card");
+      card.appendChild(element("h2", "", "Recorded methods"));
+      if (!unblinded) {
+        card.appendChild(element("p", "empty", "Method metadata was validated before rendering; role-bearing details are available after unblinding."));
+        return card;
+      }
+      const list = element("dl", "metadata");
+      Object.entries(benchmark.methods || {}).forEach(([name, value]) => {
+        append(list, element("dt", "", name.replaceAll("_", " ")), element("dd", "", formatValue(value)));
+      });
+      card.appendChild(list);
+      return card;
+    }
+
+    function renderReviewer() {
+      const card = element("section", "card");
+      append(card, element("h2", "", "Downloaded feedback metadata"), element("p", "muted small", "Edits remain in this page's memory until you download feedback.json. This page does not write to the workspace."));
+      const fields = element("div", "reviewer");
+      const metadataWrap = element("div");
+      if (unblinded) {
+        const nameWrap = element("div");
+        append(nameWrap, element("label", "", "Reviewer name"));
+        const name = element("input");
+        name.id = "reviewer-name";
+        name.value = reviewerNameState;
+        name.addEventListener("input", () => { reviewerNameState = name.value; });
+        nameWrap.appendChild(name);
+        fields.appendChild(nameWrap);
+        append(metadataWrap, element("label", "", "Reviewer metadata (JSON object)"));
+        const metadata = element("textarea");
+        metadata.id = "reviewer-metadata";
+        metadata.value = reviewerMetadataText;
+        metadata.addEventListener("input", () => { reviewerMetadataText = metadata.value; });
+        metadataWrap.appendChild(metadata);
+      } else {
+        metadataWrap.appendChild(element("p", "empty", "Existing reviewer identity and metadata are preserved but hidden until unblinding."));
+      }
+      fields.appendChild(metadataWrap);
+      card.appendChild(fields);
+      card.appendChild(element("div", "download-status", "", ""));
+      card.lastChild.id = "download-status";
+      return card;
+    }
+
+    function renderSummary() {
+      const content = document.getElementById("summary-content");
+      content.replaceChildren(renderCounts(), renderQuality(), renderResources(), renderMethods(), renderReviewer());
+    }
+
+    function findingNodes() {
+      return [
+        ["Regressions", benchmark.findings.regressions, true],
+        ["Flakiness", benchmark.findings.flakiness, false],
+        ["Non-discriminating criteria", benchmark.findings.non_discriminating_criteria, false]
+      ];
+    }
+
+    function sanitizedFinding(item) {
+      const copy = { ...item };
+      return copy;
+    }
+
+    function renderNotes() {
+      const content = document.getElementById("notes-content");
+      content.replaceChildren();
+      const notes = Array.isArray(benchmark.analyzer_notes) ? benchmark.analyzer_notes : [];
+      const notesCard = element("section", "card stack");
+      notesCard.appendChild(element("h2", "", "Analyzer notes"));
+      if (!unblinded && notes.length) {
+        notesCard.appendChild(element("p", "empty", notes.length + " analyzer note(s) recorded; causal text, evidence IDs, run IDs, pair IDs, and artifact paths are hidden until explicit unblinding."));
+      } else {
+        notes.forEach((note) => {
+          const item = element("article", "note");
+          append(item, element("h3", "", note.note_id), element("p", "", note.text), evidenceList(note.evidence));
+          notesCard.appendChild(item);
+        });
+        if (!notes.length) notesCard.appendChild(element("p", "empty", "No analyzer notes supplied."));
+      }
+      content.appendChild(notesCard);
+      findingNodes().forEach(([title, items, directional]) => {
+        const card = element("section", "card");
+        card.appendChild(element("h2", "", title));
+        if (!unblinded && items.length) {
+          card.appendChild(element("p", "empty", items.length + " finding(s) recorded; configuration IDs, run ID arrays, pair IDs, evidence, reasons, and directional details are hidden until explicit unblinding."));
+        } else if (!items.length) {
+          card.appendChild(element("p", "empty", "No findings recorded."));
+        } else {
+          items.forEach((item) => {
+            const pre = element("pre", "small", JSON.stringify(sanitizedFinding(item), null, 2));
+            card.appendChild(pre);
+          });
+        }
+        content.appendChild(card);
+      });
+    }
+
+    function reviewDocument() {
+      const errors = [];
+      visibleRuns.forEach((run) => {
+        const message = validateReview(run.run_id, true);
+        if (message) errors.push(publicRunLabel(run) + ": " + message);
+      });
+      const nameInput = document.getElementById("reviewer-name");
+      const metadataInput = document.getElementById("reviewer-metadata");
+      const name = (nameInput ? nameInput.value : reviewerNameState).trim();
+      let metadata = {};
+      if (!name) errors.push("Reviewer name must be nonempty.");
+      try {
+        metadata = JSON.parse(metadataInput ? metadataInput.value : reviewerMetadataText);
+        if (!metadata || Array.isArray(metadata) || typeof metadata !== "object") errors.push("Reviewer metadata must be a JSON object.");
+      } catch (error) {
+        errors.push("Reviewer metadata is not valid JSON: " + error.message);
+      }
+      if (errors.length) throw new Error(errors.join("\n"));
+      const reviews = visibleRuns.map((run) => {
+        const state = feedbackByRun.get(run.run_id);
+        if (state.status === "unvisited") return { run_id: run.run_id, status: state.status };
+        return { run_id: run.run_id, status: state.status, text: state.text };
+      });
+      return {
+        schema_version: "1.0",
+        suite_id: benchmark.suite_id,
+        reviewer: { name, metadata },
+        timestamp: new Date().toISOString(),
+        blind_mapping: {
+          scope: blindMapping.scope,
+          method: blindMapping.method,
+          assignments: blindMapping.assignments.map((item) => ({ ...item }))
+        },
+        reviews
+      };
+    }
+
+    function downloadFeedback() {
+      let value;
+      try {
+        value = reviewDocument();
+      } catch (error) {
+        activatePanel("summary-panel");
+        const status = document.getElementById("download-status");
+        if (status) status.textContent = error.message;
+        return;
+      }
+      const blob = new Blob([JSON.stringify(value, null, 2) + "\n"], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = element("a");
+      link.href = url;
+      link.download = "feedback.json";
+      link.click();
+      URL.revokeObjectURL(url);
+      const status = document.getElementById("download-status");
+      if (status) status.textContent = "Downloaded a schema-shaped feedback.json. No workspace write was attempted.";
+    }
+
+    function activatePanel(id) {
+      document.querySelectorAll(".panel").forEach((panel) => panel.classList.toggle("active", panel.id === id));
+      document.querySelectorAll(".tab").forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.panel === id)));
+      if (id === "summary-panel") renderSummary();
+      if (id === "notes-panel") renderNotes();
+    }
+
+    function renderHeader() {
+      document.getElementById("suite-line").textContent = unblinded
+        ? "Suite " + benchmark.suite_id + " · benchmark " + benchmark.benchmark_id + " · schema " + embedded.schema_version + " · in-memory review"
+        : "Blinded paired review · schema " + embedded.schema_version + " · in-memory review";
+    }
+
+    function unblindReview() {
+      if (unblinded) return;
+      if (!globalThis.confirm("Reveal configuration labels, roles, IDs, digests, run and pair IDs, errors, findings, evidence paths, and directional comparison details? This review cannot be re-blinded in the current page.")) return;
+      unblinded = true;
+      const button = document.getElementById("unblind");
+      button.textContent = "Configurations unblinded";
+      button.disabled = true;
+      renderHeader();
+      renderCase(currentCase);
+      renderSummary();
+      renderNotes();
+    }
+
+    renderHeader();
+    document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => activatePanel(tab.dataset.panel)));
+    document.getElementById("unblind").addEventListener("click", unblindReview);
+    document.getElementById("download").addEventListener("click", downloadFeedback);
+    renderCaseList();
+    renderProgress();
+    renderCase(0);
+    renderSummary();
+    renderNotes();
+  </script>
+</body>
+</html>
