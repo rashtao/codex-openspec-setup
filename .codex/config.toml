@@ -1,11 +1,5 @@
+compaction_threshold = 0.60
+
 [agents]
 enabled = true
 max_concurrent_threads_per_session = 25
-
-#[skills]
-#disabled = ["skill-creator"]
-#
-#[[skills.config]]
-##name = "skill-creator"
-#path = "/home/michele/.codex/skills/.system/skill-creator/SKILL.md"
-#enabled = false
