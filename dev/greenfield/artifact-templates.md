@@ -1,31 +1,25 @@
-# Exact artifact templates
+# Exact artifact and console templates
 
 These templates are normative for the future product skills. Angle-bracketed
-values are placeholders. Optional fields are explicitly marked; all other
-fields and headings are required. Persisted paths are always relative to the
-repository root and use `/` separators.
+values are placeholders. Optional content is explicitly marked; every other
+field and heading is required. Persisted paths are repository-relative and use
+`/` separators.
 
-The future `product-shared/references/artifact-contracts.md` renders the
-normative templates specified by this design contract. It is the only installed
-owner of product-workflow artifact templates.
+The future `product-definition/assets/artifact-templates.md` owns the
+identifier, discovery, baseline, and definition-console sections. The future
+`product-delivery/assets/artifact-templates.md` owns the delivery, OpenSpec
+handoff, and delivery-console sections. No installed shared package exists.
 
-`schema_version: 1` is the only supported product-artifact schema version.
-Encountering any other value stops the current product action before mutation.
-Product skills never infer or perform an automatic schema migration.
+`schema_version: 1` is the only supported schema version. A different value
+blocks the current action before mutation; product skills do not migrate
+artifacts.
 
 ## Product bundle layout
 
-This section is the sole normative owner of the product bundle layout. Other
-documents cross-reference it and do not restate any subtree.
+This is the sole normative product bundle layout:
 
 ```text
 docs/product/<product-id>/
-  .workflow/
-    state.yaml
-    pending-delivery.yaml             # optional while confirmation is pending
-    receipts/
-      baseline-review.yaml
-
   discovery/
     map.md
     decisions.md
@@ -52,14 +46,14 @@ docs/product/<product-id>/
       slice-NNN-short-slug.md
 ```
 
-`.workflow/` is the control plane. Discovery is mutable until baseline
-approval, the approved baseline and archived slices are user-protected, and the
-roadmap plus one active slice support forward delivery. `delivery/` is created
-by `roadmap`, not by discovery initialization.
+Discovery and baseline exist before delivery. The first roadmap accepts the
+current baseline. The roadmap and at most one direct-child active slice are
+mutable delivery records. Archived slices are user-protected. There is no
+product control-plane subtree.
 
 ## Identifier legend
 
-Every discovery document begins with, or links to, this legend:
+Every discovery document begins with this legend:
 
 ```markdown
 ## Identifier legend
@@ -73,18 +67,15 @@ Every discovery document begins with, or links to, this legend:
 | `FOG` | Area not yet clear enough to formulate as a precise question |
 | `OOS` | Explicitly out-of-scope subject |
 | `SRC` | Evidence source supporting one or more facts |
-| `REQ` | Frozen first-release baseline requirement |
+| `REQ` | First-release baseline requirement |
 ```
 
-Discovery and requirement identifiers are zero-padded to four digits.
-Canonical examples are `FACT-0001` and `REQ-0042`. Counters only increase; an
-allocated ID is never reused. A delivery slice number is a separate bounded
-sequence, not an identifier in those namespaces. Its canonical filename uses
-exactly three digits, `001` through `999`; this difference is intentional. A
-requested slice number outside that range is rejected. Delivery slice identity
-exists only in its canonical filename.
+Discovery and requirement identifiers use four digits, such as `FACT-0001`
+and `REQ-0042`. Scan existing artifacts and the manifest requirement index,
+then allocate one above the greatest prior value. Never reuse an ID. A delivery
+slice uses its separate three-digit filename sequence.
 
-## Discovery artifacts
+## Definition artifacts
 
 ### `discovery/map.md`
 
@@ -97,9 +88,9 @@ exists only in its canonical filename.
 
 ## First-release boundary
 
-- Product: <one-sentence product description or `FOG-####`>
-- Intended first-release outcome: <outcome or `UNK-####`>
-- Explicit exclusions: <comma-separated `OOS-*` IDs or `none recorded`>
+- Product: <one-sentence description or FOG-####>
+- Intended outcome: <outcome or UNK-####>
+- Explicit exclusions: <comma-separated OOS-* IDs or `none recorded`>
 
 ## Coverage map
 
@@ -115,16 +106,16 @@ exists only in its canonical filename.
 | 8 | External dependencies | <status> | <IDs or `none`> | <IDs or `none`> |
 | 9 | Security, privacy, and compliance | <status> | <IDs or `none`> | <IDs or `none`> |
 | 10 | Performance, reliability, and operations | <status> | <IDs or `none`> | <IDs or `none`> |
-| 11 | Failure handling and recovery | <status> | <IDs or `none`> | <IDs or `none`> |
+| 11 | Failure handling and product recovery | <status> | <IDs or `none`> | <IDs or `none`> |
 | 12 | Exclusions, assumptions, and unknowns | <status> | <IDs or `none`> | <IDs or `none`> |
 
 ## Current frontier
 
-- Next round: <integer>
-- Independent questions ready now: <3–8 IDs/summaries; every ready question when fewer than 3>
-- Dependent questions waiting: <IDs and dependencies, or `none`>
-- Synthesis assessment: <not-recommended\|recommend-ask-user\|user-requested>
-- Assessment rationale: <concise evidence-based explanation>
+- Latest incomplete round: <Round N or `none`>
+- Independent questions ready now: <IDs and summaries or `none`>
+- Dependent questions waiting: <questions and dependencies or `none`>
+- Baseline readiness: <not-ready\|ready-with-unknowns\|ready>
+- Rationale: <concise evidence-based explanation>
 
 ## Confirmed facts
 
@@ -144,7 +135,7 @@ exists only in its canonical filename.
 - Rationale: <why planning can proceed this way>
 - Risk if false: <impact>
 - Validation need: <future evidence or `none`>
-- Blocking impact: <none\|delivery-slice:<outcome description>\|release>
+- Blocking impact: <none\|delivery-slice:<outcome>\|release>
 - Related IDs: <IDs or `none`>
 
 ## Known unknowns
@@ -158,7 +149,7 @@ exists only in its canonical filename.
 - Evidence so far: <IDs or `none`>
 - Risk: <high\|medium\|low>
 - Owner: <user\|product team\|delivery slice\|external party\|unknown>
-- Intended slice: <candidate outcome description or `not-yet-assigned` or `not-applicable`>
+- Intended slice: <candidate outcome or `not-yet-assigned` or `not-applicable`>
 - Resolution: <answer and evidence, or `unresolved`>
 - Related IDs: <IDs or `none`>
 
@@ -178,12 +169,15 @@ exists only in its canonical filename.
 - Exclusion: <what is excluded>
 - Horizon: <first-release\|product>
 - Rationale: <why>
-- Approved by: user
+- Decided by: user
 - Related IDs: <IDs or `none`>
 ```
 
-Resolved unknowns stay in place; their IDs are not converted into facts or
-decisions. New supporting facts or decisions receive their own IDs.
+Resolved unknowns stay in place. Their IDs are not converted into facts or
+decisions; supporting facts and decisions receive their own IDs.
+
+Every repeatable record section uses `None recorded` when empty. Example
+records may repeat as needed and are not required during initialization.
 
 ### `discovery/decisions.md`
 
@@ -226,23 +220,21 @@ decisions. New supporting facts or decisions receive their own IDs.
 - Locator: <repository-relative path, HTTPS URL, or `user statement in round N`>
 - Accessed at: <RFC3339 UTC>
 - Supports: <FACT-* IDs>
-- Supported claim: <narrow paraphrase of what this source establishes>
+- Supported claim: <narrow paraphrase>
 - Limitations: <caveats or `none identified`>
 ```
 
-Only this artifact may persist an HTTPS URL. It must never persist local
-absolute filesystem paths.
+Only `sources.md` may persist an HTTPS URL. No product artifact persists an
+absolute local path.
 
 ### `discovery/interview-log.md`
 
-Completed interview rounds are immutable. Before questions are returned, append
-the complete asked round, set `condition` to `awaiting-interview-response`, set
-`discovery.awaiting_round` to its number, and write the exact pending markers.
-Only that pending round may subsequently replace those markers with the
-verbatim response, recorded outcomes, and frontier change.
-
 ```markdown
 # Interview log — <product name>
+
+## Identifier legend
+
+<exact identifier legend table>
 
 ## Round 1 — <RFC3339 UTC>
 
@@ -250,34 +242,29 @@ verbatim response, recorded outcomes, and frontier change.
 
 1. [<coverage area>] <question>
    - Recommendation: <answer and rationale, or `none`>
-2. <repeat for all questions>
+2. <repeat for three through five independent questions, or every ready question when fewer than three exist>
 
-### Response status
+### Response
 
-pending-response
-
-### User response
-
-PENDING RESPONSE
-
-### Recorded outcomes
-
-PENDING RESPONSE
-
-### Frontier change
-
-PENDING RESPONSE
+Unanswered
 ```
 
-Completing the pending round changes `Response status` to `recorded`, replaces
-the three pending markers with exactly:
+The latest round whose response is exactly `Unanswered` is the one incomplete
+round. It is the only persisted signal that an answer is expected. Do not
+append a second incomplete round.
+
+Recording an answer replaces that response section with:
 
 ```markdown
-### User response
+### Response
+
+Recorded at <RFC3339 UTC>
+
+#### User response
 
 <verbatim response supplied for this round>
 
-### Recorded outcomes
+#### Recorded outcomes
 
 - Facts: <FACT-* or `none`>
 - Decisions: <PDEC-* or `none`>
@@ -287,22 +274,22 @@ the three pending markers with exactly:
 - Exclusions: <OOS-* or `none`>
 - Sources: <SRC-* or `none`>
 
-### Frontier change
+#### Frontier change
 
 - Newly ready: <questions or `none`>
 - Waiting: <questions and dependencies or `none`>
-- Synthesis assessment: <not-recommended\|recommend-ask-user\|user-requested>
+- Baseline readiness: <not-ready\|ready-with-unknowns\|ready>
 ```
 
-The same write clears `discovery.awaiting_round`, advances
-`discovery.next_round`, and sets the next valid condition.
+After recording, the round is immutable. A new round, if any, is appended after
+all discovery artifacts have been updated.
 
 ## Baseline artifacts
 
 ### Requirement block
 
-Every requirement appears exactly once, in either a domain file or a named
-cross-domain section. The exact block is:
+Every active requirement appears exactly once in a domain file or named
+cross-domain section:
 
 ```markdown
 ### REQ-0042 — <neutral requirement title>
@@ -317,13 +304,13 @@ cross-domain section. The exact block is:
 
 **Related requirements:** <REQ-* IDs or `None`>
 
-**Source IDs:** <FACT-*, PDEC-*, ASM-*, UNK-* IDs>
+**Source IDs:** <FACT-*, PDEC-*, ASM-*, or UNK-* IDs>
 
 **Assumptions:** <ASM-* IDs or `None`>
 ```
 
-Requirements do not contain priorities, implementation plans, Given/When/Then
-scenarios, OpenSpec change IDs, or delivery status.
+Do not put priorities, implementation plans, Given/When/Then scenarios,
+OpenSpec change IDs, or delivery status in a baseline requirement.
 
 ### `baseline/manifest.yaml`
 
@@ -332,40 +319,51 @@ schema_version: 1
 product:
   id: "<product-id>"
   name: "<product-name>"
-release: "first-usable-release"
-status: "<draft|frozen>"
-created_at: "<RFC3339 UTC>"
-frozen_at: null # RFC3339 UTC after approval
-approval:
-  method: null # explicit-skill-invocation after approval
-  approved_at: null # RFC3339 UTC after approval
-  review_receipt: null # repo-relative path after review
-highest_requirement_id: 0
-files:
-  - "docs/product/<product-id>/baseline/actors-and-journeys.md"
-  - "docs/product/<product-id>/baseline/assumptions-and-questions.md"
-  - "docs/product/<product-id>/baseline/charter.md"
-  - "docs/product/<product-id>/baseline/decisions.md"
-  - "docs/product/<product-id>/baseline/dependencies.md"
-  - "docs/product/<product-id>/baseline/domain-map.md"
-  - "docs/product/<product-id>/baseline/domains/<domain-id>.md"
-  - "docs/product/<product-id>/baseline/glossary.md"
-  - "docs/product/<product-id>/baseline/manifest.yaml"
-  - "docs/product/<product-id>/baseline/qualities.md"
+  release: "first-usable-release"
+timestamps:
+  created_at: "<RFC3339 UTC>"
+  updated_at: "<RFC3339 UTC>"
+artifacts:
+  - path: "docs/product/<product-id>/baseline/actors-and-journeys.md"
+    kind: "actors-and-journeys"
+  - path: "docs/product/<product-id>/baseline/assumptions-and-questions.md"
+    kind: "assumptions-and-questions"
+  - path: "docs/product/<product-id>/baseline/charter.md"
+    kind: "charter"
+  - path: "docs/product/<product-id>/baseline/decisions.md"
+    kind: "decisions"
+  - path: "docs/product/<product-id>/baseline/dependencies.md"
+    kind: "dependencies"
+  - path: "docs/product/<product-id>/baseline/domain-map.md"
+    kind: "domain-map"
+  - path: "docs/product/<product-id>/baseline/domains/<domain-id>.md"
+    kind: "domain"
+  - path: "docs/product/<product-id>/baseline/glossary.md"
+    kind: "glossary"
+  - path: "docs/product/<product-id>/baseline/manifest.yaml"
+    kind: "manifest"
+  - path: "docs/product/<product-id>/baseline/qualities.md"
+    kind: "qualities"
 requirements:
   - id: "REQ-0001"
+    status: "active"
     path: "docs/product/<product-id>/baseline/domains/<domain-id>.md"
     heading: "REQ-0001 — <title>"
+    source_ids: ["PDEC-0001", "FACT-0002"]
+  - id: "REQ-0002"
+    status: "retired"
+    path: null
+    heading: null
+    source_ids: []
 ```
 
-`files` and `requirements` are lexically sorted by repository-relative path and
-ID respectively. Domain-file entries repeat once per actual domain. This
-manifest is the sole owner of the `REQ-*` high-water mark and review-receipt
-path. Synthesis initializes `approval.review_receipt` to `null`. Review changes
-only that field in the candidate manifest and writes the named receipt.
-Discovery invalidation resets only that field. Approval changes the remaining
-approval and freeze fields. The approve invocation attests that the
-approval-ready draft was unchanged after review.
+`artifacts` is sorted by path and contains one entry per actual baseline
+file; domain entries repeat per domain. `requirements` is sorted by ID. Every
+active entry resolves to one exact requirement block, and its `source_ids`
+match that block. Retired entries preserve identity without owning a block.
+`created_at` survives refresh; `updated_at` records the latest completed
+baseline write. The manifest contains no lifecycle, delivery, or user-decision
+metadata.
 
 ### Baseline Markdown skeletons
 
@@ -487,7 +485,7 @@ deployment, service, team, or storage boundaries.
 
 Each section contains zero or more exact requirement blocks. A section with no
 first-release requirement says `No additional first-release requirement` and
-links the supporting `OOS-*`, `UNK-*`, or decision IDs.
+links the supporting OOS-*, UNK-*, or PDEC-* IDs.
 ```
 
 `baseline/dependencies.md`:
@@ -538,7 +536,7 @@ links the supporting `OOS-*`, `UNK-*`, or decision IDs.
 
 ## Release-blocking unknowns
 
-`None` is required for an approval-ready baseline.
+<UNK-* entries or `None`>
 ```
 
 `baseline/decisions.md`:
@@ -553,66 +551,6 @@ links the supporting `OOS-*`, `UNK-*`, or decision IDs.
 - Related requirements:
 - Source record: docs/product/<product-id>/discovery/decisions.md#<anchor>
 ```
-
-## Control-plane artifacts
-
-### `.workflow/receipts/baseline-review.yaml`
-
-```yaml
-schema_version: 1
-product: "<product-id>"
-manifest: "docs/product/<product-id>/baseline/manifest.yaml"
-reviewed_at: "<RFC3339 UTC>"
-status: "<approval-ready|issues>"
-checks:
-  template_compliance: "<pass|fail>"
-  requirement_identity: "<pass|fail>"
-  source_traceability: "<pass|fail>"
-  terminology_consistency: "<pass|fail>"
-  contradiction_and_duplicate_scan: "<pass|fail>"
-  journey_and_domain_coherence: "<pass|fail>"
-  unknown_treatment: "<pass|fail>"
-  repository_relative_paths: "<pass|fail>"
-issues:
-  - code: "<stable-code>"
-    location: "<repo-relative-path or artifact ID>"
-    message: "<actionable problem>"
-warnings:
-  - "<non-blocking observation>"
-```
-
-For an approval-ready receipt, every check is `pass` and `issues` is `[]`.
-Warnings never hide a failed check. Each review replaces the latest receipt.
-Approval retains it as the manifest's named receipt. The approve invocation is
-the user's attestation that the draft was not changed after this review; the
-receipt intentionally carries no content-binding value.
-
-### `.workflow/pending-delivery.yaml`
-
-This optional file exists only while a roadmap or slice confirmation is
-pending. Its exact schema is:
-
-```yaml
-schema_version: 1
-status: "pending-confirmation"
-action: "<roadmap|slice>"
-created_at: "<RFC3339 UTC>"
-product_root: "docs/product/<product-id>"
-targets:
-  - path: "<repository-relative target path>"
-    operation: "<create|replace>"
-    content: |
-      <complete exact target file content>
-```
-
-A roadmap preview has exactly one target at
-`docs/product/<product-id>/delivery/roadmap.md`, using `operation: "create"`
-when the roadmap is absent and `operation: "replace"` otherwise. A slice
-preview has exactly two targets in order: the new canonical active-slice path
-with `operation: "create"`, then the roadmap path with `operation: "replace"`.
-Confirmation writes exactly `targets[].content`, then removes this file and
-clears the pending condition. Rejection changes no delivery artifact, removes
-this file, and clears the condition.
 
 ## Delivery artifacts
 
@@ -634,12 +572,12 @@ this file, and clears the condition.
 ### Candidate — <outcome title>
 
 - Outcome: <independently demonstrable user or system outcome>
-- Likely requirements: <only REQ-* rows that are not delivered or are partial>
-- Sequencing rationale: <why this outcome should occur at this point>
+- Likely requirements: <only uncovered or partial REQ-* IDs>
+- Sequencing rationale: <why this outcome should occur now>
 ```
 
-The coverage table contains every baseline requirement exactly once and uses
-only these forms:
+The coverage table contains every active baseline requirement exactly once and
+uses only:
 
 ```text
 NOT DELIVERED
@@ -647,13 +585,13 @@ PARTIALLY DELIVERED (<comma-separated canonical slice names>)
 DELIVERED (<comma-separated canonical slice names>)
 ```
 
-Candidate headings are deliberately unnumbered. Candidate entries contain no
-readiness, execution, dependency, blocker, expected-change, or completion
-field. The initial roadmap sets every requirement to `NOT DELIVERED`.
+Candidate headings are unnumbered. Candidate entries contain no execution or
+readiness fields. The first roadmap sets every row to `NOT DELIVERED`;
+subsequent `roadmap` invocations preserve coverage values.
 
 ### Active and archived `delivery/slice-NNN-short-slug.md`
 
-````markdown
+`````markdown
 ---
 schema_version: 1
 kind: product-delivery-slice
@@ -677,7 +615,7 @@ roadmap: "docs/product/<product-id>/delivery/roadmap.md"
 | REQ-0002 | complete | <why the whole baseline obligation is included> |
 
 Only `partial` and `complete` are allowed. Requirements already declared
-`DELIVERED (...)` in the pre-selection roadmap never appear here.
+`DELIVERED (...)` in the pre-selection roadmap do not appear.
 
 ## In scope
 
@@ -689,87 +627,219 @@ Only `partial` and `complete` are allowed. Requirements already declared
 
 ## Planning context
 
-- Frozen baseline: <relevant requirement paths and concise context>
+- Baseline: <relevant requirement paths and concise context>
 - Archived product slices: <paths and implications, or `none`>
 - Canonical OpenSpec specs: <paths and implications, or `none`>
 - Archived OpenSpec changes: <paths and implications, or `none`>
 - Current code: <paths and implications, or `none`>
 
 ## Proposal prompt
-````
-
-The content under `## Proposal prompt` is the fully rendered [normative proposal prompt](integration-and-handoffs.md#normative-proposal-prompt); this design cross-reference is not persisted.
-
-The archived product slice uses this exact template because `archive` moves the
-active file without changing it.
-
-## Normative delivery console responses
-
-### Roadmap preview
 
 ```text
-Proposed roadmap change for `docs/product/<product-id>/delivery/roadmap.md`:
-<complete proposed file or unified change>
-
-Confirm in this session to write this roadmap. No delivery artifact has been
-changed. Pending confirmation is stored in
-`docs/product/<product-id>/.workflow/pending-delivery.yaml`.
+<fully rendered normative OpenSpec proposal handoff>
 ```
+`````
 
-### Slice preview
+`archive` moves this file without changing it, so the archived form uses the
+same template.
+
+## Normative OpenSpec proposal handoff
+
+Render every placeholder before persisting and printing this prompt:
+
+`````text
+$openspec-propose
+
+Create exactly one planning-only OpenSpec change for the greenfield product
+delivery slice below. This is a fresh session; derive context from the named
+repository artifacts and do not rely on prior conversation.
+
+Required change name: slice-NNN-short-slug
+Product bundle: docs/product/<product-id>
+Accepted baseline: docs/product/<product-id>/baseline/manifest.yaml
+Active product slice:
+docs/product/<product-id>/delivery/slice-NNN-short-slug.md
+
+Read the entire active product slice, the current code, and the canonical
+`openspec/specs/` needed to plan this outcome. Create exactly
+`slice-NNN-short-slug` using the installed OpenSpec schema. Produce every
+planning artifact required by that schema, including detailed behavioral
+requirements, scenarios, design, and tasks. Preserve the slice's in-scope and
+out-of-scope boundaries and keep it vertical and independently demonstrable.
+
+Do not implement code, apply tasks, verify behavior, synchronize canonical
+specs, archive the change, create another change, or edit anything under
+`docs/product/<product-id>/`. If the required name cannot be used or the
+outcome cannot form one coherent change, stop and report the evidence.
+
+After proposal creation, the user runs the external workflow for exactly
+`slice-NNN-short-slug`:
+
+`$openspec-apply-change slice-NNN-short-slug`
+`$openspec-verify-change slice-NNN-short-slug`
+`$openspec-archive-change slice-NNN-short-slug`
+
+Then run:
+`$product-delivery archive`
+`````
+
+The product skill prints this handoff but never invokes it. External OpenSpec
+actions run in fresh sessions and retain their own contracts.
+
+## Exact console envelopes
+
+Every response uses the four common sections in this order. The action-specific
+section appears between `Summary` and `Next`.
 
 ```text
-Proposed active slice: `slice-NNN-short-slug`
+<Action>: <done|needs-input|blocked>
 
-Requirement coverage:
-- REQ-0001: partial — <precise boundary>
-- REQ-0002: complete — <precise boundary>
+Changed:
+- <repository-relative path and operation, or `none`>
 
-In scope:
-- <item>
+Summary:
+- <action-specific result>
 
-Out of scope:
-- <item>
+<Action-specific section>
 
-Planning context:
-- <source and implication>
-
-Proposal prompt:
-<complete rendered prompt>
-
-Roadmap change:
-<complete proposed change>
-
-Confirm in this session to write the active slice and roadmap update. No
-delivery artifact has been changed. Pending confirmation is stored in
-`docs/product/<product-id>/.workflow/pending-delivery.yaml`.
+Next:
+<exact skill invocation or external OpenSpec step>
 ```
 
-### No coherent slice
+Use `done` when the action completed or delivery is already complete,
+`needs-input` when a user answer or product decision is required, and
+`blocked` when repository evidence or a workflow gate prevents the action.
+List every actual changed path; never claim a write from response text alone.
+
+### Discover
 
 ```text
-Warning: the remaining uncovered or partial requirements do not form one
-coherent vertical slice. No files were changed.
+Discover: <done|needs-input|blocked>
 
-$product-delivery roadmap
+Changed:
+- `<path>` (<created|updated>)
+<repeat for each changed discovery file, or `- none`>
+
+Summary:
+- Product: <product-id or unresolved>
+- Recorded: <round number and outcome IDs, or `none`>
+- Coverage: <covered count>/12; <partial count> partial; <deferred count> explicitly deferred
+
+Questions:
+1. [<coverage area>] <question>
+   Recommendation: <answer and rationale, or `none`>
+<repeat, or `- none`>
+
+Next:
+<$product-definition discover, $product-definition discover <product-id>, $product-definition baseline, or $product-delivery roadmap>
 ```
 
-### Missing same-name OpenSpec archive
+When questions are present, `Next` is
+`$product-definition discover`; the user includes the complete answers with
+that invocation. When no question remains, `Next` is
+`$product-definition baseline`.
+
+### Baseline
 
 ```text
-No archived OpenSpec change was found for `slice-NNN-short-slug`.
-Complete and archive the OpenSpec change named `slice-NNN-short-slug`, then
-retry `$product-delivery archive`.
+Baseline: <done|needs-input|blocked>
+
+Changed:
+- `<path>` (<created|replaced|removed>)
+<repeat for every changed baseline file, or `- none`>
+
+Summary:
+- <baseline created or refreshed and self-review passed, precise missing decision, or gate>
+
+Counts:
+- Active requirements: <integer>
+- Retired requirement IDs: <integer>
+- Included unknowns: <integer>
+- Excluded unknowns: <integer>
+- Release-blocking unknowns: <integer>
+- Self-review repairs: <integer>
+
+Next:
+<$product-delivery roadmap or $product-definition discover>
 ```
 
-### Successful product archive
+### Roadmap
 
 ```text
-$product-delivery slice
+Roadmap: <done|needs-input|blocked>
+
+Changed:
+- `docs/product/<product-id>/delivery/roadmap.md` (<created|replaced>)
+<or `- none`>
+
+Summary:
+- <initial roadmap created and baseline accepted, roadmap candidates revised, or gate>
+
+Candidates:
+1. <outcome> — <likely REQ-* IDs> — <sequencing rationale>
+<repeat, or `- none`>
+
+Next:
+<$product-delivery slice, $product-definition baseline, or $product-delivery roadmap>
 ```
 
-### Delivery completion
+### Slice
+
+`````text
+Slice: <done|needs-input|blocked>
+
+Changed:
+- `docs/product/<product-id>/delivery/slice-NNN-short-slug.md` (created)
+- `docs/product/<product-id>/delivery/roadmap.md` (replaced)
+<or `- none`>
+
+Summary:
+- <slice name and outcome, delivery complete, no coherent slice, or gate>
+
+Coverage:
+- REQ-0001: partial — <precise remaining boundary>
+- REQ-0002: complete — <why the full obligation is included>
+<repeat, or `- none`>
+
+Proposal:
+```text
+<complete rendered normative OpenSpec proposal handoff>
+```
+<or `none` without a code fence>
+
+Next:
+<$openspec-propose using the proposal above, $product-delivery roadmap, Delivery complete., or one exact external OpenSpec step>
+`````
+
+On successful creation, `Next` is:
 
 ```text
-Delivery is complete.
+$openspec-propose using the proposal above in a fresh session
 ```
+
+### Archive
+
+```text
+Archive: <done|needs-input|blocked>
+
+Changed:
+- `<source>` → `<destination>` (moved unchanged)
+<or `- none`>
+
+Summary:
+- <slice archived unchanged, missing OpenSpec archive, destination conflict, or gate>
+
+Archive:
+- Source: <repository-relative path or `none`>
+- Destination: <repository-relative path or `none`>
+- OpenSpec archives: <matching direct-child basenames or `none`>
+
+Next:
+<$product-delivery slice, $product-delivery archive, one exact external OpenSpec step, or Delivery complete.>
+```
+
+When the matching OpenSpec archive is absent, `Next` is the exact external
+step `$openspec-archive-change <slice-name>`; the summary says to invoke
+`$product-delivery archive` after that external action succeeds. A successful
+move uses `$product-delivery slice` while any roadmap row remains uncovered
+or partial, and `Delivery complete.` otherwise.

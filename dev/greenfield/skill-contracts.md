@@ -1,106 +1,75 @@
 # Skill contracts
 
-## Future package layout
+## Package layout
+
+The future implementation adds only these two packages:
 
 ```text
 release/.codex/skills/
-  product-discovery/
-    SKILL.md
-    agents/
-      openai.yaml
-  product-baseline/
-    SKILL.md
-    agents/
-      openai.yaml
-  product-delivery/
-    SKILL.md
-    agents/
-      openai.yaml
-  product-shared/
+  product-definition/
     SKILL.md
     agents/
       openai.yaml
     references/
-      workflow-contract.md
-      artifact-contracts.md
-      openspec-integration.md
-      discovery-and-baseline-validation.md
-      operating-assumptions.md
-
-release/.codex/agents/
-  product-discovery.toml
-  product-baseline.toml
-  product-delivery.toml
+      action-contract.md
+    assets/
+      artifact-templates.md
+  product-delivery/
+    SKILL.md
+    agents/
+      openai.yaml
+    references/
+      action-contract.md
+    assets/
+      artifact-templates.md
 ```
 
-`product-shared` is passive, has no custom-agent declaration or executable
-helper, and contains only the files shown in this layout. Do not create an
-`assets/` directory until a future design names a concrete asset and an action
-that consumes it.
+Each package owns the action contract and templates it emits. Do not add a
+shared skill, custom agent declaration, script, router, generated helper,
+package README, or workflow-control file.
 
-## Exact frontmatter selection contracts
+The compact `SKILL.md` files act as indexes into selectively loaded references
+and assets, following [OpenAI's progressive-disclosure
+guidance](https://developers.openai.com/codex/skills) and the
+[small, composable, user-controlled approach](https://github.com/mattpocock/skills).
 
-### `product-discovery`
+Use GPT-5.6 Sol in Codex CLI. High reasoning is the normal setting; xhigh is
+recommended when invoking `baseline`. These are user-selected runtime
+settings, not package metadata or enforced routes.
+
+## Exact selection contracts
+
+`product-definition/SKILL.md` begins:
 
 ```yaml
 ---
-name: product-discovery
-description: Explicit-only workflow for initializing and interviewing a genuinely greenfield first-release product. Use only when the user explicitly invokes $product-discovery with init, interview, or status. Never select it for an unqualified request to brainstorm, explore, gather requirements, or plan an OpenSpec change.
+name: product-definition
+description: Explicit-only greenfield product discovery and first-release baseline maintenance. Use only when the user invokes $product-definition discover or $product-definition baseline. Never select it for ordinary brainstorming, requirements, planning, implementation, or OpenSpec work.
 ---
 ```
 
-### `product-baseline`
-
-```yaml
----
-name: product-baseline
-description: Explicit-only workflow for synthesizing, reviewing, approving, or inspecting an immutable first-usable-release product baseline from persisted discovery artifacts. Use only when the user explicitly invokes $product-baseline with synthesize, review, approve, or status. Never select it implicitly for ordinary requirements, documentation, or OpenSpec planning work.
----
-```
-
-### `product-delivery`
+`product-delivery/SKILL.md` begins:
 
 ```yaml
 ---
 name: product-delivery
-description: Explicit-only forward delivery workflow for roadmapping a frozen greenfield product baseline, preparing one vertical slice, archiving its unchanged slice record after the matching external OpenSpec workflow, or reporting the next step. Use only when the user explicitly invokes $product-delivery with roadmap, slice, archive, or status. Never select it implicitly for ordinary OpenSpec proposal, implementation, verification, synchronization, or archive requests.
+description: Explicit-only roadmap, vertical-slice, and product-record archive workflow for a defined greenfield product. Use only when the user invokes $product-delivery roadmap, $product-delivery slice, or $product-delivery archive. Never select it for ordinary roadmapping, implementation, review, correction, or OpenSpec work.
 ---
 ```
 
-### `product-shared`
-
-```yaml
----
-name: product-shared
-description: Passive support package containing product-workflow references, including normative artifact templates. Never invoke it as a user-facing action.
----
-```
-
-`policy.allow_implicit_invocation: false` is the enforceable activation
-boundary for all four packages. Frontmatter descriptions repeat the semantic
-exclusions as defense in depth. A natural-language request without the exact
-public skill token remains outside the activation boundary.
+Selection is enforced by `policy.allow_implicit_invocation: false`; the
+frontmatter descriptions state the same boundary for clarity. No natural
+language request without the exact skill token activates either package.
 
 ## Exact interface metadata
 
-`product-discovery/agents/openai.yaml`:
+`product-definition/agents/openai.yaml`:
 
 ```yaml
 interface:
-  display_name: "Product Discovery"
-  short_description: "Initialize and interview a greenfield product."
-  default_prompt: "Use $product-discovery to initialize or interview the requested greenfield product."
-policy:
-  allow_implicit_invocation: false
-```
-
-`product-baseline/agents/openai.yaml`:
-
-```yaml
-interface:
-  display_name: "Product Baseline"
-  short_description: "Synthesize, review, and freeze a product baseline."
-  default_prompt: "Use $product-baseline to synthesize, review, approve, or inspect the persisted product baseline."
+  display_name: "Product Definition"
+  short_description: "Discover and baseline a greenfield product."
+  default_prompt: "Use $product-definition discover to begin defining this greenfield product."
 policy:
   allow_implicit_invocation: false
 ```
@@ -110,294 +79,394 @@ policy:
 ```yaml
 interface:
   display_name: "Product Delivery"
-  short_description: "Plan and advance one greenfield delivery slice."
-  default_prompt: "Use $product-delivery to roadmap, prepare, archive, or inspect the next product delivery step."
+  short_description: "Roadmap, slice, and archive product delivery."
+  default_prompt: "Use $product-delivery roadmap to begin delivering this defined product."
 policy:
   allow_implicit_invocation: false
 ```
 
-`product-shared/agents/openai.yaml`:
+Both short descriptions are between 25 and 64 characters. Metadata contains no
+model, reasoning, dependency, or routing configuration.
 
-```yaml
-interface:
-  display_name: "Product Shared"
-  short_description: "Index passive product workflow references."
-  default_prompt: "Use $product-shared only as a passive index for product-workflow references; do not execute it as an action."
-policy:
-  allow_implicit_invocation: false
-```
+## Compact `SKILL.md` bodies
 
-The four `short_description` values are respectively 46, 50, 47, and 42
-characters. Every value must remain between 25 and 64 characters inclusive.
-
-## User-facing modes
-
-### Discovery
-
-```text
-$product-discovery init <product-id>
-$product-discovery interview
-$product-discovery status
-```
-
-- `init` checks greenfield eligibility and creates discovery/control artifacts.
-- `interview` asks one breadth-first round, or records the immediately pending
-  response and recalculates the frontier.
-- `status` is read-only and reports coverage, unknowns, blockers, and the next
-  explicit invocation.
-- A missing or unknown mode prints usage and performs no fallback action.
-
-### Baseline
-
-```text
-$product-baseline synthesize
-$product-baseline review
-$product-baseline approve
-$product-baseline status
-```
-
-- `synthesize` creates a draft baseline from persisted discovery artifacts only.
-- `review` independently performs structural, schema, traceability, and
-  coherence checks and writes the latest review receipt.
-- `approve` requires an `approval-ready` receipt. Invoking it attests that the
-  reviewed draft has not changed and freezes that draft.
-- `status` is read-only.
-- A missing or unknown mode prints usage and performs no fallback action.
-
-### Delivery
-
-```text
-$product-delivery roadmap
-$product-delivery slice
-$product-delivery archive
-$product-delivery status
-```
-
-- `roadmap` creates or revises coverage and unnumbered candidate slices. It
-  persists and displays its preview, then waits for same-session confirmation.
-- `slice` previews one canonical active slice and its roadmap update, waits for
-  same-session confirmation of the persisted preview, then writes both targets
-  and prints one embedded `$openspec-propose` prompt.
-- `archive` moves the one canonical active slice unchanged into
-  `delivery/archive/` after the external archive-name check.
-- `status` is read-only and prints exactly the next product step.
-- A missing or unknown mode prints usage and performs no fallback action.
-
-There are no product delivery modes for applying, verifying, reconciling,
-closing, repairing, or altering completed work.
-
-## Routing contract
-
-### Skill-side one-hop guard
-
-`product-discovery/SKILL.md` contains:
-
-“If the current task prompt contains `ROUTED_ACTION=product-discovery`, execute
-this installed skill directly and never route `product-discovery` again.
-Otherwise dispatch exactly one child using the routing form below.”
-
-`product-baseline/SKILL.md` contains:
-
-“If the current task prompt contains `ROUTED_ACTION=product-baseline`, execute
-this installed skill directly and never route `product-baseline` again.
-Otherwise dispatch exactly one child using the routing form below.”
-
-`product-delivery/SKILL.md` contains:
-
-“If the current task prompt contains `ROUTED_ACTION=product-delivery`, execute
-this installed skill directly and never route `product-delivery` again.
-Otherwise dispatch exactly one child using the routing form below.”
-
-Each user-facing `SKILL.md` applies its exact marker guard. An unmarked
-invocation dispatches exactly one routed child and performs no product action
-in the parent. A marked invocation executes the installed skill directly and
-does not dispatch the product action again.
-
-The marker in the current task prompt activates the guard. Reading an agent
-`.toml`, using its name as `task_name`, or mentioning its developer instructions
-does not activate the guard.
-
-### Routing form
-
-```text
-spawn_agent({
-  task_name: "<product_action>",
-  message: """
-ROUTED_ACTION=<skill-name>
-
-Execute exactly this product-skill action.
-Read `.codex/skills/<skill-name>/SKILL.md` before acting.
-Never route a product action again and never spawn a writer.
-For roadmap or slice only, load
-`.codex/skills/openspec-shared/references/subagents.md` before any optional
-read-only specialist delegation. Every other mode spawns no agent.
-
-MODE: <mode>
-USER_REQUEST:
-<verbatim current user request>
-
-WORKING_DIRECTORY: repository root
-PRODUCT_ROOT: <repository-relative path or unresolved>
-
-Return the result required by the action contract.
-""",
-  fork_turns: "1",
-  model: "<exact model from the mode route table>",
-  reasoning_effort: "<exact effort from the mode route table>"
-})
-```
-
-Top-level product-action routing uses `fork_turns: "1"` so the immediately
-preceding user turn is available to the routed child. The child may use that
-turn only to parse the explicit invocation, the response to the exactly pending
-interview round, or the confirmation or rejection of the exactly pending
-delivery preview. Product facts and proposed writes come from persisted
-artifacts. The action never relies on older conversation history.
-
-A response without a product-skill token continues `interview` only when
-`condition` is `awaiting-interview-response`, `discovery.awaiting_round` names
-exactly one persisted round, and that round carries the exact
-`pending-response` marker. A confirmation or rejection without a product-skill
-token continues `roadmap` or `slice` only when it immediately follows that
-preview in the same parent session and the persisted condition and preview
-agree. An explicit invocation in a new session never confirms an earlier
-preview.
-
-`roadmap` and `slice` may delegate only independent, bounded reads when doing
-so materially reduces latency or adds a useful evidence axis. Each specialist
-receives a complete evidence packet, uses `fork_turns: "none"`,
-`model: "gpt-5.6-terra"`, and `reasoning_effort: "high"`, remains read-only,
-returns findings only, and never selects scope, changes workflow state,
-presents or accepts confirmation, writes an artifact, routes a product action,
-or spawns another agent. The routed product-action child remains the sole
-decision-maker and writer. Apply
-`.codex/skills/openspec-shared/references/subagents.md` to every such delegation.
-
-## Mode routes
-
-| Skill | Mode | Model | Effort | Write posture |
-|---|---|---|---|---|
-| `product-discovery` | `init` | `gpt-5.6-sol` | `high` | Discovery/control writes |
-| `product-discovery` | `interview` | `gpt-5.6-sol` | `high` | Discovery/control writes |
-| `product-discovery` | `status` | `gpt-5.6-luna` | `low` | No writes |
-| `product-baseline` | `synthesize` | `gpt-5.6-sol` | `xhigh` | Draft baseline/control writes |
-| `product-baseline` | `review` | `gpt-5.6-sol` | `xhigh` | Receipt, manifest-path, and phase writes |
-| `product-baseline` | `approve` | `gpt-5.6-sol` | `high` | Manifest and phase writes |
-| `product-baseline` | `status` | `gpt-5.6-luna` | `low` | No writes |
-| `product-delivery` | `roadmap` | `gpt-5.6-sol` | `high` | Pending preview and confirmed roadmap writes |
-| `product-delivery` | `slice` | `gpt-5.6-sol` | `high` | Pending preview and confirmed slice/roadmap writes |
-| `product-delivery` | `archive` | `gpt-5.6-sol` | `high` | One unchanged slice move |
-| `product-delivery` | `status` | `gpt-5.6-luna` | `low` | No writes |
-
-These are the only public mode routes. All use GPT-5.6 models. `xhigh` is
-reserved for synthesis and review; every status mode uses the cheapest route.
-
-Every `status` invocation performs zero writes regardless of the selected
-agent's sandbox. It does not update timestamps, normalize invalid state,
-persist diagnostics, create control artifacts or run outputs, or spawn a
-specialist.
-
-## Standalone declaration defaults and exact files
-
-| Agent | Model | Effort | Sandbox |
-|---|---|---|---|
-| `product-discovery` | `gpt-5.6-sol` | `high` | `workspace-write` |
-| `product-baseline` | `gpt-5.6-sol` | `high` | `workspace-write` |
-| `product-delivery` | `gpt-5.6-sol` | `high` | `workspace-write` |
-
-Standalone declaration defaults do not override the public skill's explicit
-per-mode spawn route.
-
-`release/.codex/agents/product-discovery.toml`:
-
-```toml
-name = "product-discovery"
-description = "Routed greenfield product discovery role for explicit initialization, breadth-first interviews, and persisted knowns and unknowns."
-developer_instructions = """
-ROUTED_ACTION=product-discovery
-Execute only the mode in the complete routing packet. Read .codex/skills/product-discovery/SKILL.md before acting. Never route this action again and never spawn another agent. Status performs no write regardless of `sandbox_mode`.
-"""
-model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
-sandbox_mode = "workspace-write"
-```
-
-`release/.codex/agents/product-baseline.toml`:
-
-```toml
-name = "product-baseline"
-description = "Routed product baseline role for fresh-context synthesis, independent review, and one-way approval of a first-release baseline."
-developer_instructions = """
-ROUTED_ACTION=product-baseline
-Execute only the mode in the complete routing packet. Read .codex/skills/product-baseline/SKILL.md before acting. Never route this action again and never spawn another agent. Status performs no write regardless of `sandbox_mode`.
-"""
-model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
-sandbox_mode = "workspace-write"
-```
-
-`release/.codex/agents/product-delivery.toml`:
-
-```toml
-name = "product-delivery"
-description = "Routed product delivery role for forward-only roadmap, slice, archive, and status actions around external OpenSpec changes."
-developer_instructions = """
-ROUTED_ACTION=product-delivery
-Execute only the mode in the complete routing packet. Read .codex/skills/product-delivery/SKILL.md before acting. Never route a product action again or spawn a writer. Roadmap and slice may spawn bounded read-only specialists only after loading .codex/skills/openspec-shared/references/subagents.md. Archive and status never spawn an agent. Status performs no write regardless of `sandbox_mode`.
-"""
-model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
-sandbox_mode = "workspace-write"
-```
-
-## `product-shared/references/operating-assumptions.md` contract
-
-The future reference is the normative owner of these operational trust
-assumptions:
-
-- Treat the frozen baseline and archived product slice files as user-protected
-  artifacts. Product skills do not detect or repair later edits.
-- Treat roadmap coverage as an optimistic declaration of planned partial or
-  complete coverage made when a slice is selected, not as evidence that
-  implementation, verification, synchronization, or archive has occurred.
-- Assume one user and one Codex instance are the single writer for product
-  artifacts and OpenSpec changes. The workflow provides no locking or
-  concurrent-write coordination.
-- Invoking `$product-delivery archive` attests that the user manually inspected
-  `docs/product/<product-id>/delivery/archive/` and accepts the unchanged
-  active-slice destination.
-- Use Git or other user-controlled history for recovery from accidental edits,
-  deletion, or filesystem conflict. The product workflow provides no repair or
-  rollback mode.
-- The user owns roadmap correctness, scan completeness, implementation success,
-  protection of archived slices, OpenSpec archive correctness, canonical
-  synchronization, suffix ambiguity, filesystem conflicts, and all corrective
-  work.
-
-The passive `SKILL.md` contains this exact index entry:
+After its frontmatter, `product-definition/SKILL.md` contains only this
+operational index:
 
 ```markdown
-- [`operating-assumptions.md`](references/operating-assumptions.md) — before relying on user-protected product artifacts, declared coverage, single-writer operation, archive-destination attestation, recovery, or another user-owned trust assumption.
+# Product Definition
+
+Maintain the first-release definition for one greenfield product.
+
+Accept only:
+
+- `$product-definition discover [product-id]`
+- `$product-definition baseline`
+
+Read [`action-contract.md`](references/action-contract.md) completely before
+acting. Read the applicable section of
+[`artifact-templates.md`](assets/artifact-templates.md) before writing.
+
+Execute the named action directly. Stop every definition action when
+`delivery/roadmap.md` exists. Write only the final allowed product artifacts,
+then return the exact console envelope.
 ```
 
-The passive `SKILL.md` indexes the applicable reference by link and load
-condition. It adds no mode, phase, gate, authority, mutation, or user-facing
-documentation file.
+After its frontmatter, `product-delivery/SKILL.md` contains only this
+operational index:
 
-## Authority and mutation boundaries
+```markdown
+# Product Delivery
 
-Within an action, authority descends from compatible explicit user instruction,
-to frozen baseline or persisted discovery, to live filesystem facts allowed by
-that mode, to the action skill, and finally to passive shared material.
+Advance one accepted first-release baseline through explicit product records.
 
-- Discovery writes only discovery and discovery/baseline control artifacts.
-- Synthesis writes only the draft baseline and baseline control receipt.
-- Approval performs the one-way baseline freeze. No later action checks the
-  approved files against a stored byte identity.
-- Delivery writes only its pending control-plane preview,
-  `delivery/roadmap.md`, the one active slice file, or its unchanged archived
-  destination.
-- Product skills never write code, OpenSpec specs or changes, or frozen baseline
-  files, and never invoke an external OpenSpec skill.
-- Routine discovery bookkeeping is automatic after an authorized action.
-- Baseline approval and both delivery previews remain explicit user gates.
+Accept only:
+
+- `$product-delivery roadmap`
+- `$product-delivery slice`
+- `$product-delivery archive`
+
+Read [`action-contract.md`](references/action-contract.md) completely before
+acting. Read the applicable section of
+[`artifact-templates.md`](assets/artifact-templates.md) before writing.
+
+Execute the named action directly. Do not invoke OpenSpec. Write only the final
+allowed product artifacts, then return the exact console envelope.
+```
+
+The future `references/action-contract.md` files contain only the applicable
+rules below. The future `assets/artifact-templates.md` files contain the
+corresponding definition or delivery sections of
+[`artifact-templates.md`](artifact-templates.md). This keeps exact templates
+out of `SKILL.md` and avoids a passive shared package.
+
+## Common repository rules
+
+- Resolve one repository root and only its local `openspec/` directory.
+- Require `openspec/config.yaml` or `openspec/config.yml`.
+- Accept at most one direct product bundle under `docs/product/`.
+- Require a lowercase kebab-case product ID and keep all product writes below
+  `docs/product/<product-id>/`.
+- Reject unsupported `schema_version` values before writing.
+- Keep persisted local paths repository-relative with `/` separators. Reject
+  absolute paths, parent traversal, home shorthand, drive prefixes, `file:`
+  URIs, and paths escaping through symlinks.
+- Derive progress from artifact presence. For discovery, the latest interview
+  round without a recorded response is the only incomplete round.
+- Allocate `FACT-*`, `PDEC-*`, `ASM-*`, `UNK-*`, `FOG-*`, `OOS-*`,
+  `SRC-*`, and `REQ-*` IDs with four digits. Scan persisted artifacts and
+  indexes, allocate one above the greatest prior value, and never reuse an ID.
+- Treat the accepted baseline and archived product slices as user-protected.
+  The skills do not hash, lock, or repair them.
+- Return one of `done`, `needs-input`, or `blocked` using the exact
+  console forms in `artifact-templates.md`.
+- A missing or unknown action prints the supported invocations and writes
+  nothing. Never infer a replacement action.
+
+## `$product-definition discover [product-id]`
+
+### Inputs and gates
+
+Use the optional ID when initializing. When one product bundle already exists,
+infer its ID if omitted and require any supplied ID to match it. When no bundle
+exists and no valid ID can be obtained from the invocation, ask for the ID and
+write nothing.
+
+Before initialization, inspect repository structure. Permit repository
+metadata, development tooling, empty scaffolding, an explicitly disposable
+prototype, and the installed OpenSpec distribution. Stop on evidence of:
+
+- durable application behavior;
+- canonical capability content under `openspec/specs/`;
+- any active or archived OpenSpec delivery history;
+- another product bundle under `docs/product/`; or
+- an ambiguous artifact that cannot safely be classified as disposable.
+
+Do not install OpenSpec, remove evidence, or convert a brownfield repository.
+On every invocation, stop without mutation when
+`docs/product/<product-id>/delivery/roadmap.md` exists.
+
+### Behavior
+
+When necessary, create the four discovery artifacts in the template. Do not
+create baseline or delivery artifacts.
+
+If the latest interview round is incomplete:
+
+1. Treat substantive text supplied with the invocation as the answer to that
+   round.
+2. Record the answer verbatim in that round.
+3. Classify its outcomes as facts, product decisions, assumptions, precise
+   unknowns, fog, exclusions, and sources.
+4. Update `map.md`, `decisions.md`, and `sources.md` in the same write.
+5. Leave the round incomplete and repeat its questions when no substantive
+   answer was supplied. Do not append another round.
+
+After initialization or recording an answer, calculate the breadth-first
+frontier across all twelve discovery areas. Ask three through five independent
+questions when at least three are ready; otherwise ask every ready question.
+Span different areas when possible, defer dependent questions, and include a
+recommended answer only when evidence supports it. Append at most one new
+incomplete round before returning.
+
+When the user says “I don't know,” distinguish researchable facts, safe
+assumptions, delivery-slice deferrals, future-change deferrals, release
+exclusions, and fog. Research only material external facts, prefer primary
+sources, record narrow claims in `sources.md`, and never decide a product
+preference.
+
+When no independent question remains, append nothing and report discovery
+ready for `baseline`. Discovery completeness permits explicit unknowns and
+exclusions; it does not require certainty.
+
+### Completion and mutations
+
+The action completes when initialization and any supplied answer are persisted,
+the discovery map reflects the current evidence, and either one small question
+round is present or no ready question remains.
+
+It may create or update only:
+
+```text
+docs/product/<product-id>/discovery/map.md
+docs/product/<product-id>/discovery/decisions.md
+docs/product/<product-id>/discovery/sources.md
+docs/product/<product-id>/discovery/interview-log.md
+```
+
+Use `needs-input` while questions await answers and `done` when the next
+action is `$product-definition baseline`.
+
+## `$product-definition baseline`
+
+### Inputs and gates
+
+Read all discovery artifacts. On refresh, also read the existing baseline to
+preserve requirement identity and the manifest creation timestamp. Do not use
+conversation-only product facts, application code, canonical OpenSpec specs,
+or OpenSpec changes as definition evidence.
+
+Stop without mutation when:
+
+- the roadmap exists;
+- a discovery round is incomplete;
+- any `FOG-*` remains;
+- an unknown lacks an explicit baseline treatment;
+- discovery sources contradict one another without a user decision; or
+- required discovery artifacts or references are inconsistent.
+
+The user may create a baseline with `UNK-*` entries of any risk when their
+treatment is explicit.
+
+### Behavior
+
+Create or refresh the complete baseline in one invocation:
+
+1. Normalize terminology and first-release boundaries.
+2. Identify product responsibility domains without treating them as code,
+   deployment, service, team, or storage boundaries.
+3. Separate domain and cross-domain requirements.
+4. Preserve an existing `REQ-*` for the same obligation. Allocate a new ID
+   above every active or retired requirement ID for a new obligation. Retain a
+   removed ID as `retired` in the manifest requirement index.
+5. Give every active requirement one owning location and complete source-ID
+   traceability.
+6. Render every baseline artifact before replacing the current set.
+7. Review the rendered set for exact template shape, unique ownership,
+   traceability, terminology, duplicates, contradictions, journey and domain
+   coherence, explicit unknown treatment, and repository-relative paths.
+8. Repair every issue supported by discovery evidence and repeat the review.
+   If a repair requires a new product decision, leave the existing baseline
+   unchanged and return `needs-input` with the precise gaps.
+9. Write only the final self-reviewed set, removing obsolete baseline files
+   that are not in the final artifact inventory. Do not create a separate
+   review artifact.
+
+Requirements remain comprehensive first-release obligations with high-level
+acceptance signals. They do not contain implementation steps, detailed
+OpenSpec scenarios, priorities, change IDs, or delivery status.
+
+### Completion and mutations
+
+The action completes only when all required baseline artifacts exist, the
+manifest inventory and requirement index match them, every review check passes,
+and the console reports requirement and unknown counts.
+
+It may create, replace, or remove only files under
+`docs/product/<product-id>/baseline/**`.
+Successful completion points directly to `$product-delivery roadmap`.
+`baseline` may be invoked again to refresh the definition until that roadmap
+is first created.
+
+## `$product-delivery roadmap`
+
+### Inputs and gates
+
+Require one complete, self-consistent baseline and no incomplete discovery
+round. Read discovery and baseline artifacts in full. For a revision, also read
+the existing roadmap and all canonical active and archived product slice
+records needed to preserve declared coverage.
+
+### Behavior
+
+Create or revise `delivery/roadmap.md` immediately.
+
+The first roadmap:
+
+- contains every active `REQ-*` exactly once;
+- initializes every coverage row to `NOT DELIVERED`;
+- contains unnumbered candidate slices with an outcome, likely eligible
+  requirements, and sequencing rationale; and
+- prefers a walking skeleton first, or the highest-risk coherent end-to-end
+  path when no walking skeleton exists.
+
+A revision preserves every coverage value and replaces or reorders only
+candidate slices. Candidate entries contain no readiness, execution,
+dependency, blocker, expected-change, or completion fields. When a canonical
+active product slice exists, its scope and declarations remain untouched.
+
+The first successful write marks the current baseline as accepted for
+delivery. It adds no acceptance metadata. The presence of the roadmap is the
+entire boundary.
+
+### Completion and mutations
+
+The action completes when the roadmap matches the template, covers every active
+requirement, preserves existing declarations, and reports its candidate
+outcomes.
+
+It may create `docs/product/<product-id>/delivery/` and create or replace only
+`delivery/roadmap.md`. It does not change discovery, baseline, slice, archive,
+OpenSpec, or code files. Successful completion points to
+`$product-delivery slice`.
+
+## `$product-delivery slice`
+
+### Gates
+
+Apply these checks before selecting scope or writing:
+
+1. Require a valid roadmap and baseline.
+2. Enumerate direct canonical product slice files under `delivery/`. Exactly
+   one blocks the action until its external workflow and product archive are
+   complete; more than one is an error.
+3. Enumerate direct children of `openspec/changes/` other than `archive`.
+   Any child is an active OpenSpec change and blocks the action. Do not read its
+   contents.
+4. If every roadmap row is `DELIVERED (...)`, report delivery complete and
+   write nothing.
+
+Canonical product slice filenames match:
+
+```regex
+^slice-[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$
+```
+
+Noncanonical delivery files do not participate in active-slice detection or
+number allocation.
+
+### Read budget
+
+1. Read the roadmap in full and use uncovered or partial rows plus candidate
+   outcomes to establish the candidate requirement set.
+2. Read `baseline/charter.md`, `baseline/domain-map.md`, and
+   `baseline/glossary.md` in full, then the complete owning blocks for
+   candidate requirements.
+3. Enumerate all archived product slice names. Read the five highest-numbered
+   slices in full; from older slices, read only the frontmatter name and first
+   non-empty outcome line.
+4. Enumerate canonical OpenSpec spec paths and capability headings, then read
+   only bodies implicated by candidate requirements.
+5. Enumerate archived OpenSpec change basenames and artifact paths, then read
+   only bodies whose indexed scope intersects candidate requirements.
+6. Enumerate code paths, then read only the candidate capability, its direct
+   integration boundary, and tests describing that behavior.
+7. Cite any wider read in planning context with the dependency that required
+   it.
+
+Do not read discovery artifacts or active OpenSpec change contents, and do not
+default to whole-baseline, whole-spec-store, whole-archive, or whole-codebase
+body reads.
+
+### Behavior
+
+Choose one coherent, independently demonstrable vertical outcome using only
+`NOT DELIVERED` or `PARTIALLY DELIVERED (...)` requirements. If none is
+coherent, write nothing and direct the user to revise the roadmap.
+
+Allocate one above the highest canonical number in active and archived product
+slice filenames. Accept only `001` through `999`. Derive the slug by
+lowercasing the title, retaining ASCII letters and digits, replacing every run
+of other characters with one hyphen, and trimming outer hyphens. Stop on an
+empty slug or collision; do not invent a suffix.
+
+Reject a proposed name when it equals an active OpenSpec basename or a direct
+child of `openspec/changes/archive/` ends in
+`-<proposed-canonical-name>`. Near matches do not collide.
+
+Write the canonical active slice and roadmap update in the same invocation.
+For each covered requirement:
+
+- `partial` appends the new slice name to a partial declaration;
+- `complete` changes the row to `DELIVERED (...)` and retains every prior
+  contributing slice name before appending the new one.
+
+Never duplicate a slice name. This immediate coverage update is a planning
+declaration, not implementation evidence.
+
+Persist exactly one fully rendered proposal handoff in the active slice and
+print the same handoff in the console. Do not create an OpenSpec change.
+
+### Completion and mutations
+
+The action completes when exactly one new canonical active slice exists, its
+eligible requirement declarations match the roadmap, the roadmap is updated,
+and the complete proposal handoff is printed.
+
+It may create one `delivery/slice-NNN-short-slug.md` and replace
+`delivery/roadmap.md`. It writes nothing else. The next step is the external
+OpenSpec workflow for the exact same slice name.
+
+## `$product-delivery archive`
+
+### Inputs and gates
+
+Require exactly one canonical active product slice. Let its filename without
+`.md` be `<slice-name>`. Enumerate only direct-child basenames under
+`openspec/changes/archive/`.
+
+At least one basename must end exactly in `-<slice-name>`. Zero matches block
+the move. One or more matches authorize it; prefixes and archive contents are
+irrelevant. Do not inspect tasks, implementation, verification, synchronized
+specs, or archived change contents.
+
+Require the destination
+`delivery/archive/<same-canonical-filename>` to be absent. Never overwrite an
+archived product slice.
+
+### Behavior and completion
+
+Move the active product slice to the destination without changing its bytes.
+Do not change the roadmap or any OpenSpec artifact.
+
+The action completes when the source is absent, the destination contains the
+unchanged file, and the console names both paths and the matching OpenSpec
+archive basename. If every roadmap row is now `DELIVERED (...)`, print
+delivery completion; otherwise print `$product-delivery slice`.
+
+## Mutation boundary
+
+| Action | Allowed writes |
+|---|---|
+| `discover` | Four files under `discovery/` |
+| `baseline` | Complete final set under `baseline/` |
+| `roadmap` | `delivery/roadmap.md` |
+| `slice` | One active slice and `delivery/roadmap.md` |
+| `archive` | One unchanged move from `delivery/` to `delivery/archive/` |
+
+No product action writes application code, `openspec/**`, accepted baseline
+files, workflow-control artifacts, receipts, run outputs, or external messages.
+Archived product slice contents are never edited; `archive` may create only
+its unchanged destination through the documented move. No action invokes
+another product or OpenSpec skill. The user performs every external OpenSpec
+step explicitly.

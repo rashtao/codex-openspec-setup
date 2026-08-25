@@ -1,75 +1,73 @@
-# Greenfield product-workflow skill design
+# Greenfield product workflow
 
-Status: design complete for review; not implemented.
+Status: design contract for two future Codex skills.
 
-This directory is the authoritative implementation contract for Codex skills
-that discover a genuinely greenfield product, freeze its first-usable-release
-baseline, and deliver that baseline through one focused OpenSpec change at a
-time. `workflow.md` is a historical, non-normative summary. This README and the
-indexed documents are the authoritative implementation contract.
+This directory defines a small, user-controlled workflow for discovering one
+greenfield product, establishing its first-release baseline, and delivering it
+through one external OpenSpec change at a time.
 
-## Design constraints
+```text
+$product-definition discover
+→ $product-definition baseline
+→ $product-delivery roadmap
+→ $product-delivery slice
+→ external OpenSpec propose → apply → verify → archive
+→ $product-delivery archive
+→ repeat
+```
 
-- Codex only; all four product packages enforce explicit-only activation with
-  `agents/openai.yaml` and retain frontmatter exclusions as defense in depth.
-- All top-level product-action dispatches use `fork_turns: "1"`; the routed
-  child may use only the latest user turn, and persisted artifacts remain the
-  authority for pending interactions and product facts. Public product modes
-  use the deterministic GPT-5.6 route table in `skill-contracts.md`; every
-  status mode uses `gpt-5.6-luna` at `low` effort and performs zero writes.
-- Every public product skill uses an exact `ROUTED_ACTION=<skill-name>` guard
-  to enforce one-hop routing.
-- Only `roadmap` and `slice` may use bounded read-only specialists;
-  product-action rerouting and delegated writes are forbidden.
-- Existing external OpenSpec skills, agents, configuration, schemas, specs, and
-  change conventions remain unchanged.
-- `product-shared` ships no assets; installed normative templates live in
-  `references/artifact-contracts.md`.
-- External OpenSpec actions are invoked manually in fresh sessions. Product
-  skills may print a prompt for them but never invoke them.
-- Product-workflow test assets remain under `dev/greenfield/test/`; none are
-  published under `release/`.
-- The workflow supports one genuinely greenfield product and one repository.
-- Discovery remains mutable until baseline approval. The approved baseline is
-  frozen, with no refreeze or baseline v2.
-- Asked interview rounds and delivery previews are persisted in the product
-  control plane before the workflow waits for a response or confirmation.
-- Delivery is the forward-only loop `roadmap → slice → external OpenSpec
-  workflow → archive → repeat`.
-- External OpenSpec verification remains the sole behavioral verification.
+## Principles
 
-## Designed skill set
+- The two skills run only when explicitly invoked.
+- Run Codex CLI with GPT-5.6 Sol. High reasoning suits ordinary actions;
+  xhigh is recommended for baseline synthesis. The skills neither select nor
+  enforce a model or reasoning level.
+- Each invocation performs one named action directly. It does not route work,
+  spawn agents, run scripts, or maintain a workflow state machine.
+- Mutating actions write their final artifacts immediately. Git provides
+  history and recovery.
+- The user owns scope, implementation, review, corrections, archive judgment,
+  and protection of accepted product artifacts.
+- Persisted artifacts are the only cross-session context. Progress follows
+  their presence and the latest incomplete interview round.
+- The first creation of `delivery/roadmap.md` accepts the current baseline for
+  delivery. Definition actions stop after that file exists.
+- Roadmap coverage is an optimistic planning declaration made when a slice is
+  created. It is not evidence of implementation or verification.
+- Product skills never invoke or mutate the external OpenSpec workflow.
 
-| Skill | Kind | Responsibility |
-|---|---|---|
-| `product-discovery` | User-facing action | Initialize discovery, run breadth-first interview rounds, and persist findings. |
-| `product-baseline` | User-facing action | Synthesize, review, and approve the immutable first-release baseline. |
-| `product-delivery` | User-facing action | Maintain requirement coverage, prepare one active slice, archive it after external OpenSpec completion, and report status. |
-| `product-shared` | Passive support | Provide passive references, including normative artifact templates and operating assumptions. It has no scripts, assets, custom agent, or user-facing mode. |
+## Boundaries
 
-## Operational responsibilities
+The workflow assumes one product, one repository, one user, and one writer.
+Initialization is for a genuinely greenfield repository with a local OpenSpec
+configuration. Product artifacts live under `docs/product/<product-id>/`.
+OpenSpec continues to own detailed change requirements, scenarios, designs,
+tasks, implementation, verification, canonical specifications, and its change
+archive.
 
-The normative trust assumptions belong to the
-[`product-shared/references/operating-assumptions.md` contract](skill-contracts.md#product-sharedreferencesoperating-assumptionsmd-contract).
+There is no product action for status, repair, rollback, reopening, locking,
+implementation, verification, or baseline versioning. Once delivery starts,
+the user makes any necessary corrections directly and relies on Git for
+recovery.
 
-## Document index
+## Authoritative documents
 
-- [`skill-contracts.md`](skill-contracts.md) — package layout, trigger
-  descriptions, modes, routing, and mutation boundaries.
-- [`workflow-state.md`](workflow-state.md) — discovery and baseline state plus
-  the forward-only delivery loop.
-- [`artifact-templates.md`](artifact-templates.md) — normative persisted
-  artifacts, console responses, and the sole product bundle layout.
-- [`integration-and-handoffs.md`](integration-and-handoffs.md) — fresh-context
-  OpenSpec integration, name matching, and the sole normative proposal prompt.
-- [`discovery-and-baseline-validation.md`](discovery-and-baseline-validation.md)
-  — discovery and baseline checks and stopping rules.
-- [`test-plan.md`](test-plan.md) — description-boundary and behavioral tests.
-- [`workflow.md`](workflow.md) — historical, non-normative design summary.
+- [`skill-contracts.md`](skill-contracts.md) defines the two packages, five
+  actions, action inputs, completion criteria, and mutation boundaries.
+- [`artifact-templates.md`](artifact-templates.md) defines the exact product
+  artifacts, console envelopes, and external OpenSpec handoff.
+- [`test-plan.md`](test-plan.md) defines structural and behavioral acceptance.
 
-## Non-goals
+These four files are the complete greenfield design. No historical workflow,
+standalone state, validation, routing, or integration document is normative.
 
-This design does not modify external OpenSpec, verify implementation at the
-product layer, keep delivery ledgers, close or archive the product bundle,
-coordinate concurrent writers, or add correction, abandonment, reopening,
-rollback, locking, or delivery-repair workflows.
+## Deferred simplifications
+
+The following ideas remain future options and are not part of this revision:
+
+- retain only `REQ-*` identifiers and remove discovery-level identifiers;
+- merge discovery documents or baseline documents if their granularity proves
+  costly;
+- remove the product-side archive action and rely only on OpenSpec archives;
+- replace named actions with natural-language intent after the workflow is
+  stable.
