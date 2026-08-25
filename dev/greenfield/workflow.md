@@ -1,3 +1,5 @@
+> Status: Historical, non-normative summary. The authoritative contract is [`README.md`](README.md) and its indexed documents.
+
 # Greenfield product workflow — design summary
 
 ## Objective
@@ -30,8 +32,8 @@ does not become a second behavioral specification.
 - Product horizon: first usable release.
 - Repository topology: one code repository.
 - Product authority: the user is the sole decision-maker.
-- Interview style: breadth-first rounds of approximately five to eight
-  independent questions.
+- Normative interview-round sizing belongs to
+  [`workflow-state.md`](workflow-state.md#breadth-first-discovery).
 - The baseline becomes immutable after approval; there is no baseline v2.
 - Product slices never modify the baseline.
 - OpenSpec changes are created one at a time, immediately before implementation.
@@ -44,38 +46,12 @@ does not become a second behavioral specification.
 
 ## Repository structure
 
+The canonical product bundle layout is defined only by
+[`artifact-templates.md`](artifact-templates.md#product-bundle-layout).
+
+The external OpenSpec integration roots are:
+
 ```text
-docs/product/<product-id>/
-  .workflow/
-    state.yaml
-    receipts/
-      baseline-review.yaml
-
-  discovery/
-    map.md
-    decisions.md
-    sources.md
-    interview-log.md
-
-  baseline/
-    manifest.yaml
-    charter.md
-    actors-and-journeys.md
-    glossary.md
-    domain-map.md
-    qualities.md
-    dependencies.md
-    assumptions-and-questions.md
-    decisions.md
-    domains/
-      <domain-id>.md
-
-  delivery/
-    roadmap.md
-    slice-NNN-short-slug.md
-    archive/
-      slice-NNN-short-slug.md
-
 openspec/
   specs/                          # Current implemented behavior
   changes/<focused-change>/       # Next unit of work
@@ -119,11 +95,15 @@ Each round:
 
 1. reads the current discovery map;
 2. identifies all independent questions on the current frontier;
-3. asks approximately five to eight across different product areas;
+3. Normative interview-round sizing belongs to
+   [`workflow-state.md`](workflow-state.md#breadth-first-discovery).
 4. includes a recommended answer when evidence supports one;
-5. waits for the complete response;
-6. records decisions, assumptions, facts, sources, unknowns, fog, and exclusions;
-7. recalculates the frontier.
+5. persists the asked round with the `pending-response` markers and awaiting
+   state before returning the questions;
+6. waits for the complete response;
+7. records the response verbatim with decisions, assumptions, facts, sources,
+   unknowns, fog, and exclusions;
+8. clears the pending round and recalculates the frontier.
 
 Questions that depend on another open answer wait for a later round. Findings
 are classified as confirmed fact, user product decision, accepted assumption,
@@ -153,10 +133,8 @@ Breadth-first discovery covers:
 11. failure handling and product recovery;
 12. exclusions, assumptions, and unknowns.
 
-Complete discovery does not eliminate uncertainty. It makes the release
-boundary explicit, covers important actor journeys and capabilities, provides
-coherent domain responsibilities, makes cross-cutting concerns and dependencies
-visible, and gives every remaining uncertainty a precise treatment.
+Normative discovery-coverage rationale belongs to
+[`discovery-and-baseline-validation.md`](discovery-and-baseline-validation.md#discovery-interview).
 
 ## Fresh-context synthesis and review
 
@@ -169,7 +147,10 @@ gaps without inventing answers.
 A fresh review checks structure, schema, traceability, terminology, duplicates,
 contradictions, journeys, domain coherence, unknown treatment, and persisted
 path form. Review writes either an `issues` or `approval-ready` receipt and
-does not edit the candidate.
+changes only the manifest's receipt-path control field. An `issues` receipt
+leaves the phase at `baseline-draft`; an `approval-ready` receipt changes it to
+`baseline-reviewed`. Later discovery changes clear the manifest-owned receipt
+path and return the phase to `baseline-draft`.
 
 The explicit approve invocation attests that the approval-ready candidate was
 not changed and freezes it. Approval records the receipt and timestamp. The
@@ -218,24 +199,29 @@ baseline.
 
 Candidate slices are coarse and revisable. They contain no execution or
 readiness state. Slices should cut vertically through the product and may touch
-several domains. The first should generally be a walking skeleton or a
-high-risk end-to-end path.
+several domains.
 
-Every roadmap write requires a preview and same-session confirmation. While a
-slice is active, only candidates may be revised.
+Normative first-candidate sequencing belongs to
+[`workflow-state.md`](workflow-state.md#roadmap).
+
+Every roadmap write requires a control-plane preview and same-session
+confirmation. The preview changes no delivery artifact. While a slice is
+active, only candidates may be revised.
 
 ## Incremental OpenSpec loop
 
 For each slice:
 
 1. ensure no active product slice and no active OpenSpec change exists;
-2. read the whole roadmap, frozen baseline, archived product slices, canonical
-   OpenSpec specs, archived OpenSpec changes, and current code;
+2. read the prioritized candidate-scope budget defined by
+   [`integration-and-handoffs.md`](integration-and-handoffs.md#what-slice-may-read);
 3. choose only uncovered or partially covered requirements;
-4. preview a canonical `slice-NNN-short-slug`, precise coverage, boundaries,
-   planning context, proposal prompt, and roadmap change;
-5. after same-session approval, persist the active slice and immediately update
-   roadmap coverage;
+4. persist and display a preview of the canonical
+   `slice-NNN-short-slug`, precise coverage, boundaries, planning context,
+   proposal prompt, and roadmap change;
+5. after same-session approval, write the exact persisted active slice and
+   roadmap targets, clear the pending preview, and immediately declare the
+   planned roadmap coverage;
 6. run the printed `$openspec-propose` prompt in a fresh session;
 7. independently apply, verify, and archive that exactly named OpenSpec change;
 8. invoke `$product-delivery archive` to move the unchanged product slice;

@@ -18,8 +18,10 @@ workflow when planning needs revision. Existing files under
 `release/.codex/skills/openspec-*`, matching external agents, and
 `release/openspec/config.yaml` remain outside the product mutation boundary.
 
-Product skills do not invoke bulk creation, bulk archival, fast-forward,
-onboarding, registered-store, or separate synchronization workflows.
+Registered standalone OpenSpec stores are out of scope. Product skills resolve
+only the repository-local `openspec/` root and never discover, select, or pass a
+registered-store selector. They do not invoke bulk creation, bulk archival,
+fast-forward, onboarding, or separate synchronization workflows.
 
 ## Canonical slice identity
 
@@ -43,6 +45,10 @@ Noncanonical files in the delivery root do not participate in active-slice
 detection or number allocation.
 
 ## Normative proposal prompt
+
+This section is the sole normative owner of the proposal prompt. Persist the
+fully rendered prompt inside a `text` fence under the active slice's
+`## Proposal prompt` heading.
 
 Every active slice embeds exactly one prompt of this shape, with all
 placeholders rendered before persistence:
@@ -83,19 +89,35 @@ packet or control artifact.
 
 ## What `slice` may read
 
-Before selecting scope, `$product-delivery slice` reads:
+Before selecting scope, `$product-delivery slice` follows this prioritized read
+budget:
 
-- the complete roadmap;
-- every frozen baseline artifact;
-- every canonical direct-child archived product slice;
-- canonical `openspec/specs/`;
-- archived `openspec/changes/archive/` changes;
-- current application code.
+1. Read `delivery/roadmap.md` in full.
+2. Use its uncovered or partial rows and candidate outcomes to establish the
+   candidate requirement set.
+3. From the frozen baseline, read `charter.md`, `domain-map.md`, and
+   `glossary.md` in full, then read the complete owning requirement blocks only
+   for candidate `REQ-*` IDs.
+4. Enumerate every canonical archived product-slice filename for identity
+   allocation. Read the five highest-numbered archived slices in full. From
+   every older canonical slice, read only its frontmatter `name` and the first
+   non-empty line under `## Outcome`.
+5. Enumerate canonical-spec paths and top-level capability headings before
+   reading bodies. Read full canonical spec bodies only for capabilities
+   implicated by the candidate requirements.
+6. Enumerate archived OpenSpec change basenames and artifact paths before
+   reading bodies. Read full archived-change bodies only when their name or
+   indexed artifact scope intersects the candidate requirements.
+7. Enumerate current-code paths before reading file bodies. Read code bodies
+   only within the candidate capability, its directly referenced integration
+   boundary, and tests that describe that behavior.
+8. Any wider body read requires a named dependency from already loaded
+   candidate-scope evidence and must be cited in the slice's planning context.
 
-It does not read discovery. It lists active OpenSpec direct-child names only to
-enforce the no-active-change gate and does not read pending change contents.
-The selected requirements must currently be `NOT DELIVERED` or
-`PARTIALLY DELIVERED (...)`.
+Do not read discovery or pending OpenSpec change contents. Never default to a
+whole-baseline, whole-spec-store, whole-archive, or whole-codebase body read.
+The selected requirements must currently be `NOT DELIVERED` or `PARTIALLY
+DELIVERED (...)`.
 
 ## Active-change gate and collisions
 
@@ -147,6 +169,11 @@ $product-delivery slice
 `$product-delivery status` prints the first applicable result:
 
 ```text
+# pending delivery preview
+Pending `<action>` preview: `docs/product/<product-id>/.workflow/pending-delivery.yaml`.
+Status cannot confirm it.
+$product-delivery <action>
+
 # roadmap missing
 $product-delivery roadmap
 

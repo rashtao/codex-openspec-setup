@@ -5,12 +5,24 @@ values are placeholders. Optional fields are explicitly marked; all other
 fields and headings are required. Persisted paths are always relative to the
 repository root and use `/` separators.
 
+The future `product-shared/references/artifact-contracts.md` renders the
+normative templates specified by this design contract. It is the only installed
+owner of product-workflow artifact templates.
+
+`schema_version: 1` is the only supported product-artifact schema version.
+Encountering any other value stops the current product action before mutation.
+Product skills never infer or perform an automatic schema migration.
+
 ## Product bundle layout
+
+This section is the sole normative owner of the product bundle layout. Other
+documents cross-reference it and do not restate any subtree.
 
 ```text
 docs/product/<product-id>/
   .workflow/
     state.yaml
+    pending-delivery.yaml             # optional while confirmation is pending
     receipts/
       baseline-review.yaml
 
@@ -64,9 +76,13 @@ Every discovery document begins with, or links to, this legend:
 | `REQ` | Frozen first-release baseline requirement |
 ```
 
-All identifiers are zero-padded to four digits. Canonical examples are
-`FACT-0001` and `REQ-0042`. Counters only increase; an allocated ID is never
-reused. Delivery slice identity exists only in its canonical filename.
+Discovery and requirement identifiers are zero-padded to four digits.
+Canonical examples are `FACT-0001` and `REQ-0042`. Counters only increase; an
+allocated ID is never reused. A delivery slice number is a separate bounded
+sequence, not an identifier in those namespaces. Its canonical filename uses
+exactly three digits, `001` through `999`; this difference is intentional. A
+requested slice number outside that range is rejected. Delivery slice identity
+exists only in its canonical filename.
 
 ## Discovery artifacts
 
@@ -105,7 +121,7 @@ reused. Delivery slice identity exists only in its canonical filename.
 ## Current frontier
 
 - Next round: <integer>
-- Independent questions ready now: <5–8 IDs/summaries, or all available>
+- Independent questions ready now: <3–8 IDs/summaries; every ready question when fewer than 3>
 - Dependent questions waiting: <IDs and dependencies, or `none`>
 - Synthesis assessment: <not-recommended\|recommend-ask-user\|user-requested>
 - Assessment rationale: <concise evidence-based explanation>
@@ -219,7 +235,11 @@ absolute filesystem paths.
 
 ### `discovery/interview-log.md`
 
-This file is append-only during discovery.
+Completed interview rounds are immutable. Before questions are returned, append
+the complete asked round, set `condition` to `awaiting-interview-response`, set
+`discovery.awaiting_round` to its number, and write the exact pending markers.
+Only that pending round may subsequently replace those markers with the
+verbatim response, recorded outcomes, and frontier change.
 
 ```markdown
 # Interview log — <product name>
@@ -232,6 +252,27 @@ This file is append-only during discovery.
    - Recommendation: <answer and rationale, or `none`>
 2. <repeat for all questions>
 
+### Response status
+
+pending-response
+
+### User response
+
+PENDING RESPONSE
+
+### Recorded outcomes
+
+PENDING RESPONSE
+
+### Frontier change
+
+PENDING RESPONSE
+```
+
+Completing the pending round changes `Response status` to `recorded`, replaces
+the three pending markers with exactly:
+
+```markdown
 ### User response
 
 <verbatim response supplied for this round>
@@ -252,6 +293,9 @@ This file is append-only during discovery.
 - Waiting: <questions and dependencies or `none`>
 - Synthesis assessment: <not-recommended\|recommend-ask-user\|user-requested>
 ```
+
+The same write clears `discovery.awaiting_round`, advances
+`discovery.next_round`, and sets the next valid condition.
 
 ## Baseline artifacts
 
@@ -315,9 +359,13 @@ requirements:
 ```
 
 `files` and `requirements` are lexically sorted by repository-relative path and
-ID respectively. Domain-file entries repeat once per actual domain. Approval
-changes only the approval and freeze fields. The approve invocation attests
-that the approval-ready draft was unchanged after review.
+ID respectively. Domain-file entries repeat once per actual domain. This
+manifest is the sole owner of the `REQ-*` high-water mark and review-receipt
+path. Synthesis initializes `approval.review_receipt` to `null`. Review changes
+only that field in the candidate manifest and writes the named receipt.
+Discovery invalidation resets only that field. Approval changes the remaining
+approval and freeze fields. The approve invocation attests that the
+approval-ready draft was unchanged after review.
 
 ### Baseline Markdown skeletons
 
@@ -506,7 +554,7 @@ links the supporting `OOS-*`, `UNK-*`, or decision IDs.
 - Source record: docs/product/<product-id>/discovery/decisions.md#<anchor>
 ```
 
-## Control-plane artifact
+## Control-plane artifacts
 
 ### `.workflow/receipts/baseline-review.yaml`
 
@@ -538,6 +586,33 @@ Warnings never hide a failed check. Each review replaces the latest receipt.
 Approval retains it as the manifest's named receipt. The approve invocation is
 the user's attestation that the draft was not changed after this review; the
 receipt intentionally carries no content-binding value.
+
+### `.workflow/pending-delivery.yaml`
+
+This optional file exists only while a roadmap or slice confirmation is
+pending. Its exact schema is:
+
+```yaml
+schema_version: 1
+status: "pending-confirmation"
+action: "<roadmap|slice>"
+created_at: "<RFC3339 UTC>"
+product_root: "docs/product/<product-id>"
+targets:
+  - path: "<repository-relative target path>"
+    operation: "<create|replace>"
+    content: |
+      <complete exact target file content>
+```
+
+A roadmap preview has exactly one target at
+`docs/product/<product-id>/delivery/roadmap.md`, using `operation: "create"`
+when the roadmap is absent and `operation: "replace"` otherwise. A slice
+preview has exactly two targets in order: the new canonical active-slice path
+with `operation: "create"`, then the roadmap path with `operation: "replace"`.
+Confirmation writes exactly `targets[].content`, then removes this file and
+clears the pending condition. Rejection changes no delivery artifact, removes
+this file, and clears the condition.
 
 ## Delivery artifacts
 
@@ -621,38 +696,9 @@ Only `partial` and `complete` are allowed. Requirements already declared
 - Current code: <paths and implications, or `none`>
 
 ## Proposal prompt
-
-```text
-$openspec-propose
-
-Create exactly one planning-only OpenSpec change for the greenfield product
-delivery slice below. This is a fresh session; derive context from the named
-repository artifacts and do not rely on prior conversation.
-
-Required change name: slice-NNN-short-slug
-Product bundle: docs/product/<product-id>
-Active product slice:
-docs/product/<product-id>/delivery/slice-NNN-short-slug.md
-
-Read the entire active product slice, the current code, and the canonical
-`openspec/specs/` needed to plan this outcome. Create exactly
-`slice-NNN-short-slug` using the installed OpenSpec schema. Produce every
-planning artifact required by that schema, including detailed behavioral
-requirements, scenarios, design, and tasks. Preserve the slice's in-scope and
-out-of-scope boundaries and keep it vertical and independently demonstrable.
-
-Do not implement code, apply tasks, verify behavior, synchronize canonical
-specs, archive the change, create another change, edit the frozen product
-baseline, edit the product roadmap, or edit the active product slice. If the
-required name cannot be used or the outcome cannot form one coherent change,
-stop and report the evidence.
-
-After the proposal is complete, continue the existing external OpenSpec
-workflow for exactly `slice-NNN-short-slug`: apply, verify, and archive it in
-separate appropriate sessions. Then invoke:
-`$product-delivery archive`
-```
 ````
+
+The content under `## Proposal prompt` is the fully rendered [normative proposal prompt](integration-and-handoffs.md#normative-proposal-prompt); this design cross-reference is not persisted.
 
 The archived product slice uses this exact template because `archive` moves the
 active file without changing it.
@@ -665,7 +711,9 @@ active file without changing it.
 Proposed roadmap change for `docs/product/<product-id>/delivery/roadmap.md`:
 <complete proposed file or unified change>
 
-Confirm in this session to write this roadmap. No files have been changed.
+Confirm in this session to write this roadmap. No delivery artifact has been
+changed. Pending confirmation is stored in
+`docs/product/<product-id>/.workflow/pending-delivery.yaml`.
 ```
 
 ### Slice preview
@@ -692,8 +740,9 @@ Proposal prompt:
 Roadmap change:
 <complete proposed change>
 
-Confirm in this session to write the active slice and roadmap update. No files
-have been changed.
+Confirm in this session to write the active slice and roadmap update. No
+delivery artifact has been changed. Pending confirmation is stored in
+`docs/product/<product-id>/.workflow/pending-delivery.yaml`.
 ```
 
 ### No coherent slice

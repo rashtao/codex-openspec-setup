@@ -8,8 +8,9 @@ corrective subsystem.
 ## Validation mechanism
 
 The public skills read the normative templates and inspect artifacts directly.
-`product-shared` provides references, templates, assets, and its README only.
-It contains no executable helpers.
+`product-shared` provides references, including normative artifact templates,
+only. It contains no executable helpers, assets, or user-facing documentation
+file.
 
 All mutating discovery and baseline modes check these invariants before writing:
 
@@ -17,19 +18,30 @@ All mutating discovery and baseline modes check these invariants before writing:
    `openspec/config.yaml` or `openspec/config.yml`.
 2. The product ID is lowercase kebab-case and the derived bundle is below
    `docs/product/`.
-3. At most one non-archived product bundle exists.
-4. YAML parses without duplicate keys and uses the supported schema version.
+3. At most one product bundle exists.
+4. YAML parses without duplicate keys and uses the schema version defined by
+   `artifact-templates.md`.
 5. Required artifacts, keys, headings, enum values, and value types match the
    normative templates.
 6. Persisted local paths are repository-relative, use `/` separators, remain
    under the intended product or OpenSpec root, and contain no absolute path,
    parent traversal, home shorthand, drive prefix, or `file:` URI.
-7. Discovery and requirement IDs match their prefix, are unique, do not exceed
-   the corresponding high-water mark, and are not reused.
+7. Discovery IDs match their prefixes, are unique, do not exceed the
+   corresponding `.workflow/state.yaml` high-water mark, and are not reused.
+   Requirement IDs are unique, match `REQ-*`, do not exceed
+   `baseline/manifest.yaml` → `highest_requirement_id`, and are not reused.
 8. Every artifact and ID reference resolves to its owning artifact.
-9. Phase, discovery/baseline condition, and artifact existence agree.
+9. Phase, condition, `discovery.awaiting_round`, pending interview marker,
+   manifest-owned review-receipt path and receipt status,
+   `.workflow/pending-delivery.yaml` action and targets, and artifact existence
+   agree. `baseline-draft` has either a null receipt path or a named `issues`
+   receipt, never a named `approval-ready` receipt. `baseline-reviewed` has a
+   named `approval-ready` receipt.
 
-Read-only status reports violations and never normalizes or fixes them.
+Read-only status reports violations and never normalizes or fixes them. Every
+discovery or baseline `status` invocation performs zero writes regardless of
+the selected agent's sandbox; it does not update timestamps, persist
+diagnostics, create artifacts or run outputs, or spawn a specialist.
 
 ## Discovery initialization
 
@@ -41,7 +53,7 @@ repository structure and stops on any of:
 - any canonical capability under `openspec/specs/`;
 - any active change under `openspec/changes/`;
 - any archived change under `openspec/changes/archive/`;
-- another non-archived directory under `docs/product/`;
+- another product bundle under `docs/product/`;
 - an existing destination for the requested product ID.
 
 Repository metadata, development tooling, empty scaffolding, an explicitly
@@ -51,19 +63,39 @@ make the product brownfield. Ambiguous evidence is listed for the user;
 
 ## Discovery interview
 
-An interview response is persisted only when it maps to the currently awaiting
-round or when an explicit invocation in a new session contains the complete
-answer. Before advancing the round, the skill confirms:
+Before returning questions, the skill appends the complete asked round with
+`Response status` set to `pending-response`, writes every exact `PENDING
+RESPONSE` marker, sets `condition` to `awaiting-interview-response`, and sets
+`discovery.awaiting_round` to that round number.
 
-- the complete user response is appended verbatim;
+An interview response is persisted only when it maps to that currently awaiting
+round or when an explicit invocation in a new session contains the complete
+answer for it. A response without a product-skill token is accepted only as the
+immediately following same-session response. Before advancing the round, the
+skill confirms:
+
+- the state names exactly one round carrying every pending marker;
+- the complete user response is recorded verbatim;
 - every extracted fact, decision, assumption, unknown, fog item, exclusion, and
   source has a valid unique ID;
 - every recorded outcome appears in the round's outcome list;
 - coverage and frontier references exist;
 - dependent questions were not pulled into the current breadth-first round.
 
+The same write changes the response status to `recorded`, replaces all pending
+markers, clears `discovery.awaiting_round`, advances `discovery.next_round`,
+and sets the next valid condition. Completed rounds are immutable.
+
 Product recovery remains one of the required domain coverage areas. It is
 ordinary product subject matter, not a product-workflow repair mechanism.
+
+The twelve coverage rows owned by `artifact-templates.md` are required breadth
+categories because together they make the release boundary explicit, cover
+actor journeys and functional capabilities, establish coherent domain
+responsibilities, expose cross-cutting qualities and external dependencies,
+and require a precise treatment for every remaining uncertainty. Coverage does
+not require certainty; an area may remain explicitly deferred with valid
+evidence and treatment.
 
 ## Synthesis
 
@@ -93,10 +125,18 @@ Review reads all discovery and draft baseline artifacts and checks:
 - repository-relative persisted paths;
 - `None` under release-blocking unknowns.
 
-It writes `status: issues` if any check fails and never edits the candidate.
-A passing review writes `status: approval-ready`. The receipt identifies the
-product, manifest, time, check results, issues, and warnings but carries no
+Review never repairs requirement or narrative content. It writes `status:
+issues` if any check fails, changes only `manifest.approval.review_receipt` to
+the receipt path, and leaves the phase at `baseline-draft`. A passing review
+writes `status: approval-ready`, changes only that same manifest field, and
+changes the phase to `baseline-reviewed`. The receipt identifies the product,
+manifest, time, check results, issues, and warnings but carries no
 content-binding value.
+
+Any later discovery change resets `manifest.approval.review_receipt` to `null`
+and changes the phase to `baseline-draft`. A new synthesis also initializes the
+field to `null`. An unreferenced receipt may remain as non-authoritative
+history.
 
 ## Baseline approval
 
@@ -168,7 +208,7 @@ conflicts instead of stopping after the first.
 | Repository is not genuinely greenfield | Stop before creating a bundle and list durable code/spec/change/archive evidence | Use a different workflow or prepare a genuinely new repository |
 | External research is unavailable or approval-gated | Persist a precise `UNK-*`; never invent a fact | Supply evidence, authorize research, defer, or exclude |
 | User leaves an issue unknown | Persist the precise uncertainty and its treatment | Continue discovery, synthesize with explicit treatment, or resolve later |
-| Review finds gaps | Write an `issues` receipt and preserve the draft | Add discovery evidence or decisions, synthesize again, and review |
+| Review finds gaps | Write an `issues` receipt, name it from the manifest, preserve the draft, and leave the phase at `baseline-draft` | Add discovery evidence or decisions, synthesize again, and review |
 | Approval receipt is not approval-ready | Stop without changing the manifest | Invoke `$product-baseline review` |
 | User changed the draft after review | Approval invocation must not be used because its attestation would be false | Invoke `$product-baseline review` on the current draft |
 | An active OpenSpec change exists during approval | Stop and list its direct-child name | Complete the external OpenSpec work, then retry approval |
