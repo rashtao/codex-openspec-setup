@@ -1,0 +1,6 @@
+interface:
+  display_name: "Product Delivery"
+  short_description: "Roadmap, slice, and archive product delivery."
+  default_prompt: "Use $product-delivery roadmap to begin delivering this defined product."
+policy:
+  allow_implicit_invocation: false

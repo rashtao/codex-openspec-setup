@@ -1,0 +1,6 @@
+interface:
+  display_name: "Product Definition"
+  short_description: "Discover and baseline a greenfield product."
+  default_prompt: "Use $product-definition discover to begin defining this greenfield product."
+policy:
+  allow_implicit_invocation: false
