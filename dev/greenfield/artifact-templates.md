@@ -11,12 +11,8 @@ repository root and use `/` separators.
 docs/product/<product-id>/
   .workflow/
     state.yaml
-    baseline-hashes.yaml
-    handoffs/
-      slice-003-propose.md
     receipts/
       baseline-review.yaml
-      release-reconciliation.yaml
 
   discovery/
     map.md
@@ -39,15 +35,15 @@ docs/product/<product-id>/
 
   delivery/
     roadmap.md
-    traceability.yaml
-    deviations.md
-    decisions.md
-    post-release.md
+    slice-NNN-short-slug.md
+    archive/
+      slice-NNN-short-slug.md
 ```
 
 `.workflow/` is the control plane. Discovery is mutable until baseline
-approval, baseline is immutable after approval, and delivery is mutable until
-closure. `delivery/` is created by `roadmap`, not by discovery initialization.
+approval, the approved baseline and archived slices are user-protected, and the
+roadmap plus one active slice support forward delivery. `delivery/` is created
+by `roadmap`, not by discovery initialization.
 
 ## Identifier legend
 
@@ -66,15 +62,11 @@ Every discovery document begins with, or links to, this legend:
 | `OOS` | Explicitly out-of-scope subject |
 | `SRC` | Evidence source supporting one or more facts |
 | `REQ` | Frozen first-release baseline requirement |
-| `SLICE` | Mutable vertical delivery slice |
-| `DEV` | Accepted delivery deviation or emergent release requirement |
 ```
 
-`FACT`, `PDEC`, `ASM`, `UNK`, `FOG`, `OOS`, `SRC`, `REQ`, and `DEV` IDs are
-zero-padded to four digits. `SLICE` IDs are zero-padded to three digits so their
-number is preserved directly in the deterministic change name. Canonical
-examples are `FACT-0001`, `REQ-0042`, `SLICE-003`, and `DEV-0003`. Counters only
-increase; an allocated ID is never reused.
+All identifiers are zero-padded to four digits. Canonical examples are
+`FACT-0001` and `REQ-0042`. Counters only increase; an allocated ID is never
+reused. Delivery slice identity exists only in its canonical filename.
 
 ## Discovery artifacts
 
@@ -136,7 +128,7 @@ increase; an allocated ID is never reused.
 - Rationale: <why planning can proceed this way>
 - Risk if false: <impact>
 - Validation need: <future evidence or `none`>
-- Blocking impact: <none\|slice:<SLICE-* or description>\|release>
+- Blocking impact: <none\|delivery-slice:<outcome description>\|release>
 - Related IDs: <IDs or `none`>
 
 ## Known unknowns
@@ -150,7 +142,7 @@ increase; an allocated ID is never reused.
 - Evidence so far: <IDs or `none`>
 - Risk: <high\|medium\|low>
 - Owner: <user\|product team\|delivery slice\|external party\|unknown>
-- Intended slice: <SLICE-* or `not-yet-assigned` or `not-applicable`>
+- Intended slice: <candidate outcome description or `not-yet-assigned` or `not-applicable`>
 - Resolution: <answer and evidence, or `unresolved`>
 - Related IDs: <IDs or `none`>
 
@@ -304,7 +296,6 @@ approval:
   method: null # explicit-skill-invocation after approval
   approved_at: null # RFC3339 UTC after approval
   review_receipt: null # repo-relative path after review
-  reviewed_candidate_sha256: null # digest after review
 highest_requirement_id: 0
 files:
   - "docs/product/<product-id>/baseline/actors-and-journeys.md"
@@ -321,14 +312,12 @@ requirements:
   - id: "REQ-0001"
     path: "docs/product/<product-id>/baseline/domains/<domain-id>.md"
     heading: "REQ-0001 — <title>"
-integrity:
-  algorithm: "sha256"
-  hashes_file: null # docs/product/<product-id>/.workflow/baseline-hashes.yaml after approval
 ```
 
 `files` and `requirements` are lexically sorted by repository-relative path and
 ID respectively. Domain-file entries repeat once per actual domain. Approval
-changes only the approval/freeze fields and then hashes the final manifest.
+changes only the approval and freeze fields. The approve invocation attests
+that the approval-ready draft was unchanged after review.
 
 ### Baseline Markdown skeletons
 
@@ -517,43 +506,16 @@ links the supporting `OOS-*`, `UNK-*`, or decision IDs.
 - Source record: docs/product/<product-id>/discovery/decisions.md#<anchor>
 ```
 
-## Control-plane artifacts
-
-### `.workflow/baseline-hashes.yaml`
-
-```yaml
-schema_version: 1
-algorithm: "sha256"
-product: "<product-id>"
-frozen_at: "<RFC3339 UTC>"
-root: "docs/product/<product-id>/baseline"
-files:
-  - path: "docs/product/<product-id>/baseline/<file>"
-    sha256: "<64 lowercase hexadecimal characters>"
-aggregate:
-  canonical_input: "<file-sha256><two spaces><repo-relative-path><LF>, sorted by path"
-  sha256: "<64 lowercase hexadecimal characters>"
-```
-
-Hashes operate on exact file bytes. The aggregate is SHA-256 over UTF-8 lines
-of the documented canonical form. Every baseline file, including the frozen
-manifest, appears exactly once. The hashes file is outside the baseline and
-does not hash itself.
+## Control-plane artifact
 
 ### `.workflow/receipts/baseline-review.yaml`
 
 ```yaml
 schema_version: 1
 product: "<product-id>"
+manifest: "docs/product/<product-id>/baseline/manifest.yaml"
 reviewed_at: "<RFC3339 UTC>"
 status: "<approval-ready|issues>"
-candidate:
-  algorithm: "sha256"
-  canonical_input: "<file-sha256><two spaces><repo-relative-path><LF>, sorted by path"
-  aggregate_sha256: "<64 lowercase hexadecimal characters>"
-  files:
-    - path: "docs/product/<product-id>/baseline/<file>"
-      sha256: "<64 lowercase hexadecimal characters>"
 checks:
   template_compliance: "<pass|fail>"
   requirement_identity: "<pass|fail>"
@@ -572,11 +534,10 @@ warnings:
 ```
 
 For an approval-ready receipt, every check is `pass` and `issues` is `[]`.
-Warnings never hide a failed check.
-
-Before approval, each new review atomically replaces this latest-candidate
-receipt. After approval it is retained unchanged as the receipt named by the
-frozen manifest; no later review is allowed.
+Warnings never hide a failed check. Each review replaces the latest receipt.
+Approval retains it as the manifest's named receipt. The approve invocation is
+the user's attestation that the draft was not changed after this review; the
+receipt intentionally carries no content-binding value.
 
 ## Delivery artifacts
 
@@ -585,187 +546,181 @@ frozen manifest; no later review is allowed.
 ```markdown
 # First-release delivery roadmap — <product name>
 
-## State legend
+## Coverage
 
-- Readiness `candidate`: plausible, not on the immediate frontier.
-- Readiness `ready`: dependencies are satisfied and selection is allowed.
-- Readiness `blocked`: a named dependency or decision prevents selection.
-- Execution `unstarted`: no sealed handoff exists.
-- Execution `selected`: a proposal handoff is sealed.
-- Execution `change-active`: the deterministic OpenSpec change exists.
-- Execution `archived`: a matching archive exists; reconciliation is pending.
-- Execution `delivered`: structural reconciliation succeeded.
-- Execution `invalidated`: the slice cannot continue and its ID is retired.
+| Requirement | Declared coverage |
+|---|---|
+| REQ-0001 | NOT DELIVERED |
+| REQ-0002 | PARTIALLY DELIVERED (slice-001-customer-starts) |
+| REQ-0003 | DELIVERED (slice-001-customer-starts, slice-002-customer-finishes) |
 
-## Frontier
+## Candidate slices
 
-- Recommended next slice: <SLICE-* or `ambiguous` or `none`>
-- Ready alternatives: <SLICE-* IDs or `none`>
-- Rationale: <risk/dependency explanation>
+### Candidate — <outcome title>
 
-## Slices
-
-### SLICE-001 — <outcome title>
-
-- Outcome: <independently demonstrable user/system outcome>
-- Covers: <REQ-* IDs>
-- Accepted deviations: <DEV-* IDs or `none`>
-- Coverage intent: <REQ-0001=partial, REQ-0002=complete>
-- Depends on: <SLICE-* IDs or `none`>
-- Blockers: <IDs/reasons or `none`>
-- Demonstration: <observable end-to-end demonstration>
-- Main risk: <risk reduced>
-- Readiness: <candidate|ready|blocked>
-- Execution: <unstarted|selected|change-active|archived|delivered|invalidated>
-- Expected OpenSpec change: <slice-001-slug or `not-created`>
-- OpenSpec archive: <repo-relative archive path or `not-archived`>
-- Canonical specs: <repo-relative paths or `not-reconciled`>
-- Handoff: <repo-relative path or `not-sealed`>
-- Notes: <coarse future note or current-slice detail>
+- Outcome: <independently demonstrable user or system outcome>
+- Likely requirements: <only REQ-* rows that are not delivered or are partial>
+- Sequencing rationale: <why this outcome should occur at this point>
 ```
 
-The roadmap may change ordering, dependencies, detail, and readiness, but never
-reuses a `SLICE-*` ID or alters the historical identity of a selected slice.
+The coverage table contains every baseline requirement exactly once and uses
+only these forms:
 
-### `delivery/traceability.yaml`
+```text
+NOT DELIVERED
+PARTIALLY DELIVERED (<comma-separated canonical slice names>)
+DELIVERED (<comma-separated canonical slice names>)
+```
 
-```yaml
+Candidate headings are deliberately unnumbered. Candidate entries contain no
+readiness, execution, dependency, blocker, expected-change, or completion
+field. The initial roadmap sets every requirement to `NOT DELIVERED`.
+
+### Active and archived `delivery/slice-NNN-short-slug.md`
+
+````markdown
+---
 schema_version: 1
+kind: product-delivery-slice
 product: "<product-id>"
-requirements:
-  - id: "REQ-0001"
-    disposition: "<pending|implemented|superseded|unimplemented-with-reason>"
-    coverage:
-      - slice: "SLICE-001"
-        change: "slice-001-<slug>"
-        extent: "<partial|complete>"
-        archive: null
-        canonical_specs: []
-    reason: null
-    approval_archive: null
-    replacement_ids: []
-deviations:
-  - id: "DEV-0001"
-    type: "<emergent-requirement|supersession|unimplemented-with-reason>"
-    disposition: "<pending|implemented|superseded|unimplemented-with-reason>"
-    statement: "<accepted delivered or disposition statement>"
-    originating_slice: "SLICE-001"
-    approval_archive: "openspec/changes/archive/YYYY-MM-DD-slice-001-<slug>"
-    coverage:
-      - slice: "SLICE-001"
-        change: "slice-001-<slug>"
-        extent: "complete"
-        archive: "openspec/changes/archive/YYYY-MM-DD-slice-001-<slug>"
-        canonical_specs:
-          - "openspec/specs/<capability>/spec.md"
-    replacement_ids: []
-slices:
-  - id: "SLICE-001"
-    expected_change: "slice-001-<slug>"
-    handoff: "docs/product/<product-id>/.workflow/handoffs/slice-001-propose.md"
-    handoff_sha256: "<64 lowercase hexadecimal characters>"
-    archive: null
-    execution: "selected"
+name: "slice-NNN-short-slug"
+created_at: "<RFC3339 UTC>"
+roadmap: "docs/product/<product-id>/delivery/roadmap.md"
+---
+
+# <Outcome title>
+
+## Outcome
+
+<One independently demonstrable product outcome.>
+
+## Requirement coverage
+
+| Requirement | Coverage declared by this slice | Rationale |
+|---|---|---|
+| REQ-0001 | partial | <precise remaining boundary> |
+| REQ-0002 | complete | <why the whole baseline obligation is included> |
+
+Only `partial` and `complete` are allowed. Requirements already declared
+`DELIVERED (...)` in the pre-selection roadmap never appear here.
+
+## In scope
+
+- <behavior included in this one change>
+
+## Out of scope
+
+- <adjacent behavior excluded from this change>
+
+## Planning context
+
+- Frozen baseline: <relevant requirement paths and concise context>
+- Archived product slices: <paths and implications, or `none`>
+- Canonical OpenSpec specs: <paths and implications, or `none`>
+- Archived OpenSpec changes: <paths and implications, or `none`>
+- Current code: <paths and implications, or `none`>
+
+## Proposal prompt
+
+```text
+$openspec-propose
+
+Create exactly one planning-only OpenSpec change for the greenfield product
+delivery slice below. This is a fresh session; derive context from the named
+repository artifacts and do not rely on prior conversation.
+
+Required change name: slice-NNN-short-slug
+Product bundle: docs/product/<product-id>
+Active product slice:
+docs/product/<product-id>/delivery/slice-NNN-short-slug.md
+
+Read the entire active product slice, the current code, and the canonical
+`openspec/specs/` needed to plan this outcome. Create exactly
+`slice-NNN-short-slug` using the installed OpenSpec schema. Produce every
+planning artifact required by that schema, including detailed behavioral
+requirements, scenarios, design, and tasks. Preserve the slice's in-scope and
+out-of-scope boundaries and keep it vertical and independently demonstrable.
+
+Do not implement code, apply tasks, verify behavior, synchronize canonical
+specs, archive the change, create another change, edit the frozen product
+baseline, edit the product roadmap, or edit the active product slice. If the
+required name cannot be used or the outcome cannot form one coherent change,
+stop and report the evidence.
+
+After the proposal is complete, continue the existing external OpenSpec
+workflow for exactly `slice-NNN-short-slug`: apply, verify, and archive it in
+separate appropriate sessions. Then invoke:
+`$product-delivery archive`
+```
+````
+
+The archived product slice uses this exact template because `archive` moves the
+active file without changing it.
+
+## Normative delivery console responses
+
+### Roadmap preview
+
+```text
+Proposed roadmap change for `docs/product/<product-id>/delivery/roadmap.md`:
+<complete proposed file or unified change>
+
+Confirm in this session to write this roadmap. No files have been changed.
 ```
 
-An entry becomes `implemented` only when at least one coverage record has
-`extent: complete`, a matching archive, and at least one canonical spec path.
-Several `partial` records never implicitly become complete.
+### Slice preview
 
-### `delivery/deviations.md`
+```text
+Proposed active slice: `slice-NNN-short-slug`
 
-```markdown
-# Accepted delivery deviations — <product name>
+Requirement coverage:
+- REQ-0001: partial — <precise boundary>
+- REQ-0002: complete — <precise boundary>
 
-## DEV-0001 — <title>
+In scope:
+- <item>
 
-- Type: <emergent-requirement|supersession|unimplemented-with-reason>
-- Status: <accepted|delivered>
-- Statement: <new behavior or terminal disposition>
-- Original requirement: <REQ-* or `not-applicable`>
-- What changed or was discovered: <concise evidence>
-- First-release impact: <impact>
-- Replacement behavior: <REQ-* or DEV-* IDs, or `none`>
-- Originating slice: <SLICE-*>
-- Approval evidence: <repo-relative archived OpenSpec change path>
-- Canonical specs: <repo-relative paths or `not-applicable`>
-- Related IDs: <IDs or `none`>
+Out of scope:
+- <item>
+
+Planning context:
+- <source and implication>
+
+Proposal prompt:
+<complete rendered prompt>
+
+Roadmap change:
+<complete proposed change>
+
+Confirm in this session to write the active slice and roadmap update. No files
+have been changed.
 ```
 
-There is no pre-archive deviation mode. The archived change is the approval
-evidence, and reconciliation creates this record from the difference between
-the sealed handoff and the final archived change.
+### No coherent slice
 
-### `delivery/decisions.md`
+```text
+Warning: the remaining uncovered or partial requirements do not form one
+coherent vertical slice. No files were changed.
 
-```markdown
-# Delivery decisions — <product name>
-
-## <RFC3339 UTC> — <title>
-
-- Decision: <roadmap, recovery, or technical coordination decision>
-- Context: <why it was needed>
-- Consequences: <effect>
-- Evidence: <artifact IDs and repository-relative paths>
-- Related IDs: <REQ-*, DEV-*, SLICE-* or `none`>
+$product-delivery roadmap
 ```
 
-### `delivery/post-release.md`
+### Missing same-name OpenSpec archive
 
-```markdown
-# Post-release candidates — <product name>
-
-These notes are outside the frozen first-release baseline and are not delivery
-obligations unless accepted through an archived OpenSpec change and recorded as
-a `DEV-*`.
-
-## Candidate — <title>
-
-- Idea: <future behavior, documentation, or improvement>
-- Origin: <SLICE-*, archive path, or user statement>
-- Why deferred: <reason>
-- Suggested durable destination: <repo-relative path or `undecided`>
-- Related IDs: <IDs or `none`>
+```text
+No archived OpenSpec change was found for `slice-NNN-short-slug`.
+Complete and archive the OpenSpec change named `slice-NNN-short-slug`, then
+retry `$product-delivery archive`.
 ```
 
-### `.workflow/receipts/release-reconciliation.yaml`
+### Successful product archive
 
-```yaml
-schema_version: 1
-product: "<product-id>"
-release: "first-usable-release"
-reconciled_at: "<RFC3339 UTC>"
-status: "complete"
-baseline:
-  hashes_file: "docs/product/<product-id>/.workflow/baseline-hashes.yaml"
-  aggregate_sha256: "<64 lowercase hexadecimal characters>"
-counts:
-  requirements:
-    implemented: 0
-    superseded: 0
-    unimplemented_with_reason: 0
-  deviations:
-    implemented: 0
-    superseded: 0
-    unimplemented_with_reason: 0
-slices:
-  - id: "SLICE-001"
-    change: "slice-001-<slug>"
-    archive: "openspec/changes/archive/YYYY-MM-DD-slice-001-<slug>"
-    canonical_specs:
-      - "openspec/specs/<capability>/spec.md"
-checks:
-  no_active_changes: "pass"
-  baseline_integrity: "pass"
-  terminal_dispositions: "pass"
-  archive_linkage: "pass"
-  canonical_spec_paths: "pass"
-  slice_terminal_states: "pass"
-unresolved_excluded_unknowns:
-  - "UNK-0001"
-post_release_notes: "docs/product/<product-id>/delivery/post-release.md"
-archive_destination: "docs/product/archive/YYYY-MM-DD-<product-id>-first-release"
+```text
+$product-delivery slice
 ```
 
-`unresolved_excluded_unknowns` may be non-empty. Any accepted requirement or
-deviation that is not terminal makes this receipt impossible to issue.
+### Delivery completion
+
+```text
+Delivery is complete.
+```

@@ -1,348 +1,314 @@
-# Validation test plan for the future skills
+# Test plan for the future product skills
 
 ## Test philosophy
 
-The implementation is accepted only with clean-room, repository-level forward
-tests. Tests exercise the public skill invocations and inspect persisted
-artifacts; they do not pass merely because a final response contains expected
-words.
+Acceptance uses clean-room, repository-level forward tests. Tests invoke the
+public skills and inspect persisted artifacts; expected response text alone is
+not sufficient when an action should write.
 
 Every scenario records:
 
-- immutable case ID and prompt;
-- fixture tree and SHA-256 digest manifest;
-- model, reasoning effort, Codex/host version, and available-skill inventory;
+- stable case ID and exact prompt;
+- fixture path inventory and relevant file contents;
+- model, reasoning effort, host version, and available-skill inventory;
 - transcript and material output artifacts;
-- before/after hashes for protected existing release files;
-- deterministic assertions and any semantic reviewer rubric;
-- `pass`, `fail`, or `invalid`, with infrastructure errors preserved.
+- version-control diff and file inventory before and after;
+- deterministic assertions and any semantic review rubric;
+- `pass`, `fail`, or `invalid`, preserving infrastructure errors.
 
-Unless a case explicitly tests continuation of an awaiting interview response,
-each invocation begins in a clean session. Product-agent routing evidence must
-show `gpt-5.6-sol`, exactly one dispatch, and `fork_turns: "none"`. Manually
-invoked existing OpenSpec skills begin in their own fresh host sessions and are
-allowed to use their unchanged internal routing.
+Except for an immediately pending interview response or same-session preview
+confirmation, every invocation starts in a clean session. Routed product-agent
+evidence must show `gpt-5.6-sol`, exactly one dispatch, and
+`fork_turns: "none"`. Existing external OpenSpec actions run in separate
+fresh sessions and retain their own behavior.
 
-## Proposed test assets
+## Test assets
 
-A future implementation adds test data without changing existing OpenSpec
-skills:
+Future fixtures and case manifests live outside the installed skill packages,
+for example:
 
 ```text
-release/.codex/skills/openspec-product-shared/evals/
+release/test/product-workflow/
   description-cases.json
   forward-cases.json
   fixtures/
     empty-greenfield/
     brownfield-code/
-    active-change/
-    frozen-drift/
-    archived-happy-path/
-    archived-emergent-scope/
-    corrupt-ledger/
-  structured/
-    suite.json
-    run-index.json
+    discovery-unknowns/
+    baseline-draft/
+    baseline-approved/
+    delivery-roadmap/
+    active-product-slice/
+    active-openspec-change/
+    archived-openspec-change/
 ```
 
-Generated transcripts, run manifests, grading manifests, and benchmark output
-belong in an ignored run directory, never in a frozen fixture.
+Generated transcripts and run outputs belong in an ignored run directory.
+Installed `product-shared` remains passive and contains no test runner.
+
+## Static contract audits
+
+Run scoped searches over `dev/greenfield/**` and later over the implemented
+product packages to assert:
+
+- every product-owned skill, agent, artifact kind, invocation, and routed action
+  uses `product-*`;
+- no legacy product-owned identifier remains;
+- no executable helper, script directory, content-binding algorithm, content
+  identity field, baseline-byte manifest, or test-fixture content identity
+  remains;
+- external actions keep their existing names:
+  `$openspec-propose`, `$openspec-apply-change`,
+  `$openspec-update-change`, `$openspec-verify-change`, and
+  `$openspec-archive-change`;
+- delivery artifacts are limited to `roadmap.md`, zero or one canonical active
+  slice, and canonical direct-child archived slices;
+- there is no delivery ledger, separate slice identifier family, accepted
+  delivery-deviation identity, persisted proposal packet, delivery control
+  state, completion receipt, product-bundle archive transition, or product-level
+  completion phase;
+- the old validation document is absent and
+  `discovery-and-baseline-validation.md` is present;
+- no delivery repair, abandonment, reopening, rollback, lock, transaction,
+  emergent-obligation, enabling-slice, or filesystem-hardening mode exists.
+
+These are inventory and text-contract assertions, not executable-helper tests.
 
 ## Description-boundary tests
 
-Frontmatter selection is explicit-only. Therefore prompts submitted without a
-`$skill-name` token are all `near_miss`, even when the topic resembles the
-workflow. This suite tests false-positive resistance, not trigger recall.
-Explicit resolution and valid-mode behavior are tested separately by forward
-cases.
-
-Representative immutable cases are:
+Frontmatter selection is explicit-only. Prompts without a `$skill-name` token
+are `near_miss`, even when their topic resembles the workflow.
 
 | Case | Prompt without an explicit skill token | Expected |
 |---|---|---|
 | `DESC-DISC-001` | “Help me brainstorm users and requirements for a new app.” | Do not select discovery |
 | `DESC-DISC-002` | “Interview me breadth-first about this greenfield product.” | Do not select discovery |
-| `DESC-DISC-003` | “Explore whether this idea is worth building.” | Prefer ordinary conversation or `openspec-explore`, not product discovery |
+| `DESC-DISC-003` | “Explore whether this idea is worth building.” | Prefer ordinary conversation or `openspec-explore` |
 | `DESC-BASE-001` | “Turn these notes into a comprehensive product requirements document.” | Do not select baseline |
-| `DESC-BASE-002` | “Review this requirements baseline for contradictions.” | Do not select baseline without the explicit invocation |
+| `DESC-BASE-002` | “Review this requirements baseline for contradictions.” | Do not select baseline |
 | `DESC-BASE-003` | “Freeze these docs so nobody changes them.” | Do not select baseline |
 | `DESC-DEL-001` | “Break this feature into vertical slices.” | Do not select delivery |
-| `DESC-DEL-002` | “Propose and implement the next OpenSpec change.” | Select the applicable existing OpenSpec action, not product delivery |
-| `DESC-DEL-003` | “Reconcile canonical specs with what shipped.” | Do not select delivery without the explicit invocation |
-| `DESC-SHARED-001` | “Use openspec-product-shared to validate my product.” | Passive package refuses a user-facing action and points to a public skill |
+| `DESC-DEL-002` | “Propose and implement the next OpenSpec change.” | Select the applicable external OpenSpec action, not product delivery |
+| `DESC-DEL-003` | “Archive this completed OpenSpec change.” | Select the external OpenSpec archive action |
+| `DESC-SHARED-001` | “Use product-shared to validate my product.” | Passive package refuses a user-facing action and points to a public skill |
 
-Additional held-out cases use casual, abbreviated, and artifact-focused wording
-without copying development phrases. Labels and rationales are frozen before
-execution. Each case runs manually in a clean session using only the
-frontmatter description as the selection contract.
+Held-out cases vary phrasing without copying design prose. Explicit invocation
+tests cover every valid mode, a missing mode, an unknown mode, a misspelled
+product skill, and explicit passive-shared invocation. Invalid modes print usage
+and write nothing.
 
-Activation is `selected`, `not_selected`, or `unknown` only when supported by a
-documented host signal. Without such a signal it remains `unknown`; output
-behavior is graded separately. No activation accuracy/precision claim is made
-from inferred behavior.
+Activation is `selected`, `not_selected`, or `unknown` only when supported
+by a documented host signal. Output behavior is graded separately.
 
-Explicit invocation tests include every valid mode, a missing mode, an unknown
-mode, a misspelled product skill, and an explicit passive-shared invocation.
-A valid explicit public invocation must reach its skill; invalid modes must
-stop with usage and perform no fallback action.
+## Discovery and baseline artifact tests
 
-## Deterministic schema and helper tests
+For each discovery, baseline, state, and review-receipt template, test:
 
-For each artifact template, test:
-
-- minimal valid instance;
-- fully populated valid instance;
-- missing required key/heading;
-- duplicate YAML key;
-- unsupported `schema_version`;
-- invalid enum and incorrectly typed value;
+- minimal and fully populated valid instances;
+- missing required key or heading;
+- duplicate YAML key and unsupported `schema_version`;
+- invalid enum or value type;
 - duplicate, malformed, reused, or counter-exceeding ID;
-- dangling ID and path references;
-- POSIX absolute path, Windows drive path, `file:` URI, `~`, `..`, and symlink
-  escape;
-- CRLF/LF and exact-byte hash behavior;
-- unsorted manifest/hash records;
-- extra, missing, or changed frozen-baseline file;
-- zero, one, and multiple matching archives;
-- invalid calendar-date archive prefix;
-- nested and suffixed archive near misses;
-- `partial` coverage that never silently becomes `complete`.
+- dangling ID and path reference;
+- absolute local path, drive path, `file:` URI, home shorthand, parent
+  traversal, and symlink escape;
+- unsorted manifest records;
+- structural, schema, traceability, terminology, journey/domain, contradiction,
+  duplicate, unknown-treatment, and repository-relative-path review failures.
 
-Each helper is tested for exit code, JSON schema, stable diagnostic code,
-complete error enumeration, and zero writes on failure. Repeat identical runs
-against identical bytes and assert byte-identical deterministic outputs after
-normalizing only documented timestamps.
+There are no approved-baseline byte-comparison cases. Approval tests the
+presence and status of the review receipt and the user's attestation.
 
-## Forward workflow scenarios
+## Forward discovery and baseline scenarios
 
 ### `FWD-001` — Initialize a genuinely empty product
 
-Setup: OpenSpec is installed, application directories are empty scaffolding,
-canonical specs and change history are empty, and `docs/product/` has no active
-bundle.
-
-Invocation:
+Invoke:
 
 ```text
-$openspec-product-discovery init parcel-tracker
+$product-discovery init parcel-tracker
 ```
 
-Expected:
-
-- one `gpt-5.6-sol` routed agent with `fork_turns: "none"`;
-- exact state and four discovery files are created;
-- no baseline, delivery, OpenSpec change, or application file is created;
-- phase is `discovery` and counters are zero;
-- console prints the exact interview invocation.
+Expect one routed agent, exact state and four discovery files, phase
+`discovery`, zero ID counters, no baseline/delivery/OpenSpec/application write,
+and the exact interview invocation.
 
 ### `FWD-002` — Refuse a brownfield repository
 
-Setup: a functioning order endpoint and one canonical spec already exist.
-
-Expected: `init` reports both evidence paths, makes no product bundle, does not
-offer to convert/delete them, and explains that the workflow is greenfield
-only. Repeat with an archived OpenSpec change but no code and expect the same
-block.
+Use a fixture with a functioning endpoint and canonical spec, then one with
+only archived OpenSpec history. `init` lists all evidence, creates no bundle,
+and does not offer deletion or conversion.
 
 ### `FWD-003` — Breadth-first interview with explicit unknowns
 
-Setup: initialized parcel-tracker bundle. The user answers eight independent
-questions, decides the first-release actor, says “I don’t know” about carrier
-retention, defers accessibility testing to a slice, and excludes paid billing.
-
-Expected:
-
-- one round is appended verbatim;
-- `PDEC-*`, `UNK-*`, `ASM-*` if accepted, and `OOS-*` receive unique IDs;
-- retention has a precise unknown treatment;
-- paid billing is excluded rather than weakly prioritized;
-- no dependent follow-up appears in the same round;
-- the next frontier spans multiple coverage areas.
+The user answers eight independent questions, decides a first-release actor,
+says “I don’t know” about carrier retention, defers accessibility assessment to
+a slice, and excludes paid billing. Expect one verbatim round, unique IDs,
+precise unknown treatment, explicit exclusion, no dependent same-round
+follow-up, and a cross-area next frontier.
 
 ### `FWD-004` — User requests synthesis early
 
-Setup: several coverage rows remain partial, all uncertainties are precise
-`UNK-*` or `OOS-*`, and no `FOG-*` exists.
+Allow synthesis when several rows remain partial but every uncertainty is a
+precise `UNK-*` or `OOS-*`. Preserve included and excluded treatments and do
+not invent behavior. A paired fixture with one `FOG-*` writes no baseline.
 
-Invocation:
+### `FWD-005` — Fresh synthesis ignores conversation-only facts
+
+Put a material preference only in the parent conversation. The child packet
+uses `fork_turns: "none"`; the baseline excludes that preference and reports a
+gap if persisted evidence is insufficient.
+
+### `FWD-006` — Structural review and validate-then-trust approval
+
+A valid draft produces an `approval-ready` receipt with all checks passing and
+no content-binding field. Change a draft sentence after review, then invoke
+`$product-baseline approve`. The skill does not compare candidate content;
+the invocation is treated as user attestation and freezes the draft. Pair this
+with an `issues` receipt, which must stop approval without changing the
+manifest.
+
+### `FWD-007` — Approved baseline is trusted
+
+After approval, change a baseline file in a fixture and invoke roadmap. The
+delivery skill does not perform a frozen-byte comparison and proceeds from the
+current user-protected artifacts. It does not claim to have detected or
+accepted a baseline edit.
+
+## Forward delivery scenarios
+
+### `FWD-008` — Roadmap inputs and initial coverage
+
+With complete discovery and frozen baseline artifacts, invoke
+`$product-delivery roadmap`. Assert that it reads all and only those product
+context inputs, initializes every `REQ-*` to `NOT DELIVERED`, and produces
+unnumbered candidates with outcome, likely requirements, and sequencing
+rationale. No candidate contains readiness or execution fields.
+
+### `FWD-009` — Roadmap always waits for confirmation
+
+For both first creation and later revision, the first response contains the
+complete proposed change and writes nothing. Rejecting leaves the tree
+unchanged. Same-session confirmation performs exactly the previewed write. A
+confirmation in a new session does not authorize the earlier preview.
+
+### `FWD-010` — Active-slice roadmap revision changes candidates only
+
+With one active canonical slice and its already-declared partial and complete
+coverage, revise the roadmap. The preview may reorder or replace unnumbered
+candidates but preserves every coverage value declared by the active slice.
+
+### `FWD-011` — Active product slice gates
+
+One canonical delivery-root slice stops `slice` and points to finishing its
+external workflow. Two canonical active slices are an error naming both. A
+noncanonical delivery-root file is ignored.
+
+### `FWD-012` — Active OpenSpec change gate
+
+Any direct child such as `openspec/changes/fix-logging/` stops `slice` before
+selection and no pending change contents are read. No product or OpenSpec file
+is written.
+
+### `FWD-013` — Proposed-name collisions
+
+Derive the next number from the highest canonical active or archived product
+slice plus one. Stop if the proposed name equals an active OpenSpec basename or
+an external OpenSpec archive direct-child basename ends in
+`-<proposed-name>`. Ignore noncanonical product delivery-root files. Do not
+invent a suffix.
+
+### `FWD-014` — Whole-system slice inputs and exclusions
+
+Assert reads of the complete roadmap, whole frozen baseline, every canonical
+archived product slice, canonical OpenSpec specs, archived OpenSpec changes, and
+current code. Assert no discovery read and no pending OpenSpec change-content
+read. The preview cites planning context from the allowed inputs.
+
+### `FWD-015` — Slice confirmation and immediate roadmap coverage
+
+Preview the canonical name, exact partial/complete coverage, boundaries,
+planning context, complete proposal prompt, and complete roadmap change. Before
+confirmation nothing changes. After same-session confirmation:
+
+- one canonical active slice exists;
+- its only external prompt begins with `$openspec-propose` and requires the
+  exactly same change name;
+- partial coverage becomes or extends
+  `PARTIALLY DELIVERED (<slice names>)`;
+- complete coverage immediately becomes `DELIVERED (<slice names>)`;
+- no OpenSpec change or code is created.
+
+### `FWD-016` — Delivered requirements cannot enter a slice
+
+Use a roadmap mixing all three coverage forms. The preview may contain only
+`NOT DELIVERED` or `PARTIALLY DELIVERED (...)` requirements. Any attempt to
+include an already delivered requirement stops without writes.
+
+### `FWD-017` — No coherent remaining slice
+
+When the remaining eligible requirements cannot form one coherent vertical
+outcome, expect a warning, no file change, and final output:
 
 ```text
-$openspec-product-baseline synthesize
+$product-delivery roadmap
 ```
 
-Expected: synthesis is allowed, excluded unknowns remain excluded, included
-assumptions remain visible, uncovered behavior is not invented, and the draft
-reports its limitations. A paired fixture with one `FOG-*` must block without
-writing a baseline.
+### `FWD-018` — Product archive uses suffix-only authorization
 
-### `FWD-005` — Fresh synthesis cannot use conversation-only facts
+With one active `slice-004-export-audit-log.md`, provide multiple direct-child
+OpenSpec archives whose basenames end in
+`-slice-004-export-audit-log`. Make their contents incomplete, conflicting, or
+unreadable to the product skill. Invocation attests manual destination
+inspection; the skill does not inspect `delivery/archive/`, accepts the
+multiple suffix matches, does not read OpenSpec archive contents, and moves the
+active slice unchanged. It prints exactly `$product-delivery slice`.
 
-Setup: the acting parent conversation contains a material product preference
-that is absent from discovery artifacts.
+### `FWD-019` — Archive errors
 
-Expected: the routed packet has `fork_turns: "none"`; the synthesized baseline
-does not contain that preference; it either reflects persisted evidence or
-reports a gap. Transcript inspection confirms the child was not instructed to
-recover parent context.
+With no active canonical product slice, `archive` stops without inspecting the
+destination. With one active slice and no matching external suffix, it reports
+the expected canonical name and instructs the user to complete and archive that
+OpenSpec change before retrying. Near matches do not authorize a move.
 
-### `FWD-006` — Review and stale-digest approval
+### `FWD-020` — Read-only delivery status
 
-Setup: a valid draft first produces an approval-ready receipt. Then one draft
-sentence changes before approval.
+Test the first-match order:
 
-Expected: `approve` detects the candidate digest mismatch, leaves manifest
-`draft`, writes no frozen hashes, and prints `review` as the next step. After a
-new passing review, explicit approval freezes and hashes all baseline files,
-including the final manifest.
+1. missing roadmap → `$product-delivery roadmap`;
+2. active slice → finish its external OpenSpec workflow, then
+   `$product-delivery archive`;
+3. uncovered or partial requirement → `$product-delivery slice`;
+4. full declared coverage → exactly `Delivery is complete.`.
 
-### `FWD-007` — Frozen baseline drift blocks delivery
+Every case has zero writes. Multiple active slices produce a named error.
 
-Setup: approved baseline, then change one byte in `charter.md` and remove a
-domain file.
+### `FWD-021` — Completion creates nothing else
 
-Expected: `roadmap`, `next`, `reconcile`, and `close` each stop; the report lists
-both changed and missing files with expected/actual evidence; no delivery or
-OpenSpec artifact changes; no repair/refreeze option is offered.
+Invoke both `slice` and `status` on full declared coverage. Both print exactly
+`Delivery is complete.`; `slice` creates nothing. Assert the product remains
+in phase `delivery` and no completion receipt, final phase, bundle destination,
+or additional product artifact appears.
 
-### `FWD-008` — Any active change blocks slice selection
+## Routing and fresh-context checks
 
-Setup: valid frozen baseline and an unrelated `openspec/changes/fix-logging/`.
+For every routed product action, assert:
 
-Expected: `next` lists the active change and does not select a slice, seal a
-handoff, or suggest that product delivery may coexist with it.
-
-### `FWD-009` — Ambiguous ready frontier waits for the user
-
-Setup: two materially different ready slices with satisfied dependencies.
-
-Expected: `next` presents both, recommends one with rationale, waits for an
-explicit choice, and allocates/seals nothing before that choice. A fixture with
-one unambiguous ready slice selects it directly.
-
-### `FWD-010` — Sealed proposal handoff is fresh-context complete
-
-Setup: selected slice covers two requirements, one partially and one
-completely, plus one accepted deviation.
-
-Expected:
-
-- deterministic change ID and immutable handoff are produced;
-- state and traceability store the handoff SHA-256;
-- the handoff includes verbatim scoped statements and the full proposal prompt;
-- every persisted local path is repository-relative;
-- prompt orders the new session to read current code/canonical specs but only
-  named baseline/deviation material;
-- proposal traceability block includes the console-rendered actual handoff
-  digest;
-- no active OpenSpec change is created;
-- the console suggests manual `$openspec-propose`.
-
-### `FWD-011` — Happy manual OpenSpec loop and reconciliation
-
-Setup: run the printed proposal in a clean session, then product reconcile,
-then printed apply, verify, and synchronized archive packets in separate clean
-sessions. The archive is a direct child named with the expected date/change and
-the canonical spec exists.
-
-Expected:
-
-- active reconcile transitions `selected → change-active`;
-- product workflow creates no verification receipt and reruns no tests;
-- final reconcile transitions `change-active/archived → delivered`;
-- coverage and canonical paths are recorded;
-- the archive remains byte-identical;
-- the next slice is not selected automatically.
-
-### `FWD-012` — Emergent release behavior becomes a deviation
-
-Setup: final archived proposal/spec explicitly includes a notification retry
-requirement absent from the sealed handoff.
-
-Expected: reconcile allocates `DEV-*` type `emergent-requirement`, cites the
-archive as approval evidence, updates the original slice/ledger, leaves the
-sealed handoff and frozen baseline unchanged, and does not ask for a second
-approval.
-
-### `FWD-013` — Archived supersession or omission is terminal evidence
-
-Setup: an archived change explicitly replaces one baseline requirement and
-records why another is intentionally unimplemented.
-
-Expected: reconcile creates the corresponding `supersession` and
-`unimplemented-with-reason` deviation records, links replacement/evidence, and
-assigns terminal dispositions. Without explicit archived rationale the same
-fixture blocks rather than inferring intent.
-
-### `FWD-014` — Invalid archive can never be reopened
-
-Setup: matching archive exists but its proposal lacks the handoff digest and a
-referenced canonical spec path does not exist.
-
-Expected: reconcile reports every mismatch, does not edit/move/delete the
-archive, does not restore it to active changes, and instructs creation of a new
-corrective slice/change. The original IDs remain terminal and retired.
-
-### `FWD-015` — Corrupt mutable ledger before archive
-
-Setup: selected slice has a malformed traceability entry and its expected
-active change exists; no corresponding archive exists.
-
-Expected: product actions make no repair or deletion, report all affected IDs
-and paths, and print the full manual pre-archive cleanup/tombstone/recreation
-protocol. After user-simulated cleanup, the next slice ID is greater than the
-retired one.
-
-### `FWD-016` — Close with an explicitly excluded unknown
-
-Setup: hashes pass, no active changes exist, all accepted `REQ-*` and `DEV-*`
-entries are terminal, slices are delivered, and one unknown remains
-`excluded-deferred-to-future-change`.
-
-Expected: `close` succeeds, receipt lists the unknown, bundle moves to the exact
-dated archive path, final state is `closed`, and the console tells the user to
-review and explicitly promote useful content from `delivery/post-release.md`.
-Nothing is promoted automatically.
-
-### `FWD-017` — Matching archive overrides stale mutable execution label
-
-Setup: slice state says `change-active`, the active directory is absent, and
-exactly one structurally valid corresponding archive exists.
-
-Expected: reconcile detects the archive by naming convention, treats the
-identity as terminal, performs structural reconciliation, and never suggests
-recreating or removing it.
-
-### `FWD-018` — Wrong active change before archive requires retirement
-
-Setup: sealed handoff expects `slice-004-export-audit-log`, but the only active
-change is `slice-004-export-logs`; neither is archived.
-
-Expected: reconcile does not attach, rename, or edit the wrong change. It emits
-the detailed pre-archive cleanup instructions, requiring a tombstone and a new
-slice ID/change identity.
-
-## Fresh-context packet checks
-
-For every routed product action, capture the child creation call and assert:
-
-- `fork_turns` is the exact string `"none"`;
-- model is exactly `gpt-5.6-sol`;
-- effort matches `skill-contracts.md`;
-- the message names the action, mode, verbatim current request, current working
-  directory semantics, and product root or states it is unresolved;
-- it tells the child which `SKILL.md` to read;
+- `fork_turns` is exactly `"none"`;
+- model and effort match `skill-contracts.md`;
+- the packet names the action, mode, verbatim request, working-directory
+  semantics, product root or unresolved state, and exact `SKILL.md`;
 - it forbids rerouting and further children;
-- it does not refer to “above,” “the earlier discussion,” or inaccessible
-  parent facts.
+- it contains no inaccessible parent-context reference.
 
-For every printed manual OpenSpec packet, start a new session with only that
+For every printed external OpenSpec prompt, start a new session with only that
 text and the fixture repository. The action must be resolvable without the
-original product-workflow transcript. Assert that all local paths in the packet
-and resulting product/OpenSpec linkage are repository-relative.
+product-workflow transcript. Product skills must not directly dispatch it.
 
-## Existing OpenSpec preservation checks
+## External OpenSpec preservation checks
 
-Before each mutating forward test, hash every pre-existing path under:
+Before and after every mutating forward case, compare path inventory, file mode,
+symlink target, and version-control diff for:
 
 ```text
 release/.codex/skills/openspec-*/**
@@ -350,74 +316,40 @@ release/.codex/agents/openspec-*.toml
 release/openspec/config.yaml
 ```
 
-After the test, compare path inventory, file mode, symlink target, and bytes.
-Any addition inside, removal from, or change to a pre-existing OpenSpec skill
-directory is a failure. New product skill/agent paths are evaluated separately.
-
-Also assert that product skills never directly dispatch an existing OpenSpec
-action and never modify `openspec/changes/`, `openspec/specs/`, application
-code, or frozen baseline files.
+Any product-workflow modification inside these external OpenSpec-owned paths is
+a failure. Also assert that product skills never modify application code,
+`openspec/changes/`, `openspec/specs/`, or frozen baseline files.
 
 ## Structured candidate-versus-baseline evaluation
 
-Because cross-session state, immutable evidence, and archive reconciliation are
-fragile, the implemented skill set receives a small structured development
-evaluation in addition to forward tests.
+Run a small development evaluation because the workflow spans fresh contexts
+and optimistic state. Compare the candidate product skills with a `no_skill`
+baseline using identical substantive fixtures, model settings, tools, and clean
+contexts. Keep attempts and infrastructure failures visible.
 
-Use the version `1.0` `suite.json`, `run-index.json`, `run.json`,
-`grading.json`, and `benchmark.json` contracts from `codex-skill-creator`.
-Freeze the suite before its first run. Changing a prompt, fixture, criterion,
-configuration, or digest creates a new suite ID.
+Use three materially different cases:
 
-The initial suite contains three materially different cases:
+1. classify mixed discovery answers without inventing decisions or erasing
+   deferrals;
+2. perform approval-ready validate-then-trust approval without trying to bind
+   the draft to the receipt;
+3. create, externally complete, and suffix-authorize one slice while preserving
+   the active slice content through its product archive move.
 
-1. `EVAL-001-discovery-unknowns` — classify a mixed interview response without
-   inventing decisions or erasing explicit deferrals;
-2. `EVAL-002-frozen-drift` — refuse delivery and enumerate all integrity
-   evidence without writes;
-3. `EVAL-003-archive-emergence` — structurally reconcile a valid archive,
-   allocate an emergent `DEV-*`, and preserve baseline/handoff/archive bytes.
-
-Each case precommits deterministic criteria for file/schema/state/hash outcomes
-and model-judge criteria for whether reports are sufficiently actionable and
-do not claim behavioral verification. Artifact presence alone is not a
-sufficient criterion.
-
-Compare exactly one normalized candidate configuration with a `no_skill`
-baseline. Candidate and baseline receive identical substantive prompts and
-fixture bytes; the sole intervention is the candidate's explicit skill
-invocation/availability, which is omitted or disabled for the baseline and
-recorded in provenance. Each matched pair uses:
-
-- independent clean contexts;
-- the same `gpt-5.6-sol` model and exposed settings within that case;
-- the same authorized tools and workspace setup;
-- no access to the other arm's outputs or grades;
-- at least two repetitions during development, with every attempt indexed.
-
-Executor errors and invalid runs remain in manifests and denominators. Missing
-token/duration telemetry is `null`, never estimated. Graders cite transcript or
-artifact evidence for each verdict. Aggregate deltas are candidate minus
-baseline only for matched pairs.
-
-Use development results to revise instructions, then freeze the candidate
-digest before opening held-out cases. A held-out case that influences a change
-becomes development history and is replaced. With only three cases, conclusions
-are explicitly limited to development evidence; they do not claim production
-trigger rates, reliability, causality, or statistical significance.
+Criteria cite transcripts and resulting artifacts. Conclusions are limited to
+this development evidence and make no production reliability claim.
 
 ## Acceptance gate
 
-Implementation is ready for user review only when:
+The future implementation is ready for review only when:
 
-- all deterministic template/helper tests pass;
-- all forward scenarios pass in clean fixtures;
-- no existing OpenSpec file changes;
-- every routed product packet proves `fork_turns: "none"` and
-  `gpt-5.6-sol`;
-- no product-level behavioral verification or verification receipt appears;
-- description evidence is reported without inferred activation claims;
-- structured evaluation has no unexplained candidate regression on a critical
-  criterion and all invalid/error runs remain visible;
-- the generated console output always ends in one safe suggested next step or a
-  detailed stop report.
+- all static contract, template, description, and forward cases pass;
+- discovery and baseline behavior remains intact under the new names;
+- every delivery preview and confirmation behaves as specified;
+- archive authorization is suffix-only and does not inspect either archive
+  content or the user-attested product destination;
+- external OpenSpec-owned files remain unchanged;
+- no removed product identifier, helper machinery, delivery ledger/control
+  state, product-level verification, completion phase, or product-bundle
+  archival behavior remains;
+- each response ends with the required single next step or stop report.
