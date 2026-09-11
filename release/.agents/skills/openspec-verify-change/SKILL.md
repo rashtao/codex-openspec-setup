@@ -16,7 +16,7 @@ Otherwise, call exactly:
 ```text
 spawn_agent({
   task_name: "openspec_verify_change",
-  message: "ROUTED_ACTION=openspec-verify-change. Execute the latest user request directly. Read .codex/skills/openspec-verify-change/SKILL.md and follow it. Never route openspec-verify-change again.",
+  message: "ROUTED_ACTION=openspec-verify-change. Execute the latest user request directly. Read .agents/skills/openspec-verify-change/SKILL.md and follow it. Never route openspec-verify-change again.",
   fork_turns: "1",
   model: "gpt-5.6-sol",
   reasoning_effort: "xhigh"

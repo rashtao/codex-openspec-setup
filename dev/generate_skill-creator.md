@@ -21,7 +21,7 @@ Treat these paths as read-only sources:
 Create or update the skill at:
 
 ```text
-.codex/skills/codex-skill-creator
+.agents/skills/codex-skill-creator
 ```
 
 Do not modify either source tree. If the destination exists, preserve intentional existing
@@ -493,7 +493,7 @@ artifacts. Do not leave them in the repository.
 
 The work is complete only when:
 
-- the new skill exists at `.codex/skills/codex-skill-creator`;
+- the new skill exists at `.agents/skills/codex-skill-creator`;
 - both source trees are unchanged and intentional pre-existing destination work is
   preserved;
 - the result remains recognizably based on OpenAI's Codex `skill-creator`;

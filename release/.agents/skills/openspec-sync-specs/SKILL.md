@@ -16,7 +16,7 @@ Otherwise, make exactly one action-role dispatch with the verified callable form
 ```text
 spawn_agent({
   task_name: "openspec_sync_specs_action",
-  message: "ROUTED_ACTION=openspec-sync-specs. Execute the latest user request directly. Read .codex/skills/openspec-sync-specs/SKILL.md and follow it. Never route openspec-sync-specs again.",
+  message: "ROUTED_ACTION=openspec-sync-specs. Execute the latest user request directly. Read .agents/skills/openspec-sync-specs/SKILL.md and follow it. Never route openspec-sync-specs again.",
   fork_turns: "1",
   model: "gpt-5.6-sol",
   reasoning_effort: "high"

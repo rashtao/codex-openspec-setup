@@ -14,7 +14,7 @@ If the current task prompt contains `ROUTED_ACTION=openspec-ff-change`, execute 
 ```text
 spawn_agent({
   task_name: "openspec_ff_change",
-  message: "ROUTED_ACTION=openspec-ff-change. Execute the latest user request directly. Read .codex/skills/openspec-ff-change/SKILL.md and follow it. Never route openspec-ff-change again.",
+  message: "ROUTED_ACTION=openspec-ff-change. Execute the latest user request directly. Read .agents/skills/openspec-ff-change/SKILL.md and follow it. Never route openspec-ff-change again.",
   fork_turns: "1",
   model: "gpt-5.6-sol",
   reasoning_effort: "high"

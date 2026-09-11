@@ -21,8 +21,8 @@ For both future packages:
 1. Run the repository's current Codex skill validator:
 
    ```text
-   .codex/skills/codex-skill-creator/scripts/quick_validate.py release/.codex/skills/product-definition
-   .codex/skills/codex-skill-creator/scripts/quick_validate.py release/.codex/skills/product-delivery
+   .agents/skills/codex-skill-creator/scripts/quick_validate.py release/.agents/skills/product-definition
+   .agents/skills/codex-skill-creator/scripts/quick_validate.py release/.agents/skills/product-delivery
    ```
 
 2. Assert the package inventory exactly matches
@@ -235,7 +235,7 @@ For every action and each `done`, `needs-input`, and `blocked` branch:
 Before and after each mutating case, compare all application files and:
 
 ```text
-release/.codex/skills/openspec-*/**
+release/.agents/skills/openspec-*/**
 release/.codex/agents/openspec-*.toml
 release/openspec/config.yaml
 openspec/**

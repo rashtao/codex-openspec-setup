@@ -35,20 +35,20 @@ The generator in `lib/openspec/src/core/shared/skill-generation.ts` enumerates 1
 
 | Kind | Current OpenSpec surface | Generated counterpart |
 |---|---|---|
-| generated skill | `explore` | `release/.codex/skills/openspec-explore/SKILL.md` |
-| generated skill | `propose` | `release/.codex/skills/openspec-propose/SKILL.md` |
-| generated skill | `new-change` | `release/.codex/skills/openspec-new-change/SKILL.md` |
-| generated skill | `continue-change` | `release/.codex/skills/openspec-continue-change/SKILL.md` |
-| generated skill | `ff-change` | `release/.codex/skills/openspec-ff-change/SKILL.md` |
-| generated skill | `update-change` | `release/.codex/skills/openspec-update-change/SKILL.md` |
-| generated skill | `apply-change` | `release/.codex/skills/openspec-apply-change/SKILL.md` |
-| generated skill | `verify-change` | `release/.codex/skills/openspec-verify-change/SKILL.md` |
-| generated skill | `sync-specs` | `release/.codex/skills/openspec-sync-specs/SKILL.md` |
-| generated skill | `archive-change` | `release/.codex/skills/openspec-archive-change/SKILL.md` |
-| generated skill | `bulk-archive-change` | `release/.codex/skills/openspec-bulk-archive-change/SKILL.md` |
-| generated skill | `onboard` | `release/.codex/skills/openspec-onboard/SKILL.md` |
-| optional action | `feedback` | `release/.codex/skills/openspec-feedback/SKILL.md` |
-| passive package index | shared doctrine references | `release/.codex/skills/openspec-shared/SKILL.md` and `references/*.md` |
+| generated skill | `explore` | `release/.agents/skills/openspec-explore/SKILL.md` |
+| generated skill | `propose` | `release/.agents/skills/openspec-propose/SKILL.md` |
+| generated skill | `new-change` | `release/.agents/skills/openspec-new-change/SKILL.md` |
+| generated skill | `continue-change` | `release/.agents/skills/openspec-continue-change/SKILL.md` |
+| generated skill | `ff-change` | `release/.agents/skills/openspec-ff-change/SKILL.md` |
+| generated skill | `update-change` | `release/.agents/skills/openspec-update-change/SKILL.md` |
+| generated skill | `apply-change` | `release/.agents/skills/openspec-apply-change/SKILL.md` |
+| generated skill | `verify-change` | `release/.agents/skills/openspec-verify-change/SKILL.md` |
+| generated skill | `sync-specs` | `release/.agents/skills/openspec-sync-specs/SKILL.md` |
+| generated skill | `archive-change` | `release/.agents/skills/openspec-archive-change/SKILL.md` |
+| generated skill | `bulk-archive-change` | `release/.agents/skills/openspec-bulk-archive-change/SKILL.md` |
+| generated skill | `onboard` | `release/.agents/skills/openspec-onboard/SKILL.md` |
+| optional action | `feedback` | `release/.agents/skills/openspec-feedback/SKILL.md` |
+| passive package index | shared doctrine references | `release/.agents/skills/openspec-shared/SKILL.md` and `references/*.md` |
 
 Generated counts: 12 authoritative generated counterparts, 1 optional action counterpart, 1 passive shared index, 13 action-agent declarations, and 8 specialist-agent declarations.
 
@@ -155,8 +155,8 @@ The repository has no top-level `tests/` directory, so the requested root test s
 
 ## Publication inventory
 
-- `release/.codex/skills/openspec-*/SKILL.md`
-- `release/.codex/skills/openspec-shared/references/*.md`
+- `release/.agents/skills/openspec-*/SKILL.md`
+- `release/.agents/skills/openspec-shared/references/*.md`
 - `release/.codex/agents/openspec-*.toml`
 - `release/.codex/agents/opsx-*.toml`
 - `release/openspec/config.yaml`

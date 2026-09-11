@@ -16,7 +16,7 @@ Otherwise, make exactly one new-agent dispatch:
 ```text
 spawn_agent({
   task_name: "openspec_archive_change",
-  message: "ROUTED_ACTION=openspec-archive-change. Execute the latest user request directly. Read .codex/skills/openspec-archive-change/SKILL.md and follow it. Never route openspec-archive-change again.",
+  message: "ROUTED_ACTION=openspec-archive-change. Execute the latest user request directly. Read .agents/skills/openspec-archive-change/SKILL.md and follow it. Never route openspec-archive-change again.",
   fork_turns: "1",
   model: "gpt-5.6-terra",
   reasoning_effort: "high"

@@ -44,14 +44,14 @@ publishing; if it changed during the run, stop without publishing a mixed-versio
 
 Inventory all of the following recursively from the release tree:
 
-1. Every skill represented by a `release/.codex/skills/*/SKILL.md`, using its directory,
+1. Every skill represented by a `release/.agents/skills/*/SKILL.md`, using its directory,
    frontmatter name and description, body, and any local metadata.
 2. Every action-agent TOML under `release/.codex/agents/` that explicitly declares an
    OpenSpec action route, including optional actions.
 3. Every remaining custom-agent TOML under `release/.codex/agents/` as a specialist agent.
 4. Every passive support skill and every reference it owns, including all files beneath a
    passive skill's `references/` directory.
-5. Every reviewer prompt packet anywhere under `release/.codex/skills/**`.
+5. Every reviewer prompt packet anywhere under `release/.agents/skills/**`.
 6. The generated OpenSpec configuration at `release/openspec/config.yaml`.
 
 Use content, not filename prefix alone, to classify components:
@@ -170,7 +170,7 @@ Write concise, durable user documentation in this stable order:
    describe planning or source-tree artifacts.
 
 Use repository-relative Markdown links resolved from the guide's location in `release/`.
-For example, a release skill link begins `.codex/skills/`, and the configuration link is
+For example, a release skill link begins `.agents/skills/`, and the configuration link is
 `openspec/config.yaml`. Prefer links to raw path text whenever naming a release asset.
 Keep paths, action names, agent names, models, efforts, sandboxes, states, and command names
 verbatim. Paraphrase prose instead of copying large instruction passages.

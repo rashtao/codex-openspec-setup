@@ -89,8 +89,8 @@ Modify only the declared generated and staging paths. Build under `staging/`, va
 then publish the accepted result to:
 
 ```text
-release/.codex/skills/<one directory per discovered OpenSpec skill>/
-release/.codex/skills/openspec-shared/
+release/.agents/skills/<one directory per discovered OpenSpec skill>/
+release/.agents/skills/openspec-shared/
 release/.codex/agents/<one custom agent per discovered action>.toml
 release/.codex/agents/opsx-*.toml
 release/openspec/config.yaml
@@ -185,7 +185,7 @@ Give each rewriter only:
 5. its model route and the verified dispatch contract.
 
 Do not give a rewriter another worker's output. Require it to initialize and write
-`staging/release/.codex/skills/<skill-name>/` and return a rewrite report. Save that report
+`staging/release/.agents/skills/<skill-name>/` and return a rewrite report. Save that report
 as `staging/reports/skills/<skill-name>/REWRITE_REPORT.md`, containing preserved behavior,
 imported and rejected concepts, conflict resolutions, required shared references and load
 reasons, action boundary, runtime model, and uncertainties. Reject any edit outside its
@@ -202,7 +202,7 @@ skill.
 
 Dispatch `merge-reference-editor` with `gpt-5.6-sol` at `high`, the merge contract, rewrite
 reports, and only needed source excerpts. Create a compact canonical set under
-`staging/release/.codex/skills/openspec-shared/references/`, normally:
+`staging/release/.agents/skills/openspec-shared/references/`, normally:
 
 - `evidence-first.md`
 - `performance-memory.md`
@@ -305,8 +305,8 @@ Apply current official Codex and `skill-creator` requirements to every generated
   reports, or an imported skill at runtime.
 
 Shared references must live inside `openspec-shared`; the installer does not ship loose
-references. Every directory matching `release/.codex/skills/openspec-*` must contain a real
-`SKILL.md`. Do not create symlinks anywhere under `release/.codex/skills/**` or
+references. Every directory matching `release/.agents/skills/openspec-*` must contain a real
+`SKILL.md`. Do not create symlinks anywhere under `release/.agents/skills/**` or
 `release/openspec/**`.
 
 ## Engineering doctrine to distill

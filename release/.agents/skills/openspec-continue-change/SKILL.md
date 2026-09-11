@@ -16,7 +16,7 @@ Otherwise, dispatch exactly one child with:
 ```text
 spawn_agent({
   task_name: "openspec_continue_change",
-  message: "ROUTED_ACTION=openspec-continue-change. Execute the latest user request directly. Read .codex/skills/openspec-continue-change/SKILL.md and follow it. Never route openspec-continue-change again.",
+  message: "ROUTED_ACTION=openspec-continue-change. Execute the latest user request directly. Read .agents/skills/openspec-continue-change/SKILL.md and follow it. Never route openspec-continue-change again.",
   fork_turns: "1",
   model: "gpt-5.6-sol",
   reasoning_effort: "high"

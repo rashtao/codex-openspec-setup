@@ -15,7 +15,7 @@ Before any other action step:
 ```text
 spawn_agent({
   task_name: "openspec_apply_change",
-  message: "ROUTED_ACTION=openspec-apply-change. Execute the latest user request directly. Read .codex/skills/openspec-apply-change/SKILL.md and follow it. Never route openspec-apply-change again.",
+  message: "ROUTED_ACTION=openspec-apply-change. Execute the latest user request directly. Read .agents/skills/openspec-apply-change/SKILL.md and follow it. Never route openspec-apply-change again.",
   fork_turns: "1",
   model: "gpt-5.6-sol",
   reasoning_effort: "high"
