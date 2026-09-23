@@ -3,7 +3,7 @@ set -euo pipefail
 
 repository_archive_url='https://github.com/rashtao/codex-openspec-setup/archive/refs/heads/main.tar.gz'
 
-for destination in .codex openspec; do
+for destination in .agents .codex openspec; do
   if [ -e "$destination" ] || [ -L "$destination" ]; then
     printf 'Installation aborted: %s already exists.\n' "$destination" >&2
     exit 1
@@ -38,12 +38,13 @@ if ! tar -xzf "$archive_path" -C "$extraction_directory"; then
 fi
 
 release_directory="$extraction_directory/codex-openspec-setup-main/release"
-if [ ! -d "$release_directory/.codex" ] || [ ! -d "$release_directory/openspec" ]; then
+if [ ! -d "$release_directory/.agents/skills" ] || [ ! -d "$release_directory/.codex/agents" ] || [ ! -d "$release_directory/openspec" ]; then
   printf '%s\n' 'Installation aborted: repository archive is missing release content.' >&2
   exit 1
 fi
 
+cp -R "$release_directory/.agents" ./.agents
 cp -R "$release_directory/.codex" ./.codex
 cp -R "$release_directory/openspec" ./openspec
 
-printf '%s\n' 'Installed .codex and openspec.'
+printf '%s\n' 'Installed .agents, .codex, and openspec.'

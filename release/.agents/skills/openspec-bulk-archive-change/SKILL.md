@@ -14,7 +14,7 @@ If the current task prompt contains `ROUTED_ACTION=openspec-bulk-archive-change`
 ```text
 spawn_agent({
   task_name: "openspec_bulk_archive_change",
-  message: "ROUTED_ACTION=openspec-bulk-archive-change. Execute the latest user request directly. Read .codex/skills/openspec-bulk-archive-change/SKILL.md and follow it. Never route openspec-bulk-archive-change again.",
+  message: "ROUTED_ACTION=openspec-bulk-archive-change. Execute the latest user request directly. Read .agents/skills/openspec-bulk-archive-change/SKILL.md and follow it. Never route openspec-bulk-archive-change again.",
   fork_turns: "1",
   model: "gpt-5.6-sol",
   reasoning_effort: "high"

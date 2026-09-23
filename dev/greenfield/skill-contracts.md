@@ -5,7 +5,7 @@
 The future implementation adds only these two packages:
 
 ```text
-release/.codex/skills/
+release/.agents/skills/
   product-definition/
     SKILL.md
     agents/

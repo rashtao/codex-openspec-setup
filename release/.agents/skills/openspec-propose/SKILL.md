@@ -17,7 +17,7 @@ Use exactly one routing hop.
 ```text
 spawn_agent({
   task_name: "openspec_propose_action",
-  message: "ROUTED_ACTION=openspec-propose. Execute the latest user request directly. Read .codex/skills/openspec-propose/SKILL.md and follow it. Never route openspec-propose again.",
+  message: "ROUTED_ACTION=openspec-propose. Execute the latest user request directly. Read .agents/skills/openspec-propose/SKILL.md and follow it. Never route openspec-propose again.",
   fork_turns: "1",
   model: "gpt-5.6-sol",
   reasoning_effort: "xhigh"

@@ -12,13 +12,13 @@ The current OpenSpec enumerators generate exactly these 12 action counterparts:
 
 Generated runtime dependencies have one repository packaging layout:
 
-- action skills: `release/.codex/skills/<action>/SKILL.md`;
-- optional feedback counterpart: `release/.codex/skills/openspec-feedback/SKILL.md`;
-- canonical shared doctrine: `release/.codex/skills/openspec-shared/references/*.md`;
-- passive reference index: `release/.codex/skills/openspec-shared/SKILL.md`;
+- action skills: `release/.agents/skills/<action>/SKILL.md`;
+- optional feedback counterpart: `release/.agents/skills/openspec-feedback/SKILL.md`;
+- canonical shared doctrine: `release/.agents/skills/openspec-shared/references/*.md`;
+- passive reference index: `release/.agents/skills/openspec-shared/SKILL.md`;
 - OpenSpec project configuration: `release/openspec/config.yaml`.
 
-The installer copies packaged skills into the target project's `.codex/skills/` runtime
+The installer copies packaged skills into the target project's `.agents/skills/` runtime
 layout and the packaged OpenSpec configuration into its `openspec/` runtime layout.
 References embedded in runtime files therefore continue to use those installed paths
 rather than the repository packaging paths.
@@ -80,14 +80,14 @@ Operational doctrine has exactly one owner. The contract establishes ownership a
 
 | Doctrine | Canonical owner |
 |---|---|
-| Planning-artifact substance and traceability | [artifact-quality.md](../../release/.codex/skills/openspec-shared/references/artifact-quality.md) |
-| Evidence, task-completion proof, and pass claims | [evidence-first.md](../../release/.codex/skills/openspec-shared/references/evidence-first.md) |
-| Performance and memory | [performance-memory.md](../../release/.codex/skills/openspec-shared/references/performance-memory.md) |
-| Connector and framework integration | [integration-correctness.md](../../release/.codex/skills/openspec-shared/references/integration-correctness.md) |
-| Diagnosis and the distribution's sole numeric failure counter | [debugging.md](../../release/.codex/skills/openspec-shared/references/debugging.md) |
-| Independent review | [review.md](../../release/.codex/skills/openspec-shared/references/review.md) |
-| Version-specific external research | [research.md](../../release/.codex/skills/openspec-shared/references/research.md) |
-| Delegation, evidence packets, and concurrency | [subagents.md](../../release/.codex/skills/openspec-shared/references/subagents.md) |
+| Planning-artifact substance and traceability | [artifact-quality.md](../../release/.agents/skills/openspec-shared/references/artifact-quality.md) |
+| Evidence, task-completion proof, and pass claims | [evidence-first.md](../../release/.agents/skills/openspec-shared/references/evidence-first.md) |
+| Performance and memory | [performance-memory.md](../../release/.agents/skills/openspec-shared/references/performance-memory.md) |
+| Connector and framework integration | [integration-correctness.md](../../release/.agents/skills/openspec-shared/references/integration-correctness.md) |
+| Diagnosis and the distribution's sole numeric failure counter | [debugging.md](../../release/.agents/skills/openspec-shared/references/debugging.md) |
+| Independent review | [review.md](../../release/.agents/skills/openspec-shared/references/review.md) |
+| Version-specific external research | [research.md](../../release/.agents/skills/openspec-shared/references/research.md) |
+| Delegation, evidence packets, and concurrency | [subagents.md](../../release/.agents/skills/openspec-shared/references/subagents.md) |
 
 ## 6. Representable dispatch
 
@@ -104,11 +104,11 @@ Every spawn with explicit `model` or `reasoning_effort` sets an explicit partial
 - top-level action routing uses `fork_turns: "1"`, so the latest user request is available;
 - a specialist whose message contains the complete evidence packet uses `fork_turns: "none"`.
 
-An action skill implements one representable nonrecursive guard. If its current task prompt already contains `ROUTED_ACTION=<action>`, it executes directly and never routes that action again. Otherwise it spawns exactly once with the action route in [MODEL_MATRIX.md](MODEL_MATRIX.md); the message contains `ROUTED_ACTION=<action>`, instructs the child to execute the latest user request directly, tells it to read `.codex/skills/<action>/SKILL.md`, and forbids routing the same action again. The parent waits and returns the child's result without duplicate work.
+An action skill implements one representable nonrecursive guard. If its current task prompt already contains `ROUTED_ACTION=<action>`, it executes directly and never routes that action again. Otherwise it spawns exactly once with the action route in [MODEL_MATRIX.md](MODEL_MATRIX.md); the message contains `ROUTED_ACTION=<action>`, instructs the child to execute the latest user request directly, tells it to read `.agents/skills/<action>/SKILL.md`, and forbids routing the same action again. The parent waits and returns the child's result without duplicate work.
 
 Specialist messages contain the full bounded objective, exact scope, authoritative artifacts, raw evidence, constraints, expected return, and no-recursion instruction. They do not claim custom-TOML activation. Custom-agent TOMLs independently include the appropriate routed marker for runtimes that actually select them.
 
-Existing-agent coordination is not another creation mechanism. The canonical coordination and concurrency rules are owned by [subagents.md](../../release/.codex/skills/openspec-shared/references/subagents.md).
+Existing-agent coordination is not another creation mechanism. The canonical coordination and concurrency rules are owned by [subagents.md](../../release/.agents/skills/openspec-shared/references/subagents.md).
 
 ## 7. Model and sandbox ownership
 

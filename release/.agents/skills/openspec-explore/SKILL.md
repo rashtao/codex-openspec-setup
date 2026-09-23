@@ -18,7 +18,7 @@ If the current task prompt contains `ROUTED_ACTION=openspec-explore`, execute th
 ```text
 spawn_agent({
   task_name: "openspec_explore_action",
-  message: "ROUTED_ACTION=openspec-explore. Execute the latest user request directly. Read .codex/skills/openspec-explore/SKILL.md and follow it. Never route openspec-explore again.",
+  message: "ROUTED_ACTION=openspec-explore. Execute the latest user request directly. Read .agents/skills/openspec-explore/SKILL.md and follow it. Never route openspec-explore again.",
   fork_turns: "1",
   model: "gpt-5.6-sol",
   reasoning_effort: "high"

@@ -16,7 +16,7 @@ This action does not create or edit a planning artifact, write to an artifact `o
 Run this guard once, before the procedure:
 
 - If the current task prompt contains `ROUTED_ACTION=openspec-new-change`, execute this installed skill directly. Never route `openspec-new-change` again.
-- Otherwise, make exactly one dispatch with `spawn_agent({ task_name, message, fork_turns, model, reasoning_effort })`, using `task_name: "openspec_new_change"`, `fork_turns: "1"`, `model: "gpt-5.6-sol"`, and `reasoning_effort: "high"`. The message must be: `ROUTED_ACTION=openspec-new-change. Execute the latest user request directly. Read .codex/skills/openspec-new-change/SKILL.md and follow it. Never route openspec-new-change again.` Wait for that child and return its result; do not repeat its work locally.
+- Otherwise, make exactly one dispatch with `spawn_agent({ task_name, message, fork_turns, model, reasoning_effort })`, using `task_name: "openspec_new_change"`, `fork_turns: "1"`, `model: "gpt-5.6-sol"`, and `reasoning_effort: "high"`. The message must be: `ROUTED_ACTION=openspec-new-change. Execute the latest user request directly. Read .agents/skills/openspec-new-change/SKILL.md and follow it. Never route openspec-new-change again.` Wait for that child and return its result; do not repeat its work locally.
 - Never replace `spawn_agent` with a custom-agent selector or another creation mechanism, and never allow an action agent to dispatch itself.
 
 ## Authoritative procedure
